@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { KEY_SIZE_REM } from "../constants";
 import type { KeyDefinition } from "../types";
 import { cn } from "../utils/cn";
+import { getKeyLabel } from "../utils/getKeyLabel";
 
 interface SimpleKeyboardProps {
   mappings: Map<number, number>;
@@ -20,12 +21,12 @@ export function SimpleKeyboard({
         // biome-ignore lint/suspicious/noArrayIndexKey: 順序が不変であるため
         <div className="flex justify-center gap-1.5" key={rowIndex}>
           {row.map((key) => {
-            const isRemapped = mappings.has(key.vk);
+            const remapped = mappings.get(key.vk);
             return (
               <motion.button
                 className={cn(
                   "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
-                  isRemapped
+                  remapped
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background text-foreground hover:bg-muted"
                 )}
@@ -39,7 +40,7 @@ export function SimpleKeyboard({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {key.label}
+                {remapped ? getKeyLabel(remapped, keyboardLayout) : key.label}
               </motion.button>
             );
           })}

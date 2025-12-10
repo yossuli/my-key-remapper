@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { KeyDefinition } from "../types";
+import { getKeyLabel } from "../utils/getKeyLabel";
 
 interface KeyEditorModalProps {
   isOpen: boolean;
@@ -110,11 +111,11 @@ export function KeyEditorModal({
           <div className="space-y-4 p-6">
             <div className="flex items-center justify-center gap-4 font-bold text-2xl">
               <div className="rounded border bg-muted px-4 py-2">
-                {getKeyLabel(targetVk)}
+                {getKeyLabel(targetVk, keyboardLayout)}
               </div>
               <span className="text-muted-foreground">→</span>
               <div className="rounded border bg-primary/10 px-4 py-2 text-primary">
-                {targetKey ? getKeyLabel(+targetKey) : "?"}
+                {targetKey ? getKeyLabel(+targetKey, keyboardLayout) : "?"}
               </div>
             </div>
 

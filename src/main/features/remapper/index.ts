@@ -1,8 +1,10 @@
 import { ipcMain } from "electron";
-import { setupKeyboardHook, teardownKeyboardHook } from "./hook";
+import { setupKeyboardHook } from "./hook";
 import { remapRules } from "./rules";
 
-export function setupRemapper(sender: (channel: string, data: any) => void) {
+export function setupRemapper(
+  sender: (channel: string, data: unknown) => void
+) {
   setupKeyboardHook(sender);
 
   // IPC Handlers
@@ -16,5 +18,3 @@ export function setupRemapper(sender: (channel: string, data: any) => void) {
     remapRules.remove(from);
   });
 }
-
-export { teardownKeyboardHook as teardownRemapper };

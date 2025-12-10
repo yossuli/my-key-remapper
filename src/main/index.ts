@@ -1,5 +1,5 @@
+import { join } from "node:path";
 import { app, BrowserWindow } from "electron";
-import { join } from "path";
 import { setupRemapper, teardownRemapper } from "./features/remapper";
 
 let mainWindow: BrowserWindow | null = null;
@@ -15,8 +15,8 @@ function createWindow() {
     },
   });
 
-  if (process.env["ELECTRON_RENDERER_URL"]) {
-    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+  if (process.env.ELECTRON_RENDERER_URL) {
+    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
     mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
@@ -34,7 +34,9 @@ app.whenReady().then(() => {
   });
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
   });
 });
 

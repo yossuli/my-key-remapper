@@ -1,5 +1,5 @@
 export class RemapRules {
-  private rules = new Map<number, number>();
+  private readonly rules = new Map<number, number>();
 
   add(from: number, to: number) {
     console.log(`Adding mapping: ${from} -> ${to}`);

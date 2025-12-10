@@ -9,8 +9,27 @@ import {
 import { useEffect, useState } from "react";
 
 interface LogEntry {
+  id: string;
   vkCode: number;
   time: string;
+}
+
+declare global {
+  interface Window {
+    electron?: {
+      ipcRenderer: {
+        // チャンネルによってIPC引数が大きく異なるため、ここでは柔軟性のために 'any' が必要です。
+        // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
+        on: (channel: string, func: (...args: any[]) => void) => void;
+        // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
+        off: (channel: string, func: (...args: any[]) => void) => void;
+        // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
+        send: (channel: string, ...args: any[]) => void;
+        // biome-ignore lint/suspicious/noExplicitAny: IPC戻り値は動的です
+        invoke: (channel: string, ...args: any[]) => Promise<any>;
+      };
+    };
+  }
 }
 
 export default function App() {
@@ -20,16 +39,22 @@ export default function App() {
   const [newFrom, setNewFrom] = useState("");
   const [newTo, setNewTo] = useState("");
 
+  const MAX_LOG_ENTRIES = 19;
+
   useEffect(() => {
     // Listen for key events
-    const handleKeyEvent = (_event: any, data: { vkCode: number }) => {
+    const handleKeyEvent = (_event: unknown, data: { vkCode: number }) => {
       setLogs((prev) => [
-        { vkCode: data.vkCode, time: new Date().toLocaleTimeString() },
-        ...prev.slice(0, 19),
+        {
+          id: crypto.randomUUID(),
+          vkCode: data.vkCode,
+          time: new Date().toLocaleTimeString(),
+        },
+        ...prev.slice(0, MAX_LOG_ENTRIES),
       ]);
     };
 
-    const ipc = (window as any).electron?.ipcRenderer;
+    const ipc = window.electron?.ipcRenderer;
     if (ipc) {
       ipc.on("key-event", handleKeyEvent);
       // Load initial mappings
@@ -39,15 +64,17 @@ export default function App() {
     }
 
     return () => {
-      if (ipc) ipc.off("key-event", handleKeyEvent);
+      if (ipc) {
+        ipc.off("key-event", handleKeyEvent);
+      }
     };
   }, []);
 
   const addMapping = () => {
-    const from = Number.parseInt(newFrom);
-    const to = Number.parseInt(newTo);
-    if (!(isNaN(from) || isNaN(to))) {
-      const ipc = (window as any).electron?.ipcRenderer;
+    const from = Number.parseInt(newFrom, 10);
+    const to = Number.parseInt(newTo, 10);
+    if (!(Number.isNaN(from) || Number.isNaN(to))) {
+      const ipc = window.electron?.ipcRenderer;
       ipc?.send("add-mapping", { from, to });
       setMappings((prev) => [...prev.filter((m) => m[0] !== from), [from, to]]);
       setNewFrom("");
@@ -56,7 +83,7 @@ export default function App() {
   };
 
   const removeMapping = (from: number) => {
-    const ipc = (window as any).electron?.ipcRenderer;
+    const ipc = window.electron?.ipcRenderer;
     ipc?.send("remove-mapping", from);
     setMappings((prev) => prev.filter((m) => m[0] !== from));
   };
@@ -81,6 +108,7 @@ export default function App() {
               : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
           }`}
           onClick={() => setIsActive(!isActive)}
+          type="button"
         >
           <Power className="h-4 w-4" />
           {isActive ? "Active" : "Disabled"}
@@ -117,8 +145,9 @@ export default function App() {
               />
               <button
                 className="rounded bg-primary p-1.5 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-                disabled={!(newFrom && newTo)}
+                disabled={newFrom === "" || newTo === ""}
                 onClick={addMapping}
+                type="button"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -152,6 +181,7 @@ export default function App() {
                       className="rounded p-1.5 text-muted-foreground opacity-0 transition-colors hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                       onClick={() => removeMapping(from)}
                       title="Remove mapping"
+                      type="button"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -174,10 +204,10 @@ export default function App() {
                 Waiting for input...
               </p>
             ) : (
-              logs.map((log, i) => (
+              logs.map((log) => (
                 <div
                   className="fade-in slide-in-from-left-2 flex animate-in items-center justify-between duration-200"
-                  key={i}
+                  key={log.id}
                 >
                   <span className="rounded bg-accent/50 px-2 py-0.5 text-accent-foreground">
                     VK: {log.vkCode}

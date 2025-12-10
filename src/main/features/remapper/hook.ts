@@ -85,17 +85,17 @@ function processKeyboardEvent(
 ): boolean {
   try {
     const info = koffi.decode(lParam, KBDLLHOOKSTRUCT);
-    // Ignore injected events
+    // 注入された（インジェクト）イベントを無視
     // biome-ignore lint/suspicious/noBitwiseOperators: フラグチェックにはビット演算が必要です
     if ((info.flags & 0x10) !== 0) {
-      return false; // Proceed to CallNextHookEx
+      return false; // CallNextHookExへ進める
     }
 
     const vkCode = info.vkCode;
     const isUp = wParam === WM_KEYUP || wParam === WM_SYSKEYUP;
 
     if (handleKeyLogic(vkCode, isUp)) {
-      return true; // Block
+      return true; // ブロックする
     }
   } catch (err) {
     console.error("Error inside hook callback:", err);
@@ -104,7 +104,7 @@ function processKeyboardEvent(
 }
 
 function handleKeyLogic(vkCode: number, isUp: boolean): boolean {
-  // Logging
+  // ログ出力
   if (!isUp) {
     console.log(`[HOOK] Key Down: ${vkCode}`);
     if (eventSender) {
@@ -112,12 +112,12 @@ function handleKeyLogic(vkCode: number, isUp: boolean): boolean {
     }
   }
 
-  // Remap Logic
+  // リマップ処理
   const targetVk = remapRules.get(vkCode);
   if (targetVk !== undefined) {
     console.log(`Remapping ${vkCode} -> ${targetVk} (${isUp ? "UP" : "DOWN"})`);
     sendKey(targetVk, isUp);
-    return true; // Block original
+    return true; // 元の入力をブロックする
   }
   return false;
 }

@@ -25,8 +25,8 @@ function createWindow() {
 app.whenReady().then(async () => {
   createWindow();
 
-  // Initialize Remapper Feature
-  // Pass a sender function to allow the feature to communicate with the renderer
+  // リマッパー機能を初期化
+  // レンダラと通信するための送信関数を渡す
   await setupRemapper((channel, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send(channel, data);
@@ -42,8 +42,8 @@ app.whenReady().then(async () => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    // Clean up hook before exit
-    teardownRemapper();
+  // 終了前にフックをクリーンアップ
+  teardownRemapper();
     app.quit();
   }
 });

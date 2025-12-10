@@ -12,7 +12,7 @@ import {
 const user32 = koffi.load("user32.dll");
 const kernel32 = koffi.load("kernel32.dll");
 
-// Callback Signature
+// コールバックのシグネチャ
 export const HookCallbackProto = koffi.proto("HookCallbackProto", LRESULT, [
   "int",
   WPARAM,

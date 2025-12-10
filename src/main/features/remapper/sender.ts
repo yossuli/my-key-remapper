@@ -17,7 +17,7 @@ export const sendKey = (vk: number, up: boolean) => {
       },
     };
 
-    // SendInput returns number of events inserted
+    // SendInputは挿入されたイベント数を返す
     const sent = SendInput(1, [input], koffi.sizeof(INPUT));
     if (sent !== 1) {
       console.error(`SendInput failed. Sent: ${sent}`);

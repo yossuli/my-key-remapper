@@ -1,6 +1,7 @@
 import { AlertCircle, Keyboard, Power, Settings } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { KeyEditorModal, SimpleKeyboard } from "./components/simpleKeyboard";
+import { KeyEditorModal } from "./components/keyEditorModal";
+import { SimpleKeyboard } from "./components/simpleKeyboard";
 import { KEYBOARD_LAYOUT, SWITCH_LAYOUT_RULE } from "./constants";
 import type { LayoutType } from "./types";
 
@@ -33,7 +34,7 @@ export default function App() {
   const [isActive, setIsActive] = useState(true);
   const [mappings, setMappings] = useState<[number, number][]>([]);
   const [editingKey, setEditingKey] = useState<number | null>(null);
-  const [layout, setLayout] = useState<LayoutType>("US");
+  const [layout, setLayout] = useState<LayoutType>("JIS");
 
   const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT[layout], [layout]);
 
@@ -45,7 +46,7 @@ export default function App() {
   const mappingsMap = new Map(mappings);
 
   useEffect(() => {
-    // Listen for key events
+    // キーイベントを受信
     const handleKeyEvent = (_event: unknown, data: { vkCode: number }) => {
       setLogs((prev) => [
         {
@@ -60,7 +61,7 @@ export default function App() {
     const ipc = window.electron?.ipcRenderer;
     if (ipc) {
       ipc.on("key-event", handleKeyEvent);
-      // Load initial mappings
+      // 初期マッピングを読み込む
       ipc.invoke("get-mappings").then((initial: [number, number][]) => {
         setMappings(initial);
       });
@@ -76,7 +77,7 @@ export default function App() {
   const saveMapping = (from: number, to: number) => {
     const ipc = window.electron?.ipcRenderer;
     ipc?.send("add-mapping", { from, to });
-    // Optimistic update
+    // 楽観的更新（UIを先行更新）
     setMappings((prev) => {
       const newMap = new Map(prev);
       newMap.set(from, to);

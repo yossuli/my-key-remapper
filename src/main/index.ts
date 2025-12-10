@@ -1,12 +1,46 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { join } from "path";
 import koffi from "koffi";
+// ... (imports)
+
+// ... (hook logic)
+
+// Remove the test rule
+// remapRules.set(65, 66);
+
+// ... (createWindow function)
+
+app.whenReady().then(() => {
+  createWindow();
+  setupKeyboardHook();
+
+  // --- IPC Handlers for Mappings ---
+  ipcMain.handle("get-mappings", () => {
+    return Array.from(remapRules.entries());
+  });
+
+  ipcMain.on("add-mapping", (_event, { from, to }) => {
+    console.log(`Adding mapping: ${from} -> ${to}`);
+    remapRules.set(from, to);
+  });
+
+  ipcMain.on("remove-mapping", (_event, from) => {
+    console.log(`Removing mapping: ${from}`);
+    remapRules.delete(from);
+  });
+
+  // Also existing activate handler
+  app.on("activate", function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
 let mainWindow: BrowserWindow | null = null;
 
 // --- FFI & Hook Logic ---
 let hHook: any = null;
 let hookCallback: any = null; // Keep reference to prevent GC
+let remapRules = new Map<number, number>(); // Global rules: <FromVK, ToVK>
 
 function setupKeyboardHook() {
   if (process.platform !== "win32") {
@@ -40,13 +74,60 @@ function setupKeyboardHook() {
     });
 
     // Callback Signature
-    // Callback Signature
     const HookCallbackProto = koffi.proto("HookCallbackProto", LRESULT, [
       "int",
       WPARAM,
       koffi.pointer(KBDLLHOOKSTRUCT), // Received as a pointer object (External)
     ]);
     const HookCallbackPtr = koffi.pointer(HookCallbackProto);
+
+    // --- SendInput Definitions ---
+    const INPUT_KEYBOARD = 1;
+    const KEYEVENTF_KEYUP = 0x0002;
+    // const KEYEVENTF_SCANCODE = 0x0008; // Not used yet
+
+    const KEYBDINPUT = koffi.struct("KEYBDINPUT", {
+      wVk: "uint16_t",
+      wScan: "uint16_t",
+      dwFlags: "uint32_t",
+      time: "uint32_t",
+      dwExtraInfo: "uintptr_t",
+    });
+
+    const MOUSEINPUT = koffi.struct("MOUSEINPUT", {
+      dx: "long",
+      dy: "long",
+      mouseData: "uint32_t",
+      dwFlags: "uint32_t",
+      time: "uint32_t",
+      dwExtraInfo: "uintptr_t",
+    });
+
+    const HARDWAREINPUT = koffi.struct("HARDWAREINPUT", {
+      uMsg: "uint32_t",
+      wParamL: "uint16_t",
+      wParamH: "uint16_t",
+    });
+
+    const InputUnion = koffi.union("InputUnion", {
+      ki: KEYBDINPUT,
+      mi: MOUSEINPUT,
+      hi: HARDWAREINPUT,
+    });
+
+    const INPUT = koffi.struct("INPUT", {
+      type: "uint32_t",
+      // On x64, there is 4 bytes padding after type to align union to 8 bytes.
+      // Koffi should handle natural alignment, but being explicit is safer if needed.
+      // However, C struct is usually: DWORD type; UNION u;
+      u: InputUnion,
+    });
+
+    const SendInput = user32.func("SendInput", "uint32_t", [
+      "uint32_t",
+      koffi.pointer(INPUT),
+      "int",
+    ]);
 
     // Functions
     const CallNextHookEx = user32.func("CallNextHookEx", LRESULT, [
@@ -72,33 +153,88 @@ function setupKeyboardHook() {
       .load("kernel32.dll")
       .func("GetModuleHandleA", HINSTANCE, ["str"]);
 
-    // The Callback
+    // Test Rule: A (65) -> B (66)
+    remapRules.set(65, 66);
+
+    // Helper to send key input
+    const sendKey = (vk: number, up: boolean) => {
+      try {
+        const input = {
+          type: INPUT_KEYBOARD,
+          u: {
+            ki: {
+              wVk: vk,
+              wScan: 0,
+              dwFlags: up ? KEYEVENTF_KEYUP : 0,
+              time: 0,
+              dwExtraInfo: 0,
+            },
+          },
+        };
+
+        // SendInput returns number of events inserted
+        const sent = SendInput(1, [input], koffi.sizeof(INPUT));
+        if (sent !== 1) {
+          console.error(`SendInput failed. Sent: ${sent}`);
+        }
+      } catch (e) {
+        console.error("SendInput Error:", e);
+      }
+    };
+
     // The Callback
     hookCallback = koffi.register(
       (nCode: number, wParam: number, lParam: any) => {
-        // nCode < 0 means we must pass it on
-        // koffi.address(lParam) extracts the raw address from the pointer object
         if (nCode < 0) {
           return CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
         }
 
-        if (wParam === WM_KEYDOWN || wParam === WM_SYSKEYDOWN) {
+        if (
+          wParam === WM_KEYDOWN ||
+          wParam === WM_SYSKEYDOWN ||
+          wParam === 0x0101 /* WM_KEYUP */ ||
+          wParam === 0x0105 /* WM_SYSKEYUP */
+        ) {
           try {
-            // Explicitly decode the pointer to get the struct data
             const info = koffi.decode(lParam, KBDLLHOOKSTRUCT);
-            console.log(`[HOOK] Key Pressed: vkCode=${info.vkCode}`);
 
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send("key-event", {
-                vkCode: info.vkCode,
-              });
+            // Ignore injected events to prevent infinite loops
+            // LLKHF_INJECTED = 0x00000010
+            if ((info.flags & 0x10) !== 0) {
+              // console.log("Ignoring injected key");
+              return CallNextHookEx(
+                hHook,
+                nCode,
+                wParam,
+                koffi.address(lParam)
+              );
+            }
+
+            const vkCode = info.vkCode;
+            const isUp = wParam === 0x0101 || wParam === 0x0105;
+
+            // Logging
+            if (!isUp) {
+              console.log(`[HOOK] Key Down: ${vkCode}`);
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.send("key-event", { vkCode });
+              }
+            }
+
+            // Remap Logic
+            if (remapRules.has(vkCode)) {
+              const targetVk = remapRules.get(vkCode)!;
+              console.log(
+                `Remapping ${vkCode} -> ${targetVk} (${isUp ? "UP" : "DOWN"})`
+              );
+              sendKey(targetVk, isUp);
+              return 1; // Block original
             }
           } catch (err) {
             console.error("Error inside hook callback:", err);
           }
         }
 
-        // Always call next hook -> Pass the address forward
         return CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
       },
       HookCallbackPtr

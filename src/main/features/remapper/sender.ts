@@ -1,0 +1,28 @@
+import koffi from "koffi";
+import { SendInput } from "./native";
+import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
+
+export const sendKey = (vk: number, up: boolean) => {
+  try {
+    const input = {
+      type: INPUT_KEYBOARD,
+      u: {
+        ki: {
+          wVk: vk,
+          wScan: 0,
+          dwFlags: up ? KEYEVENTF_KEYUP : 0,
+          time: 0,
+          dwExtraInfo: 0,
+        },
+      },
+    };
+
+    // SendInput returns number of events inserted
+    const sent = SendInput(1, [input], koffi.sizeof(INPUT));
+    if (sent !== 1) {
+      console.error(`SendInput failed. Sent: ${sent}`);
+    }
+  } catch (e) {
+    console.error("SendInput Error:", e);
+  }
+};

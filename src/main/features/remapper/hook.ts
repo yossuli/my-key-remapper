@@ -22,18 +22,15 @@ let hHook: any = null;
 // biome-ignore lint/suspicious/noExplicitAny: FFIコールバック
 let hookCallback: any = null;
 // biome-ignore lint/suspicious/noExplicitAny: データは動的です
-let eventSender: ((channel: string, data: any) => void) | null = null;
+type EventSender = ((channel: string, data: any) => void) | null;
 
-export function setupKeyboardHook(
-  // biome-ignore lint/suspicious/noExplicitAny: データは動的です
-  sender: (channel: string, data: any) => void
-) {
+export function setupKeyboardHook(sender: EventSender) {
   if (process.platform !== "win32") {
     console.log("Not on Windows, skipping keyboard hook setup.");
     return;
   }
 
-  eventSender = sender;
+  const eventSender = sender;
 
   try {
     hookCallback = koffi.register(
@@ -44,7 +41,12 @@ export function setupKeyboardHook(
         }
 
         if (isHorizontalKeyDownOrUp(wParam)) {
-          const blocked = processKeyboardEvent(nCode, wParam, lParam);
+          const blocked = processKeyboardEvent(
+            nCode,
+            wParam,
+            lParam,
+            eventSender
+          );
           if (blocked) {
             return 1;
           }
@@ -81,7 +83,8 @@ function processKeyboardEvent(
   _nCode: number,
   wParam: number,
   // biome-ignore lint/suspicious/noExplicitAny: データは動的です
-  lParam: any
+  lParam: any,
+  eventSender: EventSender
 ): boolean {
   try {
     const info = koffi.decode(lParam, KBDLLHOOKSTRUCT);
@@ -94,7 +97,7 @@ function processKeyboardEvent(
     const vkCode = info.vkCode;
     const isUp = wParam === WM_KEYUP || wParam === WM_SYSKEYUP;
 
-    if (handleKeyLogic(vkCode, isUp)) {
+    if (handleKeyLogic(vkCode, isUp, eventSender)) {
       return true; // ブロックする
     }
   } catch (err) {
@@ -103,13 +106,14 @@ function processKeyboardEvent(
   return false;
 }
 
-function handleKeyLogic(vkCode: number, isUp: boolean): boolean {
-  // ログ出力
-  if (!isUp) {
-    console.log(`[HOOK] Key Down: ${vkCode}`);
-    if (eventSender) {
-      eventSender("key-event", { vkCode });
-    }
+function handleKeyLogic(
+  vkCode: number,
+  isUp: boolean,
+  eventSender: EventSender
+): boolean {
+  console.log(`[HOOK] Key ${isUp ? "Up" : "Down"}: ${vkCode}`);
+  if (eventSender) {
+    eventSender("key-event", { vkCode, isUp });
   }
 
   // リマップ処理

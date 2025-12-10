@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { VK } from "../constants";
 import type { KeyDefinition } from "../types";
 import { getKeyLabel } from "../utils/getKeyLabel";
 
@@ -25,8 +26,39 @@ export function KeyEditorModal({
 }: KeyEditorModalProps) {
   const [targetKey, setTargetKey] = useState("");
   const inputFocusedRef = useRef(false);
+  const enterTimerRef = useRef<number | null>(null);
+  const enterActiveRef = useRef(false);
+  const ENTER_HOLD_MS = 2000;
 
   const currentMapping = targetVk ? mappings.get(targetVk) : undefined;
+
+  const clearEnterTimer = useCallback(() => {
+    if (enterTimerRef.current !== null) {
+      window.clearTimeout(enterTimerRef.current);
+      enterTimerRef.current = null;
+    }
+    enterActiveRef.current = false;
+  }, []);
+
+  const close = useCallback(() => {
+    clearEnterTimer();
+    onClose();
+    setTargetKey("");
+  }, [clearEnterTimer, onClose]);
+
+  const handleSave = useCallback(() => {
+    if (targetVk && targetKey) {
+      onSave(targetVk, Number.parseInt(targetKey, 10));
+      close();
+    }
+  }, [onSave, targetKey, targetVk, close]);
+
+  const handleRemove = useCallback(() => {
+    if (targetVk) {
+      onRemove(targetVk);
+      close();
+    }
+  }, [onRemove, targetVk, close]);
 
   useEffect(() => {
     if (currentMapping) {
@@ -41,8 +73,32 @@ export function KeyEditorModal({
       return;
     }
 
-    const handleKeyEvent = (_event: unknown, data: { vkCode: number }) => {
-      // 入力がフォーカスされている間は外部のキーイベントで上書きしない
+    const handleEnterKeyEvent = (isKeyUp: boolean) => {
+      if (isKeyUp) {
+        clearEnterTimer();
+        if (enterActiveRef.current) {
+          enterActiveRef.current = false;
+          return true;
+        }
+        handleSave();
+        close();
+      } else if (!enterActiveRef.current) {
+        enterActiveRef.current = true;
+        enterTimerRef.current = window.setTimeout(() => {
+          enterActiveRef.current = false;
+        }, ENTER_HOLD_MS);
+      }
+      return false;
+    };
+
+    const handleKeyEvent = (
+      _event: unknown,
+      data: { vkCode: number; isUp: boolean }
+    ) => {
+      if (data.vkCode === VK.ENTER && !handleEnterKeyEvent(data.isUp)) {
+        return;
+      }
+
       if (inputFocusedRef.current) {
         return;
       }
@@ -54,36 +110,7 @@ export function KeyEditorModal({
     return () => {
       ipc?.off("key-event", handleKeyEvent);
     };
-  }, [isOpen]);
-
-  const handleSave = () => {
-    if (targetVk && targetKey) {
-      onSave(targetVk, Number.parseInt(targetKey, 10));
-      onClose();
-    }
-  };
-
-  const handleRemove = () => {
-    if (targetVk) {
-      onRemove(targetVk);
-      onClose();
-    }
-  };
-
-  const getKeyLabel = (vk: number) => {
-    for (const row of keyboardLayout) {
-      const found = row.find((k) => k.vk === vk);
-      if (found) {
-        return found.label;
-      }
-    }
-    return `VK ${vk}`;
-  };
-
-  const close = () => {
-    onClose();
-    setTargetKey("");
-  };
+  }, [isOpen, clearEnterTimer, close, handleSave]);
 
   if (!isOpen || targetVk === null) {
     return null;

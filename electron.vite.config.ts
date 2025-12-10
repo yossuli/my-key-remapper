@@ -1,4 +1,5 @@
 import { defineConfig, externalizeDepsPlugin } from "electron-vite";
+import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
   },
   renderer: {
+    plugins: [react()],
     root: "src/renderer",
     build: {
       rollupOptions: {

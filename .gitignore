@@ -3,5 +3,6 @@ dist/
 out/
 .DS_Store
 .agent/
+
 .github/copilot-instructions.md
 GEMINI.md

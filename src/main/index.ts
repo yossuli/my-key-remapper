@@ -22,12 +22,12 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
 
   // Initialize Remapper Feature
   // Pass a sender function to allow the feature to communicate with the renderer
-  setupRemapper((channel, data) => {
+  await setupRemapper((channel, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send(channel, data);
     }

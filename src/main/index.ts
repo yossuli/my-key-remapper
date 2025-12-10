@@ -42,8 +42,8 @@ app.whenReady().then(async () => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-  // 終了前にフックをクリーンアップ
-  teardownRemapper();
+    // 終了前にフックをクリーンアップ
+    teardownRemapper();
     app.quit();
   }
 });

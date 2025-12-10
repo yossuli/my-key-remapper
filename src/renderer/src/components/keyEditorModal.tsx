@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyDefinition } from "../types";
 
 interface KeyEditorModalProps {
@@ -23,6 +23,7 @@ export function KeyEditorModal({
   onRemove,
 }: KeyEditorModalProps) {
   const [targetKey, setTargetKey] = useState("");
+  const inputFocusedRef = useRef(false);
 
   const currentMapping = targetVk ? mappings.get(targetVk) : undefined;
 
@@ -40,6 +41,10 @@ export function KeyEditorModal({
     }
 
     const handleKeyEvent = (_event: unknown, data: { vkCode: number }) => {
+      // 入力がフォーカスされている間は外部のキーイベントで上書きしない
+      if (inputFocusedRef.current) {
+        return;
+      }
       setTargetKey(data.vkCode.toString());
     };
 
@@ -123,7 +128,13 @@ export function KeyEditorModal({
               <input
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 name="vkCode"
+                onBlur={() => {
+                  inputFocusedRef.current = false;
+                }}
                 onChange={(e) => setTargetKey(e.target.value)}
+                onFocus={() => {
+                  inputFocusedRef.current = true;
+                }}
                 placeholder="Enter VK Code (e.g., 65)"
                 type="number"
                 value={targetKey}

@@ -246,11 +246,15 @@ export function KeyEditorModal({
 
             {/* アクション種別選択 */}
             <div className="space-y-2">
-              <label className="font-medium text-muted-foreground text-xs">
+              <label
+                className="font-medium text-muted-foreground text-xs"
+                htmlFor="action"
+              >
                 アクション
               </label>
               <select
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                name="action"
                 onChange={(e) =>
                   setActionType(
                     e.target.value as

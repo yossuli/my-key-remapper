@@ -47,23 +47,6 @@ export default function App() {
     [layerId, layout]
   );
 
-  // 後方互換性のため、baseレイヤーのtapバインディングからmappingsMapを生成
-  const mappingsMap = useMemo(() => {
-    const map = new Map<number, number>();
-    const currentLayer = layers.find((l) => l.id === layerId);
-    if (!currentLayer) {
-      return map;
-    }
-
-    for (const [keyCode, bindings] of Object.entries(currentLayer.bindings)) {
-      const tapBinding = bindings.find((b) => b.trigger === "tap");
-      if (tapBinding?.action.type === "remap") {
-        map.set(Number(keyCode), tapBinding.action.key);
-      }
-    }
-    return map;
-  }, [layers, layerId]);
-
   const toggleLayout = () => {
     setLayout((prev) => SWITCH_LAYOUT_RULE[prev]);
   };
@@ -89,7 +72,7 @@ export default function App() {
       // 初期マッピングを読み込む
       ipc.invoke("get-mappings").then((initial: Layer[]) => {
         setLayers(initial);
-        console.log(JSON.stringify(initial))
+        console.log(initial);
       });
     }
 
@@ -212,7 +195,7 @@ export default function App() {
           <div className="overflow-x-auto pb-4">
             <SimpleKeyboard
               keyboardLayout={keyboardLayout}
-              mappings={mappingsMap}
+              bindings={layers.find((l) => l.id === layerId)?.bindings || {}}
               onKeyClick={(vk) => setEditingKey(vk)}
             />
           </div>

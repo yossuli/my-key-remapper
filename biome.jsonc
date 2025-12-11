@@ -22,7 +22,13 @@
             "style": "interface"
           }
         },
-        "noMagicNumbers": "error"
+        "noMagicNumbers": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["camelCase"]
+          }
+        }
       }
     }
   }

@@ -116,6 +116,21 @@ function processKeyboardEvent(
   return false;
 }
 
+/**
+ * 修飾キーかどうかを判定
+ * 修飾キーは長押し判定を無効化する（Windowsの特殊な動作のため）
+ */
+function isModifierKey(vkCode: number): boolean {
+  return (
+    vkCode === 16 || // VK_SHIFT
+    vkCode === 17 || // VK_CONTROL
+    vkCode === 18 || // VK_MENU (Alt)
+    vkCode === 91 || // VK_LWIN
+    vkCode === 92 || // VK_RWIN
+    (vkCode >= 160 && vkCode <= 165) // VK_LSHIFT, VK_RSHIFT, VK_LCONTROL, VK_RCONTROL, VK_LMENU, VK_RMENU
+  );
+}
+
 function handleKeyLogic(
   vkCode: number,
   isUp: boolean,
@@ -133,46 +148,35 @@ function handleKeyLogic(
 }
 
 function handleKeyDown(vkCode: number): boolean {
-  // ホールド待機中のキーがある場合、割り込みとして処理
-  // それらのキーをtapとして送信する
-  const pendingHoldKeys = keyStateManager.getPendingHoldKeys();
-  for (const pendingCode of pendingHoldKeys) {
-    if (pendingCode !== vkCode) {
-      // 待機中のキーをtapとして送信
-      const tapAction = remapRules.getAction(pendingCode, "tap");
-      if (tapAction) {
-        console.log(`[HOOK] Interrupted hold key ${pendingCode}, sending tap`);
-        executeAction(tapAction, pendingCode, true);
-      } else {
-        // バインディングがない場合は元のキーをそのまま送信
-        console.log(
-          `[HOOK] Interrupted hold key ${pendingCode}, sending original key`
-        );
-        sendKey(pendingCode, false);
-        sendKey(pendingCode, true);
-      }
-      // 割り込みとしてマーク（リリース時にtapを再送信しないようにする）
-      keyStateManager.markAsInterrupted(pendingCode);
-    }
+  // 修飾キーの場合はhold判定を無効化
+  if (isModifierKey(vkCode)) {
+    // 修飾キーは通常のキー入力として扱う（hold判定しない）
+    return false;
   }
 
-  // キー状態を更新し、ホールドトリガー時のコールバックを設定
-  keyStateManager.onKeyDown(vkCode, (code) => {
-    // ホールドタイマーが発火した時の処理
-    const holdAction = remapRules.getAction(code, "hold");
-    if (holdAction) {
-      executeAction(holdAction, code, false);
-    }
+  // キー状態を更新（ホールド判定のみ）
+  keyStateManager.onKeyDown(vkCode, () => {
+    // ホールドタイマーが発火した時はログ出力のみ
+    console.log(`[HOOK] Hold detected for key ${vkCode}`);
   });
 
   // キーダウン時点ではまだアクションを実行しない（ホールド判定待ち）
-  // ただし、バインディングがある場合は元のキーをブロックする必要がある
+  // holdバインディングのみの場合はデフォルトのキー入力を通す
+  // tap/doubleTap/tapHoldバインディングがある場合のみブロックする
   const bindings = remapRules.getBindings(vkCode);
-  if (bindings.length > 0) {
-    console.log(`[HOOK] Key Down blocked (has bindings): ${vkCode}`);
+  const hasNonHoldBinding = bindings.some(
+    (b) =>
+      b.trigger === "tap" ||
+      b.trigger === "doubleTap" ||
+      b.trigger === "tapHold"
+  );
+
+  if (hasNonHoldBinding) {
+    console.log(`[HOOK] Key Down blocked (has non-hold bindings): ${vkCode}`);
     return true;
   }
 
+  // holdのみの場合はデフォルトのキー入力を通す
   return false;
 }
 

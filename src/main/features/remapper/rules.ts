@@ -102,6 +102,13 @@ export class RemapRules {
   }
 
   /**
+   * 現在アクティブなレイヤーIDを取得（passThroughKeys判定用）
+   */
+  getActiveLayerIds(): string[] {
+    return [...this.layerStack];
+  }
+
+  /**
    * すべてのレイヤーを取得
    */
   getLayers(): Layer[] {

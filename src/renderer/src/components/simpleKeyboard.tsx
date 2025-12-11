@@ -3,15 +3,16 @@ import { KEY_SIZE_REM } from "../constants";
 import type { KeyDefinition } from "../types";
 import { cn } from "../utils/cn";
 import { getKeyLabel } from "../utils/getKeyLabel";
+import { Layer } from "../../../shared/types/remapConfig";
 
 interface SimpleKeyboardProps {
-  mappings: Map<number, number>;
+  bindings: Layer["bindings"];
   keyboardLayout: KeyDefinition[][];
   onKeyClick: (vk: number) => void;
 }
 
 export function SimpleKeyboard({
-  mappings,
+  bindings,
   keyboardLayout,
   onKeyClick,
 }: SimpleKeyboardProps) {
@@ -22,7 +23,8 @@ export function SimpleKeyboard({
         <div className="flex justify-center gap-1.5" key={rowIndex}>
           {row.map((key) => {
             const baseVk = Array.isArray(key.vk) ? key.vk[0] : key.vk;
-            const remapped = mappings.get(baseVk);
+            const remapped = bindings[baseVk];
+            const action = remapped?.find((b) => b.trigger === "tap")?.action;
             return (
               <motion.button
                 className={cn(
@@ -41,7 +43,12 @@ export function SimpleKeyboard({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {remapped ? getKeyLabel(remapped, keyboardLayout) : key.label}
+                {action
+                  ? getKeyLabel(
+                      "key" in action ? action.key : baseVk,
+                      keyboardLayout
+                    )
+                  : key.label}
               </motion.button>
             );
           })}

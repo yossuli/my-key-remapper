@@ -15,4 +15,4 @@ export interface SimpleKeyboardProps {
 
 export type LayoutType = "US" | "JIS";
 
-export type LayerType = "base" | "shift" | "custom";
+export type LayerType = "base" | "custom";

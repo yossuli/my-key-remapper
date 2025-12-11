@@ -1,26 +1,13 @@
-import type { KeyDefinition, LayerType as LayerType, LayoutType } from "../types";
+import type { KeyDefinition, LayerType, LayoutType } from "../types";
 
-import {
-  KEYBOARD_LAYOUT_JIS,
-  KEYBOARD_LAYOUT_JIS_SHIFT,
-  KEYBOARD_LAYOUT_JIS_CUSTOM,
-} from "./JIS";
-import {
-  KEYBOARD_LAYOUT_US,
-  KEYBOARD_LAYOUT_US_SHIFT,
-  KEYBOARD_LAYOUT_US_CUSTOM,
-} from "./US";
+import { KEYBOARD_LAYOUT_JIS, KEYBOARD_LAYOUT_JIS_CUSTOM } from "./JIS";
+import { KEYBOARD_LAYOUT_US, KEYBOARD_LAYOUT_US_CUSTOM } from "./US";
 
 export const KEY_SIZE_REM = 3;
 
- const KEYBOARD_LAYOUT_BASE = {
+const KEYBOARD_LAYOUT_BASE = {
   JIS: KEYBOARD_LAYOUT_JIS,
   US: KEYBOARD_LAYOUT_US,
-} as const satisfies Record<LayoutType, KeyDefinition[][]>;
-
- const KEYBOARD_LAYOUT_SHIFT = {
-  JIS: KEYBOARD_LAYOUT_JIS_SHIFT,
-  US: KEYBOARD_LAYOUT_US_SHIFT,
 } as const satisfies Record<LayoutType, KeyDefinition[][]>;
 
 const KEY_0BOARD_LAYOUT_CUSTOM = {
@@ -30,17 +17,14 @@ const KEY_0BOARD_LAYOUT_CUSTOM = {
 
 export const KEYBOARD_LAYOUT = {
   base: KEYBOARD_LAYOUT_BASE,
-  shift: KEYBOARD_LAYOUT_SHIFT,
   custom: KEY_0BOARD_LAYOUT_CUSTOM,
 } as const satisfies Record<LayerType, Record<LayoutType, KeyDefinition[][]>>;
-
-
 
 export const SWITCH_LAYOUT_RULE = {
   JIS: "US",
   US: "JIS",
 } as const satisfies Record<LayoutType, LayoutType>;
 
-export const LAYER_TYPES =["base", "shift", "custom"] as const satisfies LayerType[];
+export const LAYER_TYPES = ["base", "custom"] as const satisfies LayerType[];
 
 export { VK } from "./vk";

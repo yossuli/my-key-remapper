@@ -122,6 +122,8 @@ export interface Layer {
   name: string;
   /** キーコード → バインディング配列 */
   bindings: Record<number, KeyBinding[]>;
+  /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する */
+  passThroughKeys?: number[];
 }
 
 // =====================================
@@ -156,24 +158,6 @@ export const DEFAULT_REMAP_CONFIG: RemapConfig = {
     {
       id: "base",
       name: "Base",
-      bindings: {
-        160:[{
-          trigger: "hold",
-          action: {
-            type: "layerMomentary",
-            layerId: "shift",
-          },
-        }]
-        ,
-        161:[{
-          trigger: "hold",
-          action: { type: "layerMomentary", layerId: "shift" },
-        }]
-      },
-    },
-    {
-      id: "shift",
-      name: "Shift",
       bindings: {},
     },
   ] satisfies RemapConfig["layers"],

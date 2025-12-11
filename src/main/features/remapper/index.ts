@@ -9,14 +9,14 @@ export async function setupRemapper(
   setupKeyboardHook(sender);
 
   // IPCハンドラ
-  ipcMain.handle("get-mappings", () => remapRules.getAll());
+  ipcMain.handle("get-mappings", () => remapRules.getLayers());
 
-  ipcMain.on("add-mapping", (_event, { from, to }) => {
-    remapRules.add(from, to);
+  ipcMain.on("add-mapping", (_event, { layerId, from, binding }) => {
+    remapRules.addBinding(layerId, from, binding);
   });
 
-  ipcMain.on("remove-mapping", (_event, from) => {
-    remapRules.remove(from);
+  ipcMain.on("remove-binding", (_event, { layerId, from, trigger }) => {
+    remapRules.removeBinding(layerId, from, trigger);
   });
 }
 

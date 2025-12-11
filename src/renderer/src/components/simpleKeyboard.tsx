@@ -21,7 +21,8 @@ export function SimpleKeyboard({
         // biome-ignore lint/suspicious/noArrayIndexKey: 順序が不変であるため
         <div className="flex justify-center gap-1.5" key={rowIndex}>
           {row.map((key) => {
-            const remapped = mappings.get(key.vk);
+            const baseVk = Array.isArray(key.vk) ? key.vk[0] : key.vk;
+            const remapped = mappings.get(baseVk);
             return (
               <motion.button
                 className={cn(
@@ -30,8 +31,8 @@ export function SimpleKeyboard({
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background text-foreground hover:bg-muted"
                 )}
-                key={key.vk}
-                onClick={() => onKeyClick(key.vk)}
+                key={key.id}
+                onClick={() => onKeyClick(baseVk)}
                 style={{
                   width: `${(key.width || 1) * KEY_SIZE_REM}rem`,
                   height: "3rem",

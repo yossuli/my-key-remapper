@@ -13,7 +13,8 @@
     "format": "ultracite format",
     "ultracite:fix": "npx ultracite fix",
     "ultracite:check": "npx ultracite check",
-    "ultracite:doctor": "npx ultracite doctor"
+    "ultracite:doctor": "npx ultracite doctor",
+    "reset:config": "powershell -Command \"Remove-Item -Path $env:APPDATA/my-key-remapper/key-mapping-config*.json -ErrorAction SilentlyContinue\""
   },
   "build": {
     "appId": "com.yossuli.keyremapper",

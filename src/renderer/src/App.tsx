@@ -1,9 +1,14 @@
 import { AlertCircle, Keyboard, Power, Settings } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import type {
+  Action,
+  Layer,
+  TriggerType,
+} from "../../shared/types/remapConfig";
 import { KeyEditorModal } from "./components/keyEditorModal";
 import { SimpleKeyboard } from "./components/simpleKeyboard";
 import { KEYBOARD_LAYOUT, SWITCH_LAYOUT_RULE } from "./constants";
-import type { LayoutType } from "./types";
+import type { LayerType, LayoutType } from "./types";
 
 interface LogEntry {
   id: string;
@@ -32,18 +37,38 @@ declare global {
 export default function App() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isActive, setIsActive] = useState(true);
-  const [mappings, setMappings] = useState<[number, number][]>([]);
+  const [layers, setLayers] = useState<Layer[]>([]);
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [layout, setLayout] = useState<LayoutType>("JIS");
+  const [layerId, setLayerId] = useState<LayerType>("base");
 
-  const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT[layout], [layout]);
+  const keyboardLayout = useMemo(
+    () => KEYBOARD_LAYOUT[layerId][layout],
+    [layerId, layout]
+  );
 
-  const tggleLayout = () => {
+  // 後方互換性のため、baseレイヤーのtapバインディングからmappingsMapを生成
+  const mappingsMap = useMemo(() => {
+    const map = new Map<number, number>();
+    const currentLayer = layers.find((l) => l.id === layerId);
+    if (!currentLayer) {
+      return map;
+    }
+
+    for (const [keyCode, bindings] of Object.entries(currentLayer.bindings)) {
+      const tapBinding = bindings.find((b) => b.trigger === "tap");
+      if (tapBinding?.action.type === "remap") {
+        map.set(Number(keyCode), tapBinding.action.key);
+      }
+    }
+    return map;
+  }, [layers, layerId]);
+
+  const toggleLayout = () => {
     setLayout((prev) => SWITCH_LAYOUT_RULE[prev]);
   };
 
   const MAX_LOG_ENTRIES = 19;
-  const mappingsMap = new Map(mappings);
 
   useEffect(() => {
     // キーイベントを受信
@@ -62,8 +87,9 @@ export default function App() {
     if (ipc) {
       ipc.on("key-event", handleKeyEvent);
       // 初期マッピングを読み込む
-      ipc.invoke("get-mappings").then((initial: [number, number][]) => {
-        setMappings(initial);
+      ipc.invoke("get-mappings").then((initial: Layer[]) => {
+        setLayers(initial);
+        console.log(JSON.stringify(initial))
       });
     }
 
@@ -74,21 +100,49 @@ export default function App() {
     };
   }, []);
 
-  const saveMapping = (from: number, to: number) => {
+  const saveMapping = (from: number, trigger: TriggerType, action: Action) => {
     const ipc = window.electron?.ipcRenderer;
-    ipc?.send("add-mapping", { from, to });
+    ipc?.send("add-mapping", { layerId, from, binding: { trigger, action } });
     // 楽観的更新（UIを先行更新）
-    setMappings((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(from, to);
-      return Array.from(newMap.entries());
-    });
+    setLayers((prev) =>
+      prev.map((l) => {
+        if (l.name !== layerId) {
+          return l;
+        }
+        return {
+          ...l,
+          bindings: {
+            ...l.bindings,
+            [from]: [
+              {
+                type: "key",
+                trigger,
+                action,
+              },
+            ],
+          },
+        };
+      })
+    );
   };
 
-  const removeMapping = (from: number) => {
+  const removeMapping = (from: number, trigger: TriggerType) => {
     const ipc = window.electron?.ipcRenderer;
-    ipc?.send("remove-mapping", from);
-    setMappings((prev) => prev.filter((m) => m[0] !== from));
+    ipc?.send("remove-binding", { layerId, from, trigger });
+    setLayers((prev) =>
+      prev.map((l) => {
+        if (l.id !== layerId) {
+          return l;
+        }
+        const existingBindings = l.bindings[from] || [];
+        const filtered = existingBindings.filter((b) => b.trigger !== trigger);
+        if (filtered.length === 0) {
+          const { [from]: _, ...newBindings } = l.bindings;
+          return { ...l, bindings: newBindings };
+        }
+        return { ...l, bindings: { ...l.bindings, [from]: filtered } };
+      })
+    );
   };
 
   return (
@@ -120,6 +174,27 @@ export default function App() {
 
       <main className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
         <section className="space-y-4">
+          {/* レイヤー選択UI */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">Layer:</span>
+            <div className="flex gap-1 rounded-lg border bg-muted/30 p-1">
+              {(["base", "shift", "custom"] as const).map((l) => (
+                <button
+                  className={`rounded-md px-3 py-1.5 font-medium text-sm transition-colors ${
+                    layerId === l
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                  key={l}
+                  onClick={() => setLayerId(l)}
+                  type="button"
+                >
+                  {l.charAt(0).toUpperCase() + l.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-semibold text-lg">
               <Settings className="h-5 w-5 opacity-70" />
@@ -127,7 +202,7 @@ export default function App() {
             </h2>
             <button
               className="flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:border hover:border-primary"
-              onClick={tggleLayout}
+              onClick={toggleLayout}
               type="button"
             >
               <Keyboard className="h-4 w-4" />
@@ -173,9 +248,14 @@ export default function App() {
       </main>
 
       <KeyEditorModal
+        currentBindings={
+          editingKey !== null
+            ? layers.find((l) => l.id === layerId)?.bindings[editingKey] || []
+            : []
+        }
         isOpen={editingKey !== null}
         keyboardLayout={keyboardLayout}
-        mappings={mappingsMap}
+        layers={layers.map((l) => ({ id: l.id, name: l.name }))}
         onClose={() => setEditingKey(null)}
         onRemove={removeMapping}
         onSave={saveMapping}

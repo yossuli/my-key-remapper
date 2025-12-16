@@ -1,9 +1,6 @@
-import { motion } from "framer-motion";
-import { KEY_SIZE_REM } from "../constants";
+import type { Layer } from "../../../shared/types/remapConfig";
 import type { KeyDefinition } from "../types";
-import { cn } from "../utils/cn";
-import { getKeyLabel } from "../utils/getKeyLabel";
-import { Layer } from "../../../shared/types/remapConfig";
+import { KeyButton } from "./atoms/KeyButton";
 
 interface SimpleKeyboardProps {
   bindings: Layer["bindings"];
@@ -21,35 +18,16 @@ export function SimpleKeyboard({
       {keyboardLayout.map((row, rowIndex) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: 順序が不変であるため
         <div className="flex justify-center gap-1.5" key={rowIndex}>
-          {row.map((key) => {
-            const baseVk = Array.isArray(key.vk) ? key.vk[0] : key.vk;
-            const remapped = bindings[baseVk];
-            const action = remapped?.find((b) => b.trigger === "tap")?.action;
+          {row.map((keyDef) => {
+            const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
             return (
-              <motion.button
-                className={cn(
-                  "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
-                  remapped
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-foreground hover:bg-muted"
-                )}
-                key={key.id}
-                onClick={() => onKeyClick(baseVk)}
-                style={{
-                  width: `${(key.width || 1) * KEY_SIZE_REM}rem`,
-                  height: "3rem",
-                }}
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {action
-                  ? getKeyLabel(
-                      "key" in action ? action.key : baseVk,
-                      keyboardLayout
-                    )
-                  : key.label}
-              </motion.button>
+              <KeyButton
+                bindings={bindings[baseVk]}
+                key={keyDef.id}
+                keyboardLayout={keyboardLayout}
+                keyDef={keyDef}
+                onClick={onKeyClick}
+              />
             );
           })}
         </div>

@@ -1,0 +1,50 @@
+import { motion } from "framer-motion";
+import type { KeyBinding } from "../../../../shared/types/remapConfig";
+import { KEY_SIZE_REM } from "../../constants";
+import type { KeyDefinition } from "../../types";
+import { cn } from "../../utils/cn";
+import { getKeyLabel } from "../../utils/getKeyLabel";
+
+interface KeyButtonProps {
+  keyDef: KeyDefinition;
+  bindings?: KeyBinding[];
+  keyboardLayout: KeyDefinition[][];
+  onClick: (vk: number) => void;
+}
+
+export function KeyButton({
+  keyDef,
+  bindings,
+  keyboardLayout,
+  onClick,
+}: KeyButtonProps) {
+  const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
+  const tapAction = bindings?.find((b) => b.trigger === "tap")?.action;
+  const hasBinding = bindings && bindings.length > 0;
+
+  const displayLabel =
+    tapAction && "key" in tapAction
+      ? getKeyLabel(tapAction.key, keyboardLayout)
+      : keyDef.label;
+
+  return (
+    <motion.button
+      className={cn(
+        "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
+        hasBinding
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-foreground hover:bg-muted"
+      )}
+      onClick={() => onClick(baseVk)}
+      style={{
+        width: `${(keyDef.width || 1) * KEY_SIZE_REM}rem`,
+        height: "3rem",
+      }}
+      type="button"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {displayLabel}
+    </motion.button>
+  );
+}

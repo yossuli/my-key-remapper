@@ -27,4 +27,5 @@ export const SWITCH_LAYOUT_RULE = {
 
 export const LAYER_TYPES = ["base", "custom"] as const satisfies LayerType[];
 
+// biome-ignore lint/performance/noBarrelFile: ここは許容
 export { VK } from "./vk";

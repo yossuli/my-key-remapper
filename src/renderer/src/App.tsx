@@ -8,7 +8,8 @@ import type {
 import { KeyEditorModal } from "./components/keyEditorModal";
 import { SimpleKeyboard } from "./components/simpleKeyboard";
 import { KEYBOARD_LAYOUT, SWITCH_LAYOUT_RULE } from "./constants";
-import type { LayerType, LayoutType } from "./types";
+import type { LayoutType } from "./types";
+import { applyIf } from "./utils/appryIf";
 
 interface LogEntry {
   id: string;
@@ -40,10 +41,10 @@ export default function App() {
   const [layers, setLayers] = useState<Layer[]>([]);
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [layout, setLayout] = useState<LayoutType>("JIS");
-  const [layerId, setLayerId] = useState<LayerType>("base");
+  const [layerId, setLayerId] = useState<Layer["id"]>("base");
 
   const keyboardLayout = useMemo(
-    () => KEYBOARD_LAYOUT[layerId][layout],
+    () => KEYBOARD_LAYOUT[layerId === "base" ? "base" : "custom"][layout],
     [layerId, layout]
   );
 
@@ -88,24 +89,20 @@ export default function App() {
     ipc?.send("add-mapping", { layerId, from, binding: { trigger, action } });
     // 楽観的更新（UIを先行更新）
     setLayers((prev) =>
-      prev.map((l) => {
-        if (l.name !== layerId) {
-          return l;
-        }
-        return {
-          ...l,
-          bindings: {
-            ...l.bindings,
-            [from]: [
-              {
-                type: "key",
-                trigger,
-                action,
-              },
-            ],
-          },
-        };
-      })
+      prev.map(
+        applyIf(
+          (l) => l.name !== layerId,
+          (l) => ({
+            ...l,
+            bindings: {
+              ...l.bindings,
+              [from]: l.bindings[from].filter(
+                ({ action: a }) => a.type !== action.type
+              ),
+            },
+          })
+        )
+      )
     );
   };
 
@@ -113,18 +110,20 @@ export default function App() {
     const ipc = window.electron?.ipcRenderer;
     ipc?.send("remove-binding", { layerId, from, trigger });
     setLayers((prev) =>
-      prev.map((l) => {
-        if (l.id !== layerId) {
-          return l;
-        }
-        const existingBindings = l.bindings[from] || [];
-        const filtered = existingBindings.filter((b) => b.trigger !== trigger);
-        if (filtered.length === 0) {
-          const { [from]: _, ...newBindings } = l.bindings;
-          return { ...l, bindings: newBindings };
-        }
-        return { ...l, bindings: { ...l.bindings, [from]: filtered } };
-      })
+      prev.map(
+        applyIf(
+          (l) => l.id !== layerId,
+          (l) => {
+            const filtered =
+              l.bindings[from]?.filter((b) => b.trigger !== trigger) ?? [];
+            if (filtered.length === 0) {
+              const { [from]: _, ...newBindings } = l.bindings;
+              return { ...l, bindings: newBindings };
+            }
+            return { ...l, bindings: { ...l.bindings, [from]: filtered } };
+          }
+        )
+      )
     );
   };
 
@@ -161,18 +160,18 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-sm">Layer:</span>
             <div className="flex gap-1 rounded-lg border bg-muted/30 p-1">
-              {(["base", "shift", "custom"] as const).map((l) => (
+              {layers.map(({ name }) => (
                 <button
                   className={`rounded-md px-3 py-1.5 font-medium text-sm transition-colors ${
-                    layerId === l
+                    layerId === name
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
-                  key={l}
-                  onClick={() => setLayerId(l)}
+                  key={name}
+                  onClick={() => setLayerId(name)}
                   type="button"
                 >
-                  {l.charAt(0).toUpperCase() + l.slice(1)}
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
                 </button>
               ))}
             </div>
@@ -194,8 +193,8 @@ export default function App() {
           </div>
           <div className="overflow-x-auto pb-4">
             <SimpleKeyboard
-              keyboardLayout={keyboardLayout}
               bindings={layers.find((l) => l.id === layerId)?.bindings || {}}
+              keyboardLayout={keyboardLayout}
               onKeyClick={(vk) => setEditingKey(vk)}
             />
           </div>

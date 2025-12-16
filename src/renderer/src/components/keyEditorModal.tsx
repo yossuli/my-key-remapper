@@ -100,7 +100,7 @@ export function KeyEditorModal({
       case "layerMomentary":
         action = { type: "layerMomentary", layerId: selectedLayerId };
         break;
-      case "none":
+      default:
         action = { type: "none" };
         break;
     }

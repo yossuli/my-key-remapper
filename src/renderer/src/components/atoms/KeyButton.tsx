@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
+import { KEY_SIZE_REM } from "../../../../shared/constants/index";
 import type { KeyBinding } from "../../../../shared/types/remapConfig";
-import { KEY_SIZE_REM } from "../../constants";
 import type { KeyboardLayout, KeyDefinition } from "../../types";
 import { cn } from "../../utils/cn";
 import { getKeyLabel } from "../../utils/getKeyLabel";

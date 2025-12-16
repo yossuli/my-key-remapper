@@ -1,0 +1,23 @@
+import { Keyboard } from "lucide-react";
+import { SWITCH_LAYOUT_RULE } from "../../../../shared/constants";
+import type { LayoutType } from "../../types";
+import { Button } from "../atoms/Button";
+import { Icon } from "../atoms/Icon";
+
+interface LayoutToggleProps {
+  currentLayout: LayoutType;
+  onToggle: () => void;
+}
+
+export function LayoutToggle({ currentLayout, onToggle }: LayoutToggleProps) {
+  return (
+    <Button
+      className="gap-2 rounded-full border border-border hover:border-primary"
+      onClick={onToggle}
+      variant="ghost"
+    >
+      <Icon icon={Keyboard} size="sm" />
+      {SWITCH_LAYOUT_RULE[currentLayout]}
+    </Button>
+  );
+}

@@ -92,11 +92,13 @@ export interface PassthroughAction {
  */
 export type Action =
   | RemapAction
-  | MacroAction
+  // | MacroAction
   | LayerToggleAction
   | LayerMomentaryAction
-  | NoneAction
-  | PassthroughAction;
+  | NoneAction;
+// | PassthroughAction;
+
+export type ActionType = Action["type"];
 
 // =====================================
 // キーバインディング
@@ -119,7 +121,6 @@ export interface KeyBinding {
  */
 export interface Layer {
   id: string;
-  name: string;
   /** キーコード → バインディング配列 */
   bindings: Record<number, KeyBinding[]>;
   /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する */
@@ -157,7 +158,6 @@ export const DEFAULT_REMAP_CONFIG: RemapConfig = {
   layers: [
     {
       id: "base",
-      name: "Base",
       bindings: {},
     },
   ] satisfies RemapConfig["layers"],

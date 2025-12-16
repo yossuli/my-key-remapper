@@ -21,3 +21,8 @@ export interface SimpleKeyboardProps {
 export type LayoutType = "US" | "JIS";
 
 export type LayerType = "base" | "custom";
+
+// biome-ignore lint/suspicious/noExplicitAny: 汎用性のため
+export type AddPrefix<T extends Record<string, any>, U extends string> = {
+  [K in keyof T as `${U}${K extends string ? K : never}`]: T[K];
+};

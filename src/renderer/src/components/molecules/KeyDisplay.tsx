@@ -1,0 +1,29 @@
+import type { KeyboardLayout } from "../../types";
+import { getKeyLabel } from "../../utils/getKeyLabel";
+import { Badge } from "../atoms/Badge";
+
+interface KeyDisplayProps {
+  vkCode: number;
+  keyboardLayout: KeyboardLayout;
+  variant?: "default" | "primary" | "accent";
+  size?: "sm" | "md" | "lg";
+}
+
+export function KeyDisplay({
+  vkCode,
+  keyboardLayout,
+  variant = "default",
+  size = "md",
+}: KeyDisplayProps) {
+  const sizeStyles = {
+    sm: "px-2 py-1 text-xs",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-xl",
+  };
+
+  return (
+    <Badge className={sizeStyles[size]} variant={variant}>
+      {getKeyLabel(vkCode, keyboardLayout)}
+    </Badge>
+  );
+}

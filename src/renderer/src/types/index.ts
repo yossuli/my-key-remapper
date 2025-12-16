@@ -8,6 +8,11 @@ export interface KeyDefinition {
   code?: string;
 }
 
+export type KeyboardLayout = {
+  id: number;
+  row: KeyDefinition[];
+}[];
+
 export interface SimpleKeyboardProps {
   mappings: Map<number, number>;
   onKeyClick: (vk: number) => void;

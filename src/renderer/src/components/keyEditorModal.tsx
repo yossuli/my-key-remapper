@@ -3,7 +3,7 @@ import { Layers, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Action, TriggerType } from "../../../shared/types/remapConfig";
 import { VK } from "../constants";
-import type { KeyDefinition } from "../types";
+import type { KeyboardLayout } from "../types";
 import { getKeyLabel } from "../utils/getKeyLabel";
 
 /** トリガー種別の選択肢 */
@@ -25,7 +25,7 @@ interface KeyEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
   targetVk: number | null;
-  keyboardLayout: KeyDefinition[][];
+  keyboardLayout: KeyboardLayout;
   onSave: (from: number, trigger: TriggerType, action: Action) => void;
   onRemove: (from: number, trigger: TriggerType) => void;
   /** 現在のバインディング */
@@ -223,17 +223,21 @@ export function KeyEditorModal({
 
             {/* トリガー選択 */}
             <div className="space-y-2">
-              <label className="font-medium text-muted-foreground text-xs">
+              <label
+                className="font-medium text-muted-foreground text-xs"
+                htmlFor="selectTrigger1"
+              >
                 トリガー
               </label>
               <div className="flex gap-1 rounded-lg border bg-muted/30 p-1">
-                {TRIGGER_OPTIONS.map((opt) => (
+                {TRIGGER_OPTIONS.map((opt, i) => (
                   <button
                     className={`flex-1 rounded-md px-2 py-1.5 font-medium text-xs transition-colors ${
                       selectedTrigger === opt.value
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
+                    id={`selectTrigger${i}`}
                     key={opt.value}
                     onClick={() => setSelectedTrigger(opt.value)}
                     type="button"
@@ -304,12 +308,16 @@ export function KeyEditorModal({
             {(actionType === "layerToggle" ||
               actionType === "layerMomentary") && (
               <div className="space-y-2">
-                <label className="font-medium text-muted-foreground text-xs">
+                <label
+                  className="font-medium text-muted-foreground text-xs"
+                  htmlFor="selectLayer"
+                >
                   <Layers className="mr-1 inline h-4 w-4" />
                   対象レイヤー
                 </label>
                 <select
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  id="selectLayer"
                   onChange={(e) => setSelectedLayerId(e.target.value)}
                   value={selectedLayerId}
                 >
@@ -329,7 +337,7 @@ export function KeyEditorModal({
 
             {/* ボタン */}
             <div className="flex justify-end gap-2 pt-2">
-              {currentBinding && (
+              {currentBinding !== undefined && (
                 <button
                   className="rounded-md px-4 py-2 font-medium text-destructive text-sm transition-colors hover:bg-destructive/10"
                   onClick={handleRemove}

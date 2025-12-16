@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import type { KeyBinding } from "../../../../shared/types/remapConfig";
 import { KEY_SIZE_REM } from "../../constants";
-import type { KeyDefinition } from "../../types";
+import type { KeyboardLayout, KeyDefinition } from "../../types";
 import { cn } from "../../utils/cn";
 import { getKeyLabel } from "../../utils/getKeyLabel";
 
 interface KeyButtonProps {
   keyDef: KeyDefinition;
   bindings?: KeyBinding[];
-  keyboardLayout: KeyDefinition[][];
+  keyboardLayout: KeyboardLayout;
   onClick: (vk: number) => void;
 }
 

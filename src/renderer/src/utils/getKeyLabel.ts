@@ -1,10 +1,10 @@
-import type { KeyDefinition } from "../types";
+import type { KeyboardLayout } from "../types";
 
 export const getKeyLabel = (
   vk: number | [number, number],
-  keyboardLayout: KeyDefinition[][]
+  keyboardLayout: KeyboardLayout
 ) => {
-  for (const row of keyboardLayout) {
+  for (const { row } of keyboardLayout) {
     const found = row.find((k) => {
       if (Array.isArray(k.vk) && Array.isArray(vk)) {
         return k.vk[0] === vk[0] && k.vk[1] === vk[1];

@@ -1,4 +1,3 @@
-import { AlertCircle, Keyboard, Power, Settings } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type {
   Action,
@@ -6,7 +5,9 @@ import type {
   TriggerType,
 } from "../../shared/types/remapConfig";
 import { KeyEditorModal } from "./components/keyEditorModal";
-import { SimpleKeyboard } from "./components/simpleKeyboard";
+import { Header } from "./components/template/Header";
+import { KeyLogger } from "./components/template/KeyLogger";
+import { KeyRemapView } from "./components/template/KeyRemapView";
 import { KEYBOARD_LAYOUT, SWITCH_LAYOUT_RULE } from "./constants";
 import type { LayoutType } from "./types";
 import { applyIf } from "./utils/appryIf";
@@ -35,6 +36,8 @@ declare global {
   }
 }
 
+const MAX_LOG_ENTRIES = 19;
+
 export default function App() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isActive, setIsActive] = useState(true);
@@ -51,8 +54,6 @@ export default function App() {
   const toggleLayout = () => {
     setLayout((prev) => SWITCH_LAYOUT_RULE[prev]);
   };
-
-  const MAX_LOG_ENTRIES = 19;
 
   useEffect(() => {
     // キーイベントを受信
@@ -129,104 +130,23 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background p-6 font-sans text-foreground">
-      <header className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Keyboard className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-bold text-xl tracking-tight">Key Remapper</h1>
-            <p className="text-muted-foreground text-xs">Windows Native Hook</p>
-          </div>
-        </div>
-
-        <button
-          className={`flex items-center gap-2 rounded-full px-4 py-2 font-medium text-sm transition-colors ${
-            isActive
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          }`}
-          onClick={() => setIsActive(!isActive)}
-          type="button"
-        >
-          <Power className="h-4 w-4" />
-          {isActive ? "Active" : "Disabled"}
-        </button>
-      </header>
+      <Header
+        isActive={isActive}
+        onToggleActive={() => setIsActive(!isActive)}
+      />
 
       <main className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
-        <section className="space-y-4">
-          {/* レイヤー選択UI */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-sm">Layer:</span>
-            <div className="flex gap-1 rounded-lg border bg-muted/30 p-1">
-              {layers.map(({ name }) => (
-                <button
-                  className={`rounded-md px-3 py-1.5 font-medium text-sm transition-colors ${
-                    layerId === name
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                  key={name}
-                  onClick={() => setLayerId(name)}
-                  type="button"
-                >
-                  {name.charAt(0).toUpperCase() + name.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
+        <KeyRemapView
+          keyboardLayout={keyboardLayout}
+          layerId={layerId}
+          layers={layers}
+          layout={layout}
+          onKeyClick={(vk) => setEditingKey(vk)}
+          onLayerChange={setLayerId}
+          onLayoutToggle={toggleLayout}
+        />
 
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-semibold text-lg">
-              <Settings className="h-5 w-5 opacity-70" />
-              Keyboard Layout: {layout}
-            </h2>
-            <button
-              className="flex items-center gap-2 rounded-full border px-4 py-2 font-medium text-sm transition-colors hover:border hover:border-primary"
-              onClick={toggleLayout}
-              type="button"
-            >
-              <Keyboard className="h-4 w-4" />
-              {SWITCH_LAYOUT_RULE[layout]}
-            </button>
-          </div>
-          <div className="overflow-x-auto pb-4">
-            <SimpleKeyboard
-              bindings={layers.find((l) => l.id === layerId)?.bindings || {}}
-              keyboardLayout={keyboardLayout}
-              onKeyClick={(vk) => setEditingKey(vk)}
-            />
-          </div>
-        </section>
-
-        <section className="flex h-fit flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
-          <div className="flex items-center gap-2 border-b bg-muted/30 p-4">
-            <AlertCircle className="h-4 w-4 text-accent-foreground" />
-            <h2 className="font-semibold text-sm">Live Event Log</h2>
-          </div>
-          <div className="max-h-[400px] flex-1 space-y-2 overflow-y-auto p-4 font-mono text-sm">
-            {logs.length === 0 ? (
-              <p className="text-muted-foreground text-xs italic">
-                Waiting for input...
-              </p>
-            ) : (
-              logs.map((log) => (
-                <div
-                  className="fade-in slide-in-from-left-2 flex animate-in items-center justify-between duration-200"
-                  key={log.id}
-                >
-                  <span className="rounded bg-accent/50 px-2 py-0.5 text-accent-foreground">
-                    VK: {log.vkCode}
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    {log.time}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+        <KeyLogger logs={logs} />
       </main>
 
       <KeyEditorModal

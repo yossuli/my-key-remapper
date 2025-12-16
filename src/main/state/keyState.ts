@@ -1,4 +1,4 @@
-import type { TriggerType } from "../../../shared/types/remapConfig";
+import type { TriggerType } from "../../shared/types/remapConfig";
 
 /**
  * 個別キーの状態
@@ -181,5 +181,3 @@ export class KeyStateManager {
     state.holdFired = true;
   }
 }
-
-export const keyStateManager = new KeyStateManager();

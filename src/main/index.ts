@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { app, BrowserWindow } from "electron";
-import { setupRemapper, teardownRemapper } from "./features/remapper";
+import { setupRemapper, teardownRemapper } from "./remapper";
 
 let mainWindow: BrowserWindow | null = null;
 

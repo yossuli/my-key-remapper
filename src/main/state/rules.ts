@@ -4,9 +4,9 @@ import type {
   Layer,
   RemapConfig,
   TriggerType,
-} from "../shared/types/remapConfig";
-import { layerState } from "./state/layerState";
-import { configStorage } from "./storage/configStorage";
+} from "../../shared/types/remapConfig";
+import { configStorage } from "../storage/configStorage";
+import { layerState } from "./layerState";
 
 /**
  * レイヤーとキーバインディングを管理するファサードクラス

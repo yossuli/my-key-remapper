@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { remapRules } from "../rules";
+import { remapRules } from "../state/rules";
 
 /**
  * IPCハンドラの登録

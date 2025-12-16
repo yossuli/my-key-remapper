@@ -1,7 +1,7 @@
-import { objectiveDiscriminantSwitch } from "../renderer/src/utils/objectiveSwitch";
-import type { TriggerType } from "../shared/types/remapConfig";
-import { sendKey, sendKeyWithModifiers } from "./native/sender";
-import { remapRules } from "./rules";
+import { objectiveDiscriminantSwitch } from "../../renderer/src/utils/objectiveSwitch";
+import type { TriggerType } from "../../shared/types/remapConfig";
+import { sendKey, sendKeyWithModifiers } from "../native/sender";
+import { remapRules } from "../state/rules";
 
 /**
  * アクションの実行とレイヤー管理

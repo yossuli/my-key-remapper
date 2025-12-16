@@ -1,8 +1,8 @@
-import type { TriggerType } from "../shared/types/remapConfig";
-import type { EventSender } from "./ipc/types";
-import { remapRules } from "./rules";
-import { KeyStateManager } from "./state/keyState";
-import { isModifierKey } from "./utils/isModifierKey";
+import type { TriggerType } from "../../shared/types/remapConfig";
+import type { EventSender } from "../ipc/types";
+import { KeyStateManager } from "../state/keyState";
+import { remapRules } from "../state/rules";
+import { isModifierKey } from "../utils/isModifierKey";
 
 /**
  * キーダウン/アップのロジックを処理

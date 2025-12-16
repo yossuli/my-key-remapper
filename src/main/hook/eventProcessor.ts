@@ -5,7 +5,7 @@ import {
   WM_KEYUP,
   WM_SYSKEYDOWN,
   WM_SYSKEYUP,
-} from "./native/types";
+} from "../native/types";
 
 /**
  * イベントのデコードとフィルタリング

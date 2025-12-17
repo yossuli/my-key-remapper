@@ -7,7 +7,7 @@ import { VK } from "../../shared/constants/vk";
 export function isModifierKey(vkCode: number): boolean {
   return (
     vkCode === VK.SHIFT ||
-    vkCode === VK.CONTROL ||
+    vkCode === VK.CTRL ||
     vkCode === VK.ALT ||
     vkCode === VK.LWIN ||
     vkCode === VK.RWIN ||

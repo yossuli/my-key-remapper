@@ -23,14 +23,14 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  createWindow();
-
-  // リマッパー機能を初期化
+  // IPCハンドラを先に登録（レンダラーからの呼び出しに備える）
   await setupRemapper((channel, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send(channel, data);
     }
   });
+
+  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

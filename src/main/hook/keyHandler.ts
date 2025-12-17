@@ -51,6 +51,7 @@ function processPendingHoldKeys() {
     const holdActionKey = getRemapKey(bindings, "hold");
     if (holdActionKey) {
       sendKey(holdActionKey, false);
+      return;
     }
 
     const tapActionKey = getRemapKey(bindings, "tap");

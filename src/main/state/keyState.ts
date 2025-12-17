@@ -124,20 +124,6 @@ export class KeyStateManager {
   }
 
   /**
-   * キーが押されているかどうか
-   */
-  isKeyDown(code: number): boolean {
-    return this.getState(code).isDown;
-  }
-
-  /**
-   * 長押しが発火したかどうか
-   */
-  isHoldFired(code: number): boolean {
-    return this.getState(code).holdFired;
-  }
-
-  /**
    * すべての状態をリセット
    */
   reset() {
@@ -162,20 +148,5 @@ export class KeyStateManager {
       }
     }
     return pending;
-  }
-
-  /**
-   * ホールド待機中のキーを割り込みとしてマーク（タイマーをクリアし、割り込みフラグを設定）
-   * これにより、リリース時にtapとして扱わないようにする
-   */
-  markAsInterrupted(code: number) {
-    const state = this.getState(code);
-    if (state.holdTimerId) {
-      clearTimeout(state.holdTimerId);
-      state.holdTimerId = null;
-    }
-    // holdFiredをtrueにして、リリース時にholdとして扱う
-    // ただし実際にはすでにtapを送信済みなので、リリース時は何もしない
-    state.holdFired = true;
   }
 }

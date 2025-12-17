@@ -36,11 +36,13 @@ export function setupKeyboardHook(sender: EventSender) {
       const trigger = keyStateManager.onKeyUp(vkCode);
       const action = remapRules.getAction(vkCode, trigger);
       if (!action) {
+        console.log(1);
         sendKey(vkCode, true);
         return 1;
       }
       switch (action.type) {
         case "remap":
+          console.log(2);
           sendKey(action.key, true);
           break;
         case "layerToggle":
@@ -63,12 +65,38 @@ export function setupKeyboardHook(sender: EventSender) {
       for (const key of holdKeys) {
         const action = remapRules.getAction(key, "hold");
         if (action?.type === "remap") {
+          console.log(3);
           sendKey(action.key, false);
         }
       }
       const bindings = remapRules.getBindings(vkCode);
-      if (bindings.length === 0) {
-        sendKey(vkCode, false);
+      if (bindings.filter((b) => b.trigger === "hold").length === 0) {
+        const trigger = keyStateManager.onKeyUp(vkCode);
+        console.log(trigger);
+        const action = remapRules.getAction(vkCode, trigger);
+        if (!action) {
+          console.log(4);
+          sendKey(vkCode, false);
+          return 1;
+        }
+        switch (action.type) {
+          case "remap":
+            console.log(5);
+            sendKey(action.key, false);
+            break;
+          case "layerToggle":
+            remapRules.toggleLayer(action.layerId);
+            break;
+          case "layerMomentary":
+            addMomentaryLayer(vkCode, action.layerId);
+            break;
+          case "none":
+            break;
+          default: {
+            const _: never = action;
+            break;
+          }
+        }
         return 1;
       }
       keyStateManager.onKeyDown(vkCode);

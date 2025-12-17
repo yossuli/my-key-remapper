@@ -14,7 +14,12 @@ interface KeyState {
   holdTimerId: ReturnType<typeof setTimeout> | null;
   /** 長押しが発火したか */
   holdFired: boolean;
+  /** タップ遅延タイマーID（ダブルタップ待機用） */
+  tapTimerId: ReturnType<typeof setTimeout> | null;
 }
+
+/** トリガー発火時のコールバック */
+type TriggerCallback = (code: number, trigger: TriggerType) => void;
 
 /**
  * キー状態を管理するクラス
@@ -28,6 +33,16 @@ export class KeyStateManager {
 
   /** ダブルタップ判定の間隔（ミリ秒） */
   private tapIntervalMs = 300;
+
+  /** トリガー発火時のコールバック */
+  private onTriggerCallback: TriggerCallback | null = null;
+
+  /**
+   * トリガー発火時のコールバックを設定
+   */
+  setTriggerCallback(callback: TriggerCallback) {
+    this.onTriggerCallback = callback;
+  }
 
   /**
    * しきい値を設定
@@ -48,6 +63,7 @@ export class KeyStateManager {
         lastTapTime: 0,
         holdTimerId: null,
         holdFired: false,
+        tapTimerId: null,
       });
     }
     // biome-ignore lint/style/noNonNullAssertion: 上で必ずセットしている
@@ -55,8 +71,16 @@ export class KeyStateManager {
   }
 
   /**
+   * トリガーを発火
+   */
+  private fireTrigger(code: number, trigger: TriggerType) {
+    if (this.onTriggerCallback) {
+      this.onTriggerCallback(code, trigger);
+    }
+  }
+
+  /**
    * キーダウンイベントを処理
-   * @returns 発火すべきトリガー、またはnull（ホールド待機中）
    */
   onKeyDown(code: number): void {
     const state = this.getState(code);
@@ -71,6 +95,12 @@ export class KeyStateManager {
     state.downTime = now;
     state.holdFired = false;
 
+    // タップ遅延タイマーをクリア（ダブルタップの可能性があるため）
+    if (state.tapTimerId) {
+      clearTimeout(state.tapTimerId);
+      state.tapTimerId = null;
+    }
+
     // 長押しタイマーを開始
     if (state.holdTimerId) {
       clearTimeout(state.holdTimerId);
@@ -84,19 +114,21 @@ export class KeyStateManager {
       }
     }, this.holdThresholdMs);
 
-    // キーダウン時点ではトリガーを返さない（リリース時に判定）
     return;
   }
 
   /**
    * キーアップイベントを処理
-   * @returns 発火すべきトリガー
+   * 注意: トリガーは即時ではなく、コールバック経由で遅延発火される場合がある
+   * @param code キーコード
+   * @param hasDoubleTapBinding ダブルタップバインディングがあるか（ない場合は遅延なしで tap を発火）
+   * @returns 即時発火するトリガー、または null（遅延発火待ち）
    */
-  onKeyUp(code: number): TriggerType {
+  onKeyUp(code: number, hasDoubleTapBinding: boolean): TriggerType | null {
     const state = this.getState(code);
     const now = Date.now();
 
-    // タイマーをクリア
+    // 長押しタイマーをクリア
     if (state.holdTimerId) {
       clearTimeout(state.holdTimerId);
       state.holdTimerId = null;
@@ -109,18 +141,36 @@ export class KeyStateManager {
       return "hold";
     }
 
+    // ダブルタップバインディングがない場合は即座に tap を発火
+    if (!hasDoubleTapBinding) {
+      state.lastTapTime = 0;
+      return "tap";
+    }
+
     // 短押しの場合
     const timeSinceLastTap = now - state.lastTapTime;
 
-    // ダブルタップ判定
-    if (timeSinceLastTap < this.tapIntervalMs) {
+    // ダブルタップ判定：前回のタップから tapIntervalMs 以内
+    if (timeSinceLastTap < this.tapIntervalMs && state.lastTapTime > 0) {
+      // タップ遅延タイマーをクリア（前回のタップを取り消し）
+      if (state.tapTimerId) {
+        clearTimeout(state.tapTimerId);
+        state.tapTimerId = null;
+      }
       state.lastTapTime = 0; // リセット
       return "doubleTap";
     }
 
-    // タップ
+    // タップは遅延発火：tapIntervalMs 後に tap を発火
     state.lastTapTime = now;
-    return "tap";
+    state.tapTimerId = setTimeout(() => {
+      state.tapTimerId = null;
+      state.lastTapTime = 0; // タイムアウト後リセット
+      this.fireTrigger(code, "tap");
+    }, this.tapIntervalMs);
+
+    // 即時発火なし（コールバックで遅延発火）
+    return null;
   }
 
   /**
@@ -130,6 +180,9 @@ export class KeyStateManager {
     for (const state of this.states.values()) {
       if (state.holdTimerId) {
         clearTimeout(state.holdTimerId);
+      }
+      if (state.tapTimerId) {
+        clearTimeout(state.tapTimerId);
       }
     }
     this.states.clear();

@@ -28,8 +28,8 @@ export class RemapRules {
     layerState.popLayer(layerId);
   }
 
-  toggleLayer(layerId: string) {
-    layerState.toggleLayer(layerId);
+  setLayer(layerId: string) {
+    layerState.setLayer(layerId);
   }
 
   getLayerStack(): string[] {

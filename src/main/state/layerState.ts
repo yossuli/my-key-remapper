@@ -3,7 +3,7 @@
  */
 export class LayerState {
   /** 現在有効なレイヤーのスタック（最後が最優先） */
-  private readonly layerStack: string[] = ["base"];
+  private layerStack: string[] = ["base"];
 
   /**
    * レイヤーをスタックにプッシュ（momentary用）
@@ -27,15 +27,8 @@ export class LayerState {
     }
   }
 
-  /**
-   * レイヤーをトグル
-   */
-  toggleLayer(layerId: string) {
-    if (this.layerStack.includes(layerId)) {
-      this.popLayer(layerId);
-    } else {
-      this.pushLayer(layerId);
-    }
+  setLayer(layerId: string) {
+    this.layerStack = [layerId];
   }
 
   /**

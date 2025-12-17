@@ -24,8 +24,11 @@ export function releaseMomentaryLayer(vkCode: number) {
  * モーメンタリーレイヤーを追加
  */
 export function addMomentaryLayer(vkCode: number, layerId: string) {
-  remapRules.pushLayer(layerId);
-  momentaryLayerKeys.set(vkCode, layerId);
+  const isLayerSetCurrent = momentaryLayerKeys.get(vkCode);
+  if (isLayerSetCurrent === undefined) {
+    remapRules.pushLayer(layerId);
+    momentaryLayerKeys.set(vkCode, layerId);
+  }
 }
 
 /**
@@ -48,7 +51,13 @@ export function getRemapKey(
  */
 export function executeAction(vkCode: number, trigger: TriggerType) {
   const action = remapRules.getAction(vkCode, trigger);
+  console.log("executeAction", vkCode, trigger, action);
   if (!action) {
+    const bindings = remapRules.getBindings(vkCode);
+    if (bindings.length !== 0) {
+      sendKey(vkCode, false);
+    }
+
     sendKey(vkCode, true);
     return;
   }
@@ -58,10 +67,10 @@ export function executeAction(vkCode: number, trigger: TriggerType) {
       sendKey(action.key, true);
       break;
     case "layerToggle":
-      remapRules.toggleLayer(action.layerId);
+      remapRules.setLayer(action.layerId);
       break;
     case "layerMomentary":
-      addMomentaryLayer(vkCode, action.layerId);
+      releaseMomentaryLayer(vkCode);
       break;
     case "none":
       break;

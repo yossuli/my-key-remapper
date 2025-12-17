@@ -18,4 +18,14 @@ export function setupIPCHandlers() {
   ipcMain.on("remove-binding", (_event, { layerId, from, trigger }) => {
     remapRules.removeBinding(layerId, from, trigger);
   });
+
+  // レイヤー追加
+  ipcMain.on("add-layer", (_event, { layerId }) => {
+    remapRules.addLayer({ id: layerId, bindings: {} });
+  });
+
+  // レイヤー削除
+  ipcMain.on("remove-layer", (_event, { layerId }) => {
+    remapRules.removeLayer(layerId);
+  });
 }

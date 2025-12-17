@@ -2,8 +2,8 @@ import { sendKey } from "../native/sender";
 import { KeyStateManager } from "../state/keyState";
 import { remapRules } from "../state/rules";
 import {
+  addMomentaryLayer,
   executeAction,
-  getRemapKey,
   releaseMomentaryLayer,
 } from "./actionExecutor";
 
@@ -42,21 +42,42 @@ export function setupTriggerCallback() {
 
 /**
  * 保留中のホールドキーを処理（割り込み入力時）
+ * 1回のループでhold/tapのアクションを探索
  */
+
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 早さ優先
 function processPendingHoldKeys() {
   const holdKeys = keyStateManager.getPendingHoldKeys();
   for (const key of holdKeys) {
     const bindings = remapRules.getBindings(key);
 
-    const holdActionKey = getRemapKey(bindings, "hold");
-    if (holdActionKey) {
-      sendKey(holdActionKey, false);
-      return;
+    let holdRemapKey: number | null = null;
+    let tapRemapKey: number | null = null;
+
+    for (const binding of bindings) {
+      const { trigger, action } = binding;
+
+      // holdトリガーのlayerMomentaryは最優先で即時return
+      if (trigger === "hold" && action.type === "layerMomentary") {
+        addMomentaryLayer(key, action.layerId);
+        return;
+      }
+
+      // holdとtapのremapキーを記録
+      if (action.type === "remap") {
+        if (trigger === "hold" && holdRemapKey === null) {
+          holdRemapKey = action.key;
+        } else if (trigger === "tap" && tapRemapKey === null) {
+          tapRemapKey = action.key;
+        }
+      }
     }
 
-    const tapActionKey = getRemapKey(bindings, "tap");
-    if (tapActionKey) {
-      sendKey(tapActionKey, false);
+    // hold優先、なければtap
+    const remapKey = holdRemapKey ?? tapRemapKey;
+    if (remapKey !== null) {
+      sendKey(remapKey, false);
+      return;
     }
   }
 }

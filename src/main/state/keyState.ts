@@ -58,16 +58,13 @@ export class KeyStateManager {
    * キーダウンイベントを処理
    * @returns 発火すべきトリガー、またはnull（ホールド待機中）
    */
-  onKeyDown(
-    code: number,
-    onHoldTrigger: (triggeredCode: number) => void
-  ): TriggerType | null {
+  onKeyDown(code: number): void {
     const state = this.getState(code);
     const now = Date.now();
 
     // 既に押されている場合は無視（キーリピート）
     if (state.isDown) {
-      return null;
+      return;
     }
 
     state.isDown = true;
@@ -82,12 +79,13 @@ export class KeyStateManager {
     state.holdTimerId = setTimeout(() => {
       if (state.isDown && !state.holdFired) {
         state.holdFired = true;
-        onHoldTrigger(code);
+        this.states.set(code, state);
+        console.log(`[HOOK] Hold detected for key ${code}`);
       }
     }, this.holdThresholdMs);
 
     // キーダウン時点ではトリガーを返さない（リリース時に判定）
-    return null;
+    return;
   }
 
   /**
@@ -159,7 +157,7 @@ export class KeyStateManager {
     const pending: number[] = [];
     for (const [code, state] of this.states.entries()) {
       // 押されていて、まだホールド発火していない場合
-      if (state.isDown && !state.holdFired && state.holdTimerId !== null) {
+      if (state.isDown && state.holdFired && state.holdTimerId !== null) {
         pending.push(code);
       }
     }

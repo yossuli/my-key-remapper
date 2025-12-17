@@ -1,14 +1,13 @@
-import koffi from "koffi";
 import type { EventSender } from "../ipc/types";
-import { CallNextHookEx, UnhookWindowsHookEx } from "../native/bindings";
-import { decodeKeyEvent, isKeyEvent, isKeyUpEvent } from "./eventProcessor";
-import { executeActionIfNeeded, updateMomentaryLayerState } from "./helpers";
-import {
-  applyGlobalSettings,
-  handleKeyLogic,
-  resetKeyState,
-} from "./keyHandler";
+import { UnhookWindowsHookEx } from "../native/bindings";
+import { sendKey } from "../native/sender";
+import { KeyStateManager } from "../state/keyState";
+import { remapRules } from "../state/rules";
+import { addMomentaryLayer, releaseMomentaryLayer } from "./actionExecutor";
+import { applyGlobalSettings, resetKeyState } from "./keyHandler";
 import { clearHook, getHookHandle, registerKeyboardHook } from "./register";
+
+const keyStateManager = new KeyStateManager();
 
 /**
  * キーボードフックの設定と管理
@@ -19,7 +18,7 @@ let eventSender: EventSender | null = null;
 /**
  * キーボードフックをセットアップ
  */
-export function setupKeyboardHook(sender: EventSender | null) {
+export function setupKeyboardHook(sender: EventSender) {
   if (process.platform !== "win32") {
     console.log("Not on Windows, skipping keyboard hook setup.");
     return;
@@ -28,31 +27,53 @@ export function setupKeyboardHook(sender: EventSender | null) {
   eventSender = sender;
   applyGlobalSettings();
 
-  registerKeyboardHook((nCode, wParam, lParam) => {
-    const hHook = getHookHandle();
-    const next = () =>
-      CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
-
-    if (nCode < 0) {
-      return next();
+  registerKeyboardHook((vkCode, isUp) => {
+    if (eventSender) {
+      eventSender("key-event", { vkCode, isUp });
     }
-    if (!isKeyEvent(wParam)) {
-      return next();
+    if (isUp) {
+      releaseMomentaryLayer(vkCode);
+      const trigger = keyStateManager.onKeyUp(vkCode);
+      const action = remapRules.getAction(vkCode, trigger);
+      if (!action) {
+        sendKey(vkCode, true);
+        return 1;
+      }
+      switch (action.type) {
+        case "remap":
+          sendKey(action.key, true);
+          break;
+        case "layerToggle":
+          remapRules.toggleLayer(action.layerId);
+          break;
+        case "layerMomentary":
+          addMomentaryLayer(vkCode, action.layerId);
+          break;
+        case "none":
+          break;
+        default: {
+          const _: never = action;
+          break;
+        }
+      }
+      return 1;
+      // biome-ignore lint/style/noUselessElse: 排他的であるためif else が適当
+    } else {
+      const holdKeys = keyStateManager.getPendingHoldKeys();
+      for (const key of holdKeys) {
+        const action = remapRules.getAction(key, "hold");
+        if (action?.type === "remap") {
+          sendKey(action.key, false);
+        }
+      }
+      const bindings = remapRules.getBindings(vkCode);
+      if (bindings.length === 0) {
+        sendKey(vkCode, false);
+        return 1;
+      }
+      keyStateManager.onKeyDown(vkCode);
+      return 1;
     }
-
-    const eventInfo = decodeKeyEvent(lParam);
-    if (!eventInfo || eventInfo.isInjected) {
-      return next();
-    }
-
-    const { vkCode } = eventInfo;
-    const isUp = isKeyUpEvent(wParam);
-
-    updateMomentaryLayerState(vkCode, isUp);
-    const result = handleKeyLogic(vkCode, isUp, eventSender);
-    executeActionIfNeeded(result, vkCode, isUp);
-
-    return result.shouldBlock ? 1 : next();
   });
 }
 

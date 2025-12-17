@@ -1,10 +1,12 @@
 import koffi from "koffi";
 import {
+  CallNextHookEx,
   GetModuleHandleA,
   HookCallbackProto,
   SetWindowsHookExA,
 } from "../native/bindings";
 import { WH_KEYBOARD_LL } from "../native/types";
+import { decodeKeyEvent, isKeyEvent, isKeyUpEvent } from "./eventProcessor";
 
 /**
  * フック登録の抽象化
@@ -19,11 +21,33 @@ let hookCallback: any = null;
  * キーボードフックを登録
  */
 export function registerKeyboardHook(
-  // biome-ignore lint/suspicious/noExplicitAny: FFIコールバック型
-  callback: (nCode: number, wParam: number, lParam: any) => number
+  callback: (vkCode: number, isUp: boolean) => number
 ) {
+  // biome-ignore lint/suspicious/noExplicitAny: FFIコールバック型
+  const outerCallback = (nCode: number, wParam: number, lParam: any) => {
+    const next = () =>
+      CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
+    if (nCode < 0) {
+      return next();
+    }
+    if (!isKeyEvent(wParam)) {
+      return next();
+    }
+    const eventInfo = decodeKeyEvent(lParam);
+    if (!eventInfo || eventInfo.isInjected) {
+      return next();
+    }
+
+    const { vkCode } = eventInfo;
+    const isUp = isKeyUpEvent(wParam);
+
+    return callback(vkCode, isUp);
+  };
   try {
-    hookCallback = koffi.register(callback, koffi.pointer(HookCallbackProto));
+    hookCallback = koffi.register(
+      outerCallback,
+      koffi.pointer(HookCallbackProto)
+    );
     const hMod = GetModuleHandleA(null);
     hHook = SetWindowsHookExA(WH_KEYBOARD_LL, hookCallback, hMod, 0);
 

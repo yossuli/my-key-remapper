@@ -1,9 +1,6 @@
 import { join } from "node:path";
 import { app, BrowserWindow } from "electron";
-import { setupKeyboardHook } from "./hook";
-import { setupIPCHandlers } from "./ipc/handlers";
-import { teardownRemapper } from "./ipc/remapper";
-import { remapRules } from "./state/rules";
+import { setupRemapper, teardownRemapper } from "./ipc/index";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -29,13 +26,11 @@ app.whenReady().then(async () => {
   createWindow();
 
   // リマッパー機能を初期化
-  await remapRules.init();
-  setupKeyboardHook((channel, data) => {
+  await setupRemapper((channel, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send(channel, data);
     }
   });
-  setupIPCHandlers();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

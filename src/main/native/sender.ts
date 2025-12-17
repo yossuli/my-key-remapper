@@ -9,6 +9,8 @@ import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
  */
 
 export const sendKey = (vk: number, up: boolean) => {
+  console.log("sendkey", vk, up ? "up" : "down");
+
   try {
     const input = {
       type: INPUT_KEYBOARD,

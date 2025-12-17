@@ -1,4 +1,4 @@
-import type { TriggerType } from "../../shared/types/remapConfig";
+import type { Action } from "../../shared/types/remapConfig";
 import { executeAction, releaseMomentaryLayer } from "./actionExecutor";
 
 /**
@@ -18,11 +18,11 @@ export function updateMomentaryLayerState(vkCode: number, isUp: boolean) {
  * アクションがある場合のみ実行
  */
 export function executeActionIfNeeded(
-  result: { hasAction?: boolean; trigger?: TriggerType },
+  result: { action?: Action },
   vkCode: number,
   isUp: boolean
 ) {
-  if (result.hasAction && result.trigger) {
-    executeAction(vkCode, result.trigger, isUp);
+  if (result.action) {
+    executeAction(vkCode, result.action, isUp);
   }
 }

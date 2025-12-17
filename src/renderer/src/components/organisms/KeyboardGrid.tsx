@@ -6,12 +6,14 @@ import { Mapped } from "../control/Mapped";
 interface KeyboardGridProps {
   bindings: Layer["bindings"];
   keyboardLayout: KeyboardLayout;
+  isBaseLayer: boolean;
   onKeyClick: (vk: number) => void;
 }
 
 export function KeyboardGrid({
   bindings,
   keyboardLayout,
+  isBaseLayer,
   onKeyClick,
 }: KeyboardGridProps) {
   return (
@@ -27,6 +29,7 @@ export function KeyboardGrid({
               bindings={
                 bindings[Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk]
               }
+              isBaseLayer={isBaseLayer}
               key={keyDef.id}
               keyboardLayout={keyboardLayout}
               keyDef={keyDef}

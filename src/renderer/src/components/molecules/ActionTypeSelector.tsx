@@ -1,4 +1,8 @@
-import type { ActionType } from "../../../../shared/types/remapConfig";
+import { useMemo } from "react";
+import type {
+  ActionType,
+  TriggerType,
+} from "../../../../shared/types/remapConfig";
 import { Select } from "../atoms/Select";
 
 const ACTION_TYPE_OPTIONS = [
@@ -14,18 +18,28 @@ const ACTION_TYPE_OPTIONS = [
 
 interface ActionTypeSelectorProps {
   actionType: ActionType;
+  triggerType: TriggerType;
   onActionTypeChange: (actionType: ActionType) => void;
 }
 
 export function ActionTypeSelector({
   actionType,
+  triggerType,
   onActionTypeChange,
 }: ActionTypeSelectorProps) {
+  // holdトリガーの時のみlayerMomentaryを表示（hold以外では非表示）
+  const filteredOptions = useMemo(() => {
+    if (triggerType !== "hold") {
+      return ACTION_TYPE_OPTIONS.filter((opt) => opt.id !== "layerMomentary");
+    }
+    return ACTION_TYPE_OPTIONS;
+  }, [triggerType]);
+
   return (
     <Select
       id="actionType"
       label="アクション"
-      options={ACTION_TYPE_OPTIONS}
+      options={filteredOptions}
       select-onChange={(e) => onActionTypeChange(e.target.value as ActionType)}
       select-value={actionType}
     />

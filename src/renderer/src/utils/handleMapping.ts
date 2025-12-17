@@ -6,19 +6,27 @@ import type {
 import { applyIf } from "./appryIf";
 
 export const upsert =
-  (layerId: string, from: number, action: Action) => (prev: Layer[]) =>
+  (layerId: string, from: number, trigger: TriggerType, action: Action) =>
+  (prev: Layer[]) =>
     prev.map(
       applyIf(
         (l) => l.id === layerId,
-        (l) => ({
-          ...l,
-          bindings: {
-            ...l.bindings,
-            [from]: l.bindings[from].filter(
-              ({ action: a }) => a.type !== action.type
-            ),
-          },
-        })
+        (l) => {
+          // 既存のバインディングから同じトリガーのものを除去
+          const existingBindings = l.bindings[from] ?? [];
+          const filteredBindings = existingBindings.filter(
+            (b) => b.trigger !== trigger
+          );
+          // 新しいバインディングを追加
+          const newBinding = { trigger, action };
+          return {
+            ...l,
+            bindings: {
+              ...l.bindings,
+              [from]: [...filteredBindings, newBinding],
+            },
+          };
+        }
       )
     );
 

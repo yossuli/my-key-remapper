@@ -51,10 +51,9 @@ export function KeyRemapperPage() {
   const [layout, setLayout] = useState<LayoutType>("JIS");
   const [layerId, setLayerId] = useState<Layer["id"]>("base");
 
-  const keyboardLayout = useMemo(
-    () => KEYBOARD_LAYOUT[layerId === "base" ? "base" : "custom"][layout],
-    [layerId, layout]
-  );
+  // カスタムレイヤーでもbaseと同じキーボードレイアウトを使用
+  // KEYBOARD_LAYOUT_*_CUSTOMはvk=0のダミーレイアウトのため使用しない
+  const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT.base[layout], [layout]);
 
   const toggleLayout = () => {
     setLayout((prev) => SWITCH_LAYOUT_RULE[prev]);
@@ -102,6 +101,24 @@ export function KeyRemapperPage() {
     setLayers(remove(layerId, from, trigger));
   };
 
+  const addLayer = (newLayerId: string) => {
+    const ipc = window.electron?.ipcRenderer;
+    ipc?.send("add-layer", { layerId: newLayerId });
+    // 楽観的更新
+    setLayers((prev) => [...prev, { id: newLayerId, bindings: {} }]);
+  };
+
+  const removeLayer = (targetLayerId: string) => {
+    const ipc = window.electron?.ipcRenderer;
+    ipc?.send("remove-layer", { layerId: targetLayerId });
+    // 楽観的更新
+    setLayers((prev) => prev.filter((l) => l.id !== targetLayerId));
+    // 削除したレイヤーが選択中だった場合はbaseに戻す
+    if (layerId === targetLayerId) {
+      setLayerId("base");
+    }
+  };
+
   return (
     <>
       <MainLayout
@@ -117,9 +134,11 @@ export function KeyRemapperPage() {
             layerId={layerId}
             layers={layers}
             layout={layout}
+            onAddLayer={addLayer}
             onKeyClick={(vk) => setEditingKey(vk)}
             onLayerChange={setLayerId}
             onLayoutToggle={toggleLayout}
+            onRemoveLayer={removeLayer}
           />
         }
         sideContent={<LogList logs={logs} />}

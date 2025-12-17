@@ -12,6 +12,8 @@ interface KeyRemapSectionProps {
   layout: LayoutType;
   keyboardLayout: KeyboardLayout;
   onLayerChange: (layerId: string) => void;
+  onAddLayer: (layerId: string) => void;
+  onRemoveLayer: (layerId: string) => void;
   onLayoutToggle: () => void;
   onKeyClick: (vk: number) => void;
 }
@@ -22,6 +24,8 @@ export function KeyRemapSection({
   layout,
   keyboardLayout,
   onLayerChange,
+  onAddLayer,
+  onRemoveLayer,
   onLayoutToggle,
   onKeyClick,
 }: KeyRemapSectionProps) {
@@ -31,7 +35,9 @@ export function KeyRemapSection({
       <LayerTabs
         activeLayerId={layerId}
         layers={layers}
+        onAddLayer={onAddLayer}
         onLayerChange={onLayerChange}
+        onRemoveLayer={onRemoveLayer}
       />
 
       <div className="flex items-center justify-between">
@@ -45,6 +51,7 @@ export function KeyRemapSection({
       <div className="overflow-x-auto pb-4">
         <KeyboardGrid
           bindings={layers.find((l) => l.id === layerId)?.bindings || {}}
+          isBaseLayer={layerId === "base"}
           keyboardLayout={keyboardLayout}
           onKeyClick={onKeyClick}
         />

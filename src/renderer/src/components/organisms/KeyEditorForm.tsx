@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { VK } from "../../../../shared/constants";
 import type {
   Action,
   ActionType,
@@ -97,6 +96,12 @@ export function KeyEditorForm({
   const enterActiveRef = useRef(false);
   const ENTER_HOLD_MS = 2000;
 
+  // handleSaveとonCloseをrefで保持（useEffectの依存配列問題を回避）
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: 初期値としてのnoop関数
+  const handleSaveRef = useRef<() => void>(() => {});
+  // biome-ignore lint/suspicious/noEmptyBlockStatements: 初期値としてのnoop関数
+  const onCloseRef = useRef<() => void>(() => {});
+
   const clearEnterTimer = useCallback(() => {
     if (enterTimerRef.current !== null) {
       window.clearTimeout(enterTimerRef.current);
@@ -129,6 +134,12 @@ export function KeyEditorForm({
     selectedTrigger,
     targetKey,
   ]);
+
+  // handleSaveとonCloseのrefを更新
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+    onCloseRef.current = onClose;
+  }, [handleSave, onClose]);
 
   const handleRemove = useCallback(() => {
     onRemove(selectedTrigger);
@@ -187,46 +198,50 @@ export function KeyEditorForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetVk, layerId]);
 
-  // キーイベントリスナー
+  // キーイベントリスナー（通常のDOMイベントを使用）
   useEffect(() => {
-    const handleEnterKeyEvent = (isKeyUp: boolean) => {
-      if (isKeyUp) {
-        clearEnterTimer();
-        if (enterActiveRef.current) {
-          enterActiveRef.current = false;
-          return true;
-        }
-        handleSave();
-        onClose();
-      } else if (!enterActiveRef.current) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Enterキーで保存
+      if (e.key === "Enter" && !enterActiveRef.current) {
         enterActiveRef.current = true;
         enterTimerRef.current = window.setTimeout(() => {
           enterActiveRef.current = false;
         }, ENTER_HOLD_MS);
       }
-      return false;
-    };
 
-    const handleKeyEvent = (
-      _event: unknown,
-      data: { vkCode: number; isUp: boolean }
-    ) => {
-      if (data.vkCode === VK.ENTER && !handleEnterKeyEvent(data.isUp)) {
-        return;
-      }
-
+      // リマップ設定中のキー選択
       if (inputFocusedRef.current || actionType !== "remap") {
         return;
       }
-      setTargetKey(data.vkCode.toString());
+      // 特殊キーは無視
+      if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
+        return;
+      }
+      // e.keyCodeは非推奨だが、VKコードとして使用可能
+      if (e.keyCode) {
+        setTargetKey(e.keyCode.toString());
+      }
     };
 
-    const ipc = window.electron?.ipcRenderer;
-    ipc?.on("key-event", handleKeyEvent);
-    return () => {
-      ipc?.off("key-event", handleKeyEvent);
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        clearEnterTimer();
+        if (enterActiveRef.current) {
+          enterActiveRef.current = false;
+          return;
+        }
+        handleSaveRef.current();
+        onCloseRef.current();
+      }
     };
-  }, [clearEnterTimer, onClose, handleSave, actionType]);
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [clearEnterTimer, actionType]);
 
   return (
     <div className="space-y-4 p-6">
@@ -245,6 +260,7 @@ export function KeyEditorForm({
       <ActionTypeSelector
         actionType={actionType}
         onActionTypeChange={setActionType}
+        triggerType={selectedTrigger}
       />
 
       {/* リマップ設定 */}

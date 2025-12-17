@@ -9,6 +9,7 @@ interface KeyButtonProps {
   keyDef: KeyDefinition;
   bindings?: KeyBinding[];
   keyboardLayout: KeyboardLayout;
+  isBaseLayer: boolean;
   onClick: (vk: number) => void;
 }
 
@@ -16,24 +17,29 @@ export function KeyButton({
   keyDef,
   bindings,
   keyboardLayout,
+  isBaseLayer,
   onClick,
 }: KeyButtonProps) {
   const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
   const tapAction = bindings?.find((b) => b.trigger === "tap")?.action;
-  const hasBinding = bindings && bindings.length > 0;
+  const hasBinding = Boolean(bindings && bindings.length > 0);
 
   const displayLabel =
     tapAction && "key" in tapAction
       ? getKeyLabel(tapAction.key, keyboardLayout)
       : keyDef.label;
 
+  // カスタムレイヤーでバインディングがないキーは薄く表示
+  const isInactive = !(isBaseLayer || hasBinding);
+
   return (
     <motion.button
       className={cn(
         "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
-        hasBinding
+        hasBinding && isBaseLayer
           ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-background text-foreground hover:bg-muted"
+          : "border-border bg-background text-foreground hover:bg-muted",
+        isInactive ? "opacity-30" : ""
       )}
       onClick={() => onClick(baseVk)}
       style={{

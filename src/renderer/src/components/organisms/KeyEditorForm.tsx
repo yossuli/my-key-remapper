@@ -21,8 +21,8 @@ import { TriggerSelector } from "../molecules/TriggerSelector";
 
 interface KeyEditorFormProps {
   targetVk: number;
+  layerId: string;
   keyboardLayout: KeyboardLayout;
-  currentBinding?: { trigger: TriggerType; action: Action };
   layers: Pick<Layer, "id">[];
   onSave: (trigger: TriggerType, action: Action) => void;
   onRemove: (trigger: TriggerType) => void;
@@ -31,8 +31,8 @@ interface KeyEditorFormProps {
 
 export function KeyEditorForm({
   targetVk,
+  layerId,
   keyboardLayout,
-  currentBinding,
   layers,
   onSave,
   onRemove,
@@ -42,7 +42,56 @@ export function KeyEditorForm({
   const [actionType, setActionType] = useState<ActionType>("remap");
   const [targetKey, setTargetKey] = useState("");
   const [selectedLayerId, setSelectedLayerId] = useState(layers[0]?.id || "");
+  const [hasExistingBinding, setHasExistingBinding] = useState(false);
 
+  // トリガータイプ変更時にconfigから該当トリガーのバインディングを取得
+  const handleTriggerChange = useCallback(
+    (newTrigger: TriggerType) => {
+      setSelectedTrigger(newTrigger);
+      // 状態をリセット
+      setActionType("remap");
+      setTargetKey("");
+      setSelectedLayerId(layers[0]?.id || "");
+      setHasExistingBinding(false);
+
+      const ipc = window.electron?.ipcRenderer;
+      if (!ipc) {
+        return;
+      }
+
+      ipc.invoke("get-mappings").then((allLayers: Layer[]) => {
+        const layer = allLayers.find((l) => l.id === layerId);
+        const bindings = layer?.bindings[targetVk];
+        const currentBinding = bindings?.find((b) => b.trigger === newTrigger);
+
+        if (currentBinding) {
+          setHasExistingBinding(true);
+          objectiveDiscriminantSwitch(
+            {
+              remap: (act) => {
+                setActionType("remap");
+                setTargetKey(act.key.toString());
+              },
+              layerToggle: (act) => {
+                setActionType("layerToggle");
+                setSelectedLayerId(act.layerId);
+              },
+              layerMomentary: (act) => {
+                setActionType("layerMomentary");
+                setSelectedLayerId(act.layerId);
+              },
+              none: () => {
+                setActionType("none");
+              },
+            },
+            currentBinding.action,
+            "type"
+          );
+        }
+      });
+    },
+    [layers, layerId, targetVk]
+  );
   const inputFocusedRef = useRef(false);
   const enterTimerRef = useRef<number | null>(null);
   const enterActiveRef = useRef(false);
@@ -86,34 +135,57 @@ export function KeyEditorForm({
     onClose();
   }, [onClose, onRemove, selectedTrigger]);
 
-  // バインディングが変わったらフォームを更新
+  // マウント時にconfigからバインディングを取得（targetVkまたはlayerIdが変わった時のみ）
   useEffect(() => {
-    if (currentBinding) {
-      objectiveDiscriminantSwitch(
-        {
-          remap: (act) => {
-            setActionType("remap");
-            setTargetKey(act.key.toString());
-          },
-          layerToggle: (act) => {
-            setActionType("layerToggle");
-            setSelectedLayerId(act.layerId);
-          },
-          layerMomentary: (act) => {
-            setActionType("layerMomentary");
-            setSelectedLayerId(act.layerId);
-          },
-          none: () => {
-            setActionType("none");
-          },
-        },
-        currentBinding.action,
-        "type"
-      );
-    } else {
-      setTargetKey("");
+    // 状態をリセット
+    setSelectedTrigger("tap");
+    setActionType("remap");
+    setTargetKey("");
+    setHasExistingBinding(false);
+
+    const ipc = window.electron?.ipcRenderer;
+    if (!ipc) {
+      return;
     }
-  }, [currentBinding]);
+
+    ipc.invoke("get-mappings").then((allLayers: Layer[]) => {
+      // デフォルトのレイヤーIDを設定
+      if (allLayers.length > 0) {
+        setSelectedLayerId(allLayers[0].id);
+      }
+
+      const layer = allLayers.find((l) => l.id === layerId);
+      const bindings = layer?.bindings[targetVk];
+      const currentBinding = bindings?.find((b) => b.trigger === "tap");
+
+      if (currentBinding) {
+        setHasExistingBinding(true);
+        objectiveDiscriminantSwitch(
+          {
+            remap: (act) => {
+              setActionType("remap");
+              setTargetKey(act.key.toString());
+            },
+            layerToggle: (act) => {
+              setActionType("layerToggle");
+              setSelectedLayerId(act.layerId);
+            },
+            layerMomentary: (act) => {
+              setActionType("layerMomentary");
+              setSelectedLayerId(act.layerId);
+            },
+            none: () => {
+              setActionType("none");
+            },
+          },
+          currentBinding.action,
+          "type"
+        );
+      }
+    });
+    // layersを依存配列から除外し、targetVkとlayerIdの変更時のみ再取得
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetVk, layerId]);
 
   // キーイベントリスナー
   useEffect(() => {
@@ -165,7 +237,7 @@ export function KeyEditorForm({
 
       {/* トリガー選択 */}
       <TriggerSelector
-        onTriggerChange={setSelectedTrigger}
+        onTriggerChange={handleTriggerChange}
         selectedTrigger={selectedTrigger}
       />
 
@@ -180,11 +252,17 @@ export function KeyEditorForm({
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
             <span className="text-muted-foreground">→</span>
-            <KeyDisplay
-              keyboardLayout={keyboardLayout}
-              variant="primary"
-              vkCode={targetKey ? Number.parseInt(targetKey, 10) : 0}
-            />
+            {targetKey ? (
+              <KeyDisplay
+                keyboardLayout={keyboardLayout}
+                variant="primary"
+                vkCode={Number.parseInt(targetKey, 10)}
+              />
+            ) : (
+              <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground">
+                キーを押して選択
+              </span>
+            )}
           </div>
           <Input
             id="targetKey"
@@ -215,11 +293,11 @@ export function KeyEditorForm({
 
       {/* ボタン */}
       <div className="flex justify-end gap-2 pt-2">
-        {currentBinding !== undefined && (
+        {hasExistingBinding ? (
           <Button onClick={handleRemove} variant="destructive">
             削除
           </Button>
-        )}
+        ) : null}
         <Button
           disabled={actionType === "remap" && !targetKey}
           onClick={handleSave}

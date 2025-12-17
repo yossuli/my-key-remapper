@@ -9,7 +9,7 @@ export const upsert =
   (layerId: string, from: number, action: Action) => (prev: Layer[]) =>
     prev.map(
       applyIf(
-        (l) => l.id !== layerId,
+        (l) => l.id === layerId,
         (l) => ({
           ...l,
           bindings: {
@@ -26,7 +26,7 @@ export const remove =
   (layerId: string, from: number, trigger: TriggerType) => (prev: Layer[]) =>
     prev.map(
       applyIf(
-        (l) => l.id !== layerId,
+        (l) => l.id === layerId,
         (l) => {
           const filtered =
             l.bindings[from]?.filter((b) => b.trigger !== trigger) ?? [];

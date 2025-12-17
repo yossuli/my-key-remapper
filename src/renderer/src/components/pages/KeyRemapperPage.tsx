@@ -93,7 +93,7 @@ export function KeyRemapperPage() {
     const ipc = window.electron?.ipcRenderer;
     ipc?.send("add-mapping", { layerId, from, binding: { trigger, action } });
     // 楽観的更新（UIを先行更新）
-    setLayers(upsert(layerId, from, action));
+    setLayers(upsert(layerId, from, trigger, action));
   };
 
   const removeMapping = (from: number, trigger: TriggerType) => {
@@ -101,11 +101,6 @@ export function KeyRemapperPage() {
     ipc?.send("remove-binding", { layerId, from, trigger });
     setLayers(remove(layerId, from, trigger));
   };
-
-  const currentBindings =
-    editingKey !== null
-      ? layers.find((l) => l.id === layerId)?.bindings[editingKey] || []
-      : [];
 
   return (
     <>
@@ -137,8 +132,8 @@ export function KeyRemapperPage() {
       >
         {(e) => (
           <KeyEditorForm
-            currentBinding={currentBindings.find((b) => b.trigger === "tap")}
             keyboardLayout={keyboardLayout}
+            layerId={layerId}
             layers={layers.map((l) => ({ id: l.id }))}
             onClose={() => setEditingKey(null)}
             onRemove={(trigger) => removeMapping(e, trigger)}

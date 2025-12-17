@@ -1,4 +1,4 @@
-import type { ReactNode, SelectHTMLAttributes } from "react";
+import React, { type ReactNode, type SelectHTMLAttributes } from "react";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
@@ -47,21 +47,22 @@ export function Select({
       >
         {label}
       </label>
-      <Mapped
+      <select
         className={cn(
           "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary",
           selectClassName
         )}
-        Tag="select"
+        id={id}
         {...selectProps}
-        value={options}
       >
-        {(opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        )}
-      </Mapped>
+        <Mapped Tag={React.Fragment} value={options}>
+          {(opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          )}
+        </Mapped>
+      </select>
     </div>
   );
 }

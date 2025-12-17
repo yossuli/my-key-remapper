@@ -32,15 +32,15 @@ export function addMomentaryLayer(vkCode: number, layerId: string) {
 }
 
 /**
- * バインディングから指定トリガーのリマップ先キーを取得
+ * バインディングから指定トリガーのリマップ先キーを取得（複数キー対応）
  */
-export function getRemapKey(
+export function getRemapKeys(
   bindings: KeyBinding[],
   trigger: TriggerType
-): number | null {
+): number[] | null {
   for (const binding of bindings) {
     if (binding.trigger === trigger && binding.action.type === "remap") {
-      return binding.action.key;
+      return binding.action.keys;
     }
   }
   return null;
@@ -63,8 +63,13 @@ export function executeAction(vkCode: number, trigger: TriggerType) {
   }
   switch (action.type) {
     case "remap":
-      sendKey(action.key, false);
-      sendKey(action.key, true);
+      // 複数キーを順番にdown、逆順でup
+      for (const key of action.keys) {
+        sendKey(key, false);
+      }
+      for (const key of action.keys.toReversed()) {
+        sendKey(key, true);
+      }
       break;
     case "layerToggle":
       remapRules.setLayer(action.layerId);

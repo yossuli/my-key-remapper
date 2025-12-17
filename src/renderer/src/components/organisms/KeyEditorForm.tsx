@@ -12,7 +12,6 @@ import {
   objectiveSwitch,
 } from "../../utils/objectiveSwitch";
 import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
@@ -39,7 +38,7 @@ export function KeyEditorForm({
 }: KeyEditorFormProps) {
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
   const [actionType, setActionType] = useState<ActionType>("remap");
-  const [targetKey, setTargetKey] = useState("");
+  const [targetKeys, setTargetKeys] = useState<number[]>([]);
   const [selectedLayerId, setSelectedLayerId] = useState(layers[0]?.id || "");
   const [hasExistingBinding, setHasExistingBinding] = useState(false);
 
@@ -49,7 +48,7 @@ export function KeyEditorForm({
       setSelectedTrigger(newTrigger);
       // 状態をリセット
       setActionType("remap");
-      setTargetKey("");
+      setTargetKeys([]);
       setSelectedLayerId(layers[0]?.id || "");
       setHasExistingBinding(false);
 
@@ -69,7 +68,7 @@ export function KeyEditorForm({
             {
               remap: (act) => {
                 setActionType("remap");
-                setTargetKey(act.key.toString());
+                setTargetKeys(act.keys);
               },
               layerToggle: (act) => {
                 setActionType("layerToggle");
@@ -113,7 +112,7 @@ export function KeyEditorForm({
   const handleSave = useCallback(() => {
     const action: Action = objectiveSwitch<ActionType, Action>(
       {
-        remap: () => ({ type: "remap", key: Number.parseInt(targetKey, 10) }),
+        remap: () => ({ type: "remap", keys: targetKeys }),
         layerToggle: () => ({ type: "layerToggle", layerId: selectedLayerId }),
         layerMomentary: () => ({
           type: "layerMomentary",
@@ -132,7 +131,7 @@ export function KeyEditorForm({
     onSave,
     selectedLayerId,
     selectedTrigger,
-    targetKey,
+    targetKeys,
   ]);
 
   // handleSaveとonCloseのrefを更新
@@ -151,7 +150,7 @@ export function KeyEditorForm({
     // 状態をリセット
     setSelectedTrigger("tap");
     setActionType("remap");
-    setTargetKey("");
+    setTargetKeys([]);
     setHasExistingBinding(false);
 
     const ipc = window.electron?.ipcRenderer;
@@ -175,7 +174,7 @@ export function KeyEditorForm({
           {
             remap: (act) => {
               setActionType("remap");
-              setTargetKey(act.key.toString());
+              setTargetKeys(act.keys);
             },
             layerToggle: (act) => {
               setActionType("layerToggle");
@@ -218,8 +217,9 @@ export function KeyEditorForm({
         return;
       }
       // e.keyCodeは非推奨だが、VKコードとして使用可能
-      if (e.keyCode) {
-        setTargetKey(e.keyCode.toString());
+      // 長押しで順次キーを追加
+      if (e.keyCode && !targetKeys.includes(e.keyCode)) {
+        setTargetKeys((prev) => [...prev, e.keyCode]);
       }
     };
 
@@ -241,7 +241,7 @@ export function KeyEditorForm({
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
     };
-  }, [clearEnterTimer, actionType]);
+  }, [clearEnterTimer, actionType, targetKeys]);
 
   return (
     <div className="space-y-4 p-6">
@@ -268,32 +268,26 @@ export function KeyEditorForm({
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
             <span className="text-muted-foreground">→</span>
-            {targetKey ? (
-              <KeyDisplay
-                keyboardLayout={keyboardLayout}
-                variant="primary"
-                vkCode={Number.parseInt(targetKey, 10)}
-              />
+            {targetKeys.length > 0 ? (
+              <div className="flex gap-1">
+                {targetKeys.map((vk) => (
+                  <KeyDisplay
+                    key={vk}
+                    keyboardLayout={keyboardLayout}
+                    variant="primary"
+                    vkCode={vk}
+                  />
+                ))}
+              </div>
             ) : (
               <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground">
-                キーを押して選択
+                キーを長押して選択
               </span>
             )}
           </div>
-          <Input
-            id="targetKey"
-            input-onBlur={() => {
-              inputFocusedRef.current = false;
-            }}
-            input-onChange={(e) => setTargetKey(e.target.value)}
-            input-onFocus={() => {
-              inputFocusedRef.current = true;
-            }}
-            input-placeholder="VK Code (e.g., 65) またはキーを押す"
-            input-type="number"
-            input-value={targetKey}
-            label="ターゲットキー"
-          />
+          <Button onClick={() => setTargetKeys([])} size="sm" variant="ghost">
+            クリア
+          </Button>
         </div>
       )}
 
@@ -315,7 +309,7 @@ export function KeyEditorForm({
           </Button>
         ) : null}
         <Button
-          disabled={actionType === "remap" && !targetKey}
+          disabled={actionType === "remap" && targetKeys.length === 0}
           onClick={handleSave}
           variant="primary"
         >

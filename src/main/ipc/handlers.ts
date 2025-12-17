@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+import { setRemapEnabled } from "../hook/keyHandler";
 import { remapRules } from "../state/rules";
 
 /**
@@ -27,5 +28,10 @@ export function setupIPCHandlers() {
   // レイヤー削除
   ipcMain.on("remove-layer", (_event, { layerId }) => {
     remapRules.removeLayer(layerId);
+  });
+
+  // リマップ有効/無効設定
+  ipcMain.on("set-remap-enabled", (_event, { enabled }) => {
+    setRemapEnabled(enabled);
   });
 }

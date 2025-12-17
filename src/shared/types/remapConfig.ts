@@ -41,11 +41,11 @@ export interface MacroStep {
 }
 
 /**
- * リマップアクション
+ * リマップアクション（複数キー対応）
  */
 export interface RemapAction {
   type: "remap";
-  key: number;
+  keys: number[];
   modifiers?: ModifierOutput;
 }
 

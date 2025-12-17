@@ -13,6 +13,16 @@ import {
 
 const keyStateManager = new KeyStateManager();
 
+/** リマップ有効フラグ（モーダル表示中は無効化） */
+let remapEnabled = true;
+
+/**
+ * リマップ有効/無効を設定
+ */
+export function setRemapEnabled(enabled: boolean) {
+  remapEnabled = enabled;
+}
+
 /**
  * グローバル設定を適用
  */
@@ -51,8 +61,8 @@ function processPendingHoldKeys() {
   for (const key of holdKeys) {
     const bindings = remapRules.getBindings(key);
 
-    let holdRemapKey: number | null = null;
-    let tapRemapKey: number | null = null;
+    let holdRemapKeys: number[] | null = null;
+    let tapRemapKeys: number[] | null = null;
 
     for (const binding of bindings) {
       const { trigger, action } = binding;
@@ -65,18 +75,21 @@ function processPendingHoldKeys() {
 
       // holdとtapのremapキーを記録
       if (action.type === "remap") {
-        if (trigger === "hold" && holdRemapKey === null) {
-          holdRemapKey = action.key;
-        } else if (trigger === "tap" && tapRemapKey === null) {
-          tapRemapKey = action.key;
+        if (trigger === "hold" && holdRemapKeys === null) {
+          holdRemapKeys = action.keys;
+        } else if (trigger === "tap" && tapRemapKeys === null) {
+          tapRemapKeys = action.keys;
         }
       }
     }
 
     // hold優先、なければtap
-    const remapKey = holdRemapKey ?? tapRemapKey;
-    if (remapKey !== null) {
-      sendKey(remapKey, false);
+    const remapKeys = holdRemapKeys ?? tapRemapKeys;
+    if (remapKeys !== null) {
+      // 複数キーを順番に送信
+      for (const remapKey of remapKeys) {
+        sendKey(remapKey, false);
+      }
       return;
     }
   }
@@ -86,6 +99,11 @@ function processPendingHoldKeys() {
  * キーアップイベントを処理
  */
 export function handleKeyUp(vkCode: number): number {
+  // リマップ無効時はパススルー
+  if (!remapEnabled) {
+    return 0;
+  }
+
   releaseMomentaryLayer(vkCode);
 
   const hasDoubleTapBinding = !!remapRules.getAction(vkCode, "doubleTap");
@@ -103,6 +121,11 @@ export function handleKeyUp(vkCode: number): number {
  * キーダウンイベントを処理
  */
 export function handleKeyDown(vkCode: number): number {
+  // リマップ無効時はパススルー
+  if (!remapEnabled) {
+    return 0;
+  }
+
   processPendingHoldKeys();
 
   const bindings = remapRules.getBindings(vkCode);

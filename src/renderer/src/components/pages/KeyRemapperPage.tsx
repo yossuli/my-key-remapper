@@ -135,7 +135,12 @@ export function KeyRemapperPage() {
             layers={layers}
             layout={layout}
             onAddLayer={addLayer}
-            onKeyClick={(vk) => setEditingKey(vk)}
+            onKeyClick={(vk) => {
+              window.electron?.ipcRenderer.send("set-remap-enabled", {
+                enabled: false,
+              });
+              setEditingKey(vk);
+            }}
             onLayerChange={setLayerId}
             onLayoutToggle={toggleLayout}
             onRemoveLayer={removeLayer}
@@ -146,7 +151,12 @@ export function KeyRemapperPage() {
 
       <ModalLayout
         editingKey={editingKey}
-        onClose={() => setEditingKey(null)}
+        onClose={() => {
+          window.electron?.ipcRenderer.send("set-remap-enabled", {
+            enabled: true,
+          });
+          setEditingKey(null);
+        }}
         title="Edit Key Mapping"
       >
         {(e) => (
@@ -154,7 +164,12 @@ export function KeyRemapperPage() {
             keyboardLayout={keyboardLayout}
             layerId={layerId}
             layers={layers.map((l) => ({ id: l.id }))}
-            onClose={() => setEditingKey(null)}
+            onClose={() => {
+              window.electron?.ipcRenderer.send("set-remap-enabled", {
+                enabled: true,
+              });
+              setEditingKey(null);
+            }}
             onRemove={(trigger) => removeMapping(e, trigger)}
             onSave={(trigger, action) => saveMapping(e, trigger, action)}
             targetVk={e}

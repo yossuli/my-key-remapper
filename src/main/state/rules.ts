@@ -121,7 +121,7 @@ export class RemapRules {
   }
 
   /**
-   * 指定キーのバインディングを取得（現在有効なレイヤーから優先順に検索）
+   * 指定キーのバインディングを取得（現在有効なレイヤーのみ、なければ何もしない）
    */
   getBindings(keyCode: number): KeyBinding[] {
     const stack = layerState.getStack();

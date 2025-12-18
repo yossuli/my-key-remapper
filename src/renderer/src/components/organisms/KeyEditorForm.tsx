@@ -93,7 +93,9 @@ export function KeyEditorForm({
   const inputFocusedRef = useRef(false);
   const enterTimerRef = useRef<number | null>(null);
   const enterActiveRef = useRef(false);
-  const ENTER_HOLD_MS = 2000;
+  /** 長押し完了で保存準備ができた状態（キーリピート対策） */
+  const saveReadyRef = useRef(false);
+  const ENTER_HOLD_MS = 1000;
 
   // handleSaveとonCloseをrefで保持（useEffectの依存配列問題を回避）
   // biome-ignore lint/suspicious/noEmptyBlockStatements: 初期値としてのnoop関数
@@ -107,6 +109,7 @@ export function KeyEditorForm({
       enterTimerRef.current = null;
     }
     enterActiveRef.current = false;
+    saveReadyRef.current = false;
   }, []);
 
   const handleSave = useCallback(() => {
@@ -193,17 +196,24 @@ export function KeyEditorForm({
         );
       }
     });
-    // layersを依存配列から除外し、targetVkとlayerIdの変更時のみ再取得
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetVk, layerId]);
 
   // キーイベントリスナー（通常のDOMイベントを使用）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Enterキーで保存
+      // 保存準備完了状態でEnterが押されたらすぐに保存（キーリピート対策）
+      if (e.key === "Enter" && saveReadyRef.current) {
+        handleSaveRef.current();
+        clearEnterTimer();
+        return;
+      }
+
+      // Enterキー長押しで保存のタイマー開始
       if (e.key === "Enter" && !enterActiveRef.current) {
         enterActiveRef.current = true;
         enterTimerRef.current = window.setTimeout(() => {
+          // 長押し完了 → 保存準備状態に
+          saveReadyRef.current = true;
           enterActiveRef.current = false;
         }, ENTER_HOLD_MS);
       }
@@ -212,8 +222,8 @@ export function KeyEditorForm({
       if (inputFocusedRef.current || actionType !== "remap") {
         return;
       }
-      // 特殊キーは無視
-      if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
+      // Enterキーはタイマー管理があるため、ここではreturn
+      if (e.key === "Enter") {
         return;
       }
       // e.keyCodeは非推奨だが、VKコードとして使用可能
@@ -225,13 +235,24 @@ export function KeyEditorForm({
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        clearEnterTimer();
-        if (enterActiveRef.current) {
-          enterActiveRef.current = false;
+        // 保存準備完了状態なら保存
+        if (saveReadyRef.current) {
+          handleSaveRef.current();
+          clearEnterTimer();
           return;
         }
-        handleSaveRef.current();
-        onCloseRef.current();
+        // まだ長押しが完了していない場合 → 単押しなのでリマップ対象に追加
+        if (enterActiveRef.current) {
+          clearEnterTimer();
+          if (actionType === "remap" && !inputFocusedRef.current) {
+            const enterKeyCode = 13; // VK_RETURN
+            if (!targetKeys.includes(enterKeyCode)) {
+              setTargetKeys((prev) => [...prev, enterKeyCode]);
+            }
+          }
+          return;
+        }
+        clearEnterTimer();
       }
     };
 
@@ -242,7 +263,7 @@ export function KeyEditorForm({
       document.removeEventListener("keyup", handleKeyUp);
     };
   }, [clearEnterTimer, actionType, targetKeys]);
-
+  // console.log(enterActiveRef.current);
   return (
     <div className="space-y-4 p-6">
       {/* キー表示 */}

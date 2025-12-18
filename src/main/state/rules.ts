@@ -15,50 +15,6 @@ export class RemapRules {
   async init() {
     await configStorage.load();
     // shiftレイヤーが存在しない場合は自動生成
-    this.ensureShiftLayerExists();
-  }
-
-  /**
-   * shiftレイヤーが存在しない場合に自動生成
-   * LSHIFT/RSHIFTのholdトリガーにlayerMomentaryバインディングを設定
-   */
-  private ensureShiftLayerExists() {
-    const config = configStorage.getConfig();
-    if (!config.layers.some((l) => l.id === "shift")) {
-      config.layers.push({
-        id: "shift",
-        bindings: {},
-      });
-    }
-
-    // baseレイヤーにShiftキーのlayerMomentaryバインディングを追加（なければ）
-    const baseLayer = config.layers.find((l) => l.id === "base");
-    if (baseLayer) {
-      const LSHIFT = 160;
-      const RSHIFT = 161;
-      const shiftBinding = {
-        trigger: "hold" as const,
-        action: { type: "layerMomentary" as const, layerId: "shift" },
-      };
-
-      // LSHIFTにバインディングがなければ追加
-      if (!baseLayer.bindings[LSHIFT]?.some((b) => b.trigger === "hold")) {
-        baseLayer.bindings[LSHIFT] = [
-          ...(baseLayer.bindings[LSHIFT] || []),
-          shiftBinding,
-        ];
-      }
-
-      // RSHIFTにバインディングがなければ追加
-      if (!baseLayer.bindings[RSHIFT]?.some((b) => b.trigger === "hold")) {
-        baseLayer.bindings[RSHIFT] = [
-          ...(baseLayer.bindings[RSHIFT] || []),
-          shiftBinding,
-        ];
-      }
-    }
-
-    configStorage.save(config);
   }
 
   // =====================================
@@ -171,15 +127,8 @@ export class RemapRules {
     const stack = layerState.getStack();
     const layers = this.getLayers();
 
-    // レイヤースタックを逆順にして、最優先のレイヤーから検索
-    for (let i = stack.length - 1; i >= 0; i--) {
-      const layerId = stack[i];
-      const layer = layers.find((l) => l.id === layerId);
-      if (layer?.bindings[keyCode]) {
-        return layer.bindings[keyCode];
-      }
-    }
-    return [];
+    const layer = layers.find((l) => l.id === stack.at(-1));
+    return layer?.bindings[keyCode] ?? [];
   }
 
   /**

@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes, LabelHTMLAttributes } from "react";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
-import { Defined } from "../control/Defined";
+import { Show } from "../control/Show";
 
 interface InputProps
   extends AddPrefix<InputHTMLAttributes<HTMLInputElement>, "input-">,
@@ -31,7 +31,7 @@ export function Input({
   );
   return (
     <div className="space-y-2">
-      <Defined value={label}>
+      <Show condition={Boolean(label)}>
         <label
           className={cn(
             "font-medium text-muted-foreground text-xs",
@@ -42,7 +42,7 @@ export function Input({
         >
           {label}
         </label>
-      </Defined>
+      </Show>
       <input
         className={cn(
           "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary",
@@ -51,9 +51,9 @@ export function Input({
         )}
         {...inputProps}
       />
-      <Defined value={error}>
+      <Show condition={Boolean(error)}>
         <p className="text-destructive text-xs">{error}</p>
-      </Defined>
+      </Show>
     </div>
   );
 }

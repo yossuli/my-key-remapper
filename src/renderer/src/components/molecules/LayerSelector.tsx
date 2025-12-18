@@ -2,7 +2,7 @@ import { Layers } from "lucide-react";
 import type { Layer } from "../../../../shared/types/remapConfig";
 import { Icon } from "../atoms/Icon";
 import { Select } from "../atoms/Select";
-import { Defined } from "../control/Defined";
+import { Show } from "../control/Show";
 
 interface LayerSelectorProps {
   layers: Pick<Layer, "id">[];
@@ -36,9 +36,9 @@ export function LayerSelector({
         select-onChange={(e) => onLayerChange(e.target.value)}
         select-value={selectedLayerId}
       />
-      <Defined value={description}>
+      <Show condition={Boolean(description)}>
         <p className="text-muted-foreground text-xs">{description}</p>
-      </Defined>
+      </Show>
     </>
   );
 }

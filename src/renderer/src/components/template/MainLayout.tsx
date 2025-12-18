@@ -1,25 +1,28 @@
-import type { ReactNode } from "react";
+import type React from "react";
+import type { JSX } from "react";
+import { type BaseProps, findWithComponentType } from "../control";
 
 interface MainLayoutProps {
-  header: ReactNode;
-  mainContent: ReactNode;
-  sideContent: ReactNode;
+  children: JSX.Element[];
 }
 
-export const Header = () => <div>Header</div>;
+export const Header: React.FC<BaseProps> = ({ children }) => <>{children}</>;
 
-export function MainLayout({
-  header,
-  mainContent,
-  sideContent,
-}: MainLayoutProps) {
+export const Main: React.FC<BaseProps> = ({ children }) => <>{children}</>;
+
+export const Side: React.FC<BaseProps> = ({ children }) => <>{children}</>;
+
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const header = findWithComponentType(children, Header);
+  const main = findWithComponentType(children, Main);
+  const side = findWithComponentType(children, Side);
   return (
     <div className="flex min-h-screen flex-col bg-background p-6 font-sans text-foreground">
       {header}
       <main className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
-        {mainContent}
-        {sideContent}
+        {main}
+        {side}
       </main>
     </div>
   );
-}
+};

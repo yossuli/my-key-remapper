@@ -55,7 +55,7 @@ export function Select({
         id={id}
         {...selectProps}
       >
-        <Mapped Tag={React.Fragment} value={options}>
+        <Mapped as={React.Fragment} value={options}>
           {(opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}

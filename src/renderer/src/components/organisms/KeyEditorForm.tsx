@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type {
   Action,
-  ActionType,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
+import { useBindingConfig } from "../../hooks/useBindingConfig";
+import { useEnterToSave } from "../../hooks/useEnterToSave";
+import { useKeyEditorActions } from "../../hooks/useKeyEditorState";
+import { useRemapKeySelection } from "../../hooks/useRemapKeySelection";
 import type { KeyboardLayout } from "../../types";
 import { getLayerDescription } from "../../utils/getLayerDescription";
-import {
-  objectiveDiscriminantSwitch,
-  objectiveSwitch,
-} from "../../utils/objectiveSwitch";
 import { Button } from "../atoms/Button";
+import { Mapped } from "../control/Mapped";
+import { Show } from "../control/Show";
+import { Conditional, Else, Then } from "../control/Ternary";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
@@ -36,234 +38,45 @@ export function KeyEditorForm({
   onRemove,
   onClose,
 }: KeyEditorFormProps) {
+  // トリガー選択状態
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-  const [actionType, setActionType] = useState<ActionType>("remap");
-  const [targetKeys, setTargetKeys] = useState<number[]>([]);
-  const [selectedLayerId, setSelectedLayerId] = useState(layers[0]?.id || "");
-  const [hasExistingBinding, setHasExistingBinding] = useState(false);
 
-  // トリガータイプ変更時にconfigから該当トリガーのバインディングを取得
-  const handleTriggerChange = useCallback(
-    (newTrigger: TriggerType) => {
-      setSelectedTrigger(newTrigger);
-      // 状態をリセット
-      setActionType("remap");
-      setTargetKeys([]);
-      setSelectedLayerId(layers[0]?.id || "");
-      setHasExistingBinding(false);
+  // バインディング設定
+  const binding = useBindingConfig({
+    targetVk,
+    layerId,
+    defaultLayerId: layers[0]?.id || "",
+  });
 
-      const ipc = window.electron?.ipcRenderer;
-      if (!ipc) {
-        return;
-      }
+  // トリガー変更時
+  const handleTriggerChange = (newTrigger: TriggerType) => {
+    setSelectedTrigger(newTrigger);
+    binding.loadBindingForTrigger(newTrigger);
+  };
 
-      ipc.invoke("get-mappings").then((allLayers: Layer[]) => {
-        const layer = allLayers.find((l) => l.id === layerId);
-        const bindings = layer?.bindings[targetVk];
-        const currentBinding = bindings?.find((b) => b.trigger === newTrigger);
-
-        if (currentBinding) {
-          setHasExistingBinding(true);
-          objectiveDiscriminantSwitch(
-            {
-              remap: (act) => {
-                setActionType("remap");
-                setTargetKeys(act.keys);
-              },
-              layerToggle: (act) => {
-                setActionType("layerToggle");
-                setSelectedLayerId(act.layerId);
-              },
-              layerMomentary: (act) => {
-                setActionType("layerMomentary");
-                setSelectedLayerId(act.layerId);
-              },
-              none: () => {
-                setActionType("none");
-              },
-            },
-            currentBinding.action,
-            "type"
-          );
-        }
-      });
-    },
-    [layers, layerId, targetVk]
-  );
-  const inputFocusedRef = useRef(false);
-  const enterTimerRef = useRef<number | null>(null);
-  const enterActiveRef = useRef(false);
-  /** 長押し完了で保存準備ができた状態（キーリピート対策） */
-  const saveReadyRef = useRef(false);
-  const ENTER_HOLD_MS = 1000;
-
-  // handleSaveとonCloseをrefで保持（useEffectの依存配列問題を回避）
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: 初期値としてのnoop関数
-  const handleSaveRef = useRef<() => void>(() => {});
-  // biome-ignore lint/suspicious/noEmptyBlockStatements: 初期値としてのnoop関数
-  const onCloseRef = useRef<() => void>(() => {});
-
-  const clearEnterTimer = useCallback(() => {
-    if (enterTimerRef.current !== null) {
-      window.clearTimeout(enterTimerRef.current);
-      enterTimerRef.current = null;
-    }
-    enterActiveRef.current = false;
-    saveReadyRef.current = false;
-  }, []);
-
-  const handleSave = useCallback(() => {
-    const action: Action = objectiveSwitch<ActionType, Action>(
-      {
-        remap: () => ({ type: "remap", keys: targetKeys }),
-        layerToggle: () => ({ type: "layerToggle", layerId: selectedLayerId }),
-        layerMomentary: () => ({
-          type: "layerMomentary",
-          layerId: selectedLayerId,
-        }),
-        none: () => ({ type: "none" }),
-      },
-      actionType
-    );
-
-    onSave(selectedTrigger, action);
-    onClose();
-  }, [
-    actionType,
-    onClose,
-    onSave,
-    selectedLayerId,
+  // 保存・削除アクション
+  const { handleSave, handleRemove } = useKeyEditorActions({
+    ...binding,
     selectedTrigger,
-    targetKeys,
-  ]);
+    onSave,
+    onRemove,
+    onClose,
+  });
 
-  // handleSaveとonCloseのrefを更新
-  useEffect(() => {
-    handleSaveRef.current = handleSave;
-    onCloseRef.current = onClose;
-  }, [handleSave, onClose]);
+  // Enter長押しで保存
+  const { isEnterActive } = useEnterToSave({
+    onSave: handleSave,
+    holdMs: 1000,
+  });
 
-  const handleRemove = useCallback(() => {
-    onRemove(selectedTrigger);
-    onClose();
-  }, [onClose, onRemove, selectedTrigger]);
+  // リマップキー選択
+  useRemapKeySelection({
+    enabled: binding.actionType === "remap",
+    targetKeys: binding.targetKeys,
+    onAddKey: binding.addTargetKey,
+    handleEnterTap: !isEnterActive(),
+  });
 
-  // マウント時にconfigからバインディングを取得（targetVkまたはlayerIdが変わった時のみ）
-  useEffect(() => {
-    // 状態をリセット
-    setSelectedTrigger("tap");
-    setActionType("remap");
-    setTargetKeys([]);
-    setHasExistingBinding(false);
-
-    const ipc = window.electron?.ipcRenderer;
-    if (!ipc) {
-      return;
-    }
-
-    ipc.invoke("get-mappings").then((allLayers: Layer[]) => {
-      // デフォルトのレイヤーIDを設定
-      if (allLayers.length > 0) {
-        setSelectedLayerId(allLayers[0].id);
-      }
-
-      const layer = allLayers.find((l) => l.id === layerId);
-      const bindings = layer?.bindings[targetVk];
-      const currentBinding = bindings?.find((b) => b.trigger === "tap");
-
-      if (currentBinding) {
-        setHasExistingBinding(true);
-        objectiveDiscriminantSwitch(
-          {
-            remap: (act) => {
-              setActionType("remap");
-              setTargetKeys(act.keys);
-            },
-            layerToggle: (act) => {
-              setActionType("layerToggle");
-              setSelectedLayerId(act.layerId);
-            },
-            layerMomentary: (act) => {
-              setActionType("layerMomentary");
-              setSelectedLayerId(act.layerId);
-            },
-            none: () => {
-              setActionType("none");
-            },
-          },
-          currentBinding.action,
-          "type"
-        );
-      }
-    });
-  }, [targetVk, layerId]);
-
-  // キーイベントリスナー（通常のDOMイベントを使用）
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // 保存準備完了状態でEnterが押されたらすぐに保存（キーリピート対策）
-      if (e.key === "Enter" && saveReadyRef.current) {
-        handleSaveRef.current();
-        clearEnterTimer();
-        return;
-      }
-
-      // Enterキー長押しで保存のタイマー開始
-      if (e.key === "Enter" && !enterActiveRef.current) {
-        enterActiveRef.current = true;
-        enterTimerRef.current = window.setTimeout(() => {
-          // 長押し完了 → 保存準備状態に
-          saveReadyRef.current = true;
-          enterActiveRef.current = false;
-        }, ENTER_HOLD_MS);
-      }
-
-      // リマップ設定中のキー選択
-      if (inputFocusedRef.current || actionType !== "remap") {
-        return;
-      }
-      // Enterキーはタイマー管理があるため、ここではreturn
-      if (e.key === "Enter") {
-        return;
-      }
-      // e.keyCodeは非推奨だが、VKコードとして使用可能
-      // 長押しで順次キーを追加
-      if (e.keyCode && !targetKeys.includes(e.keyCode)) {
-        setTargetKeys((prev) => [...prev, e.keyCode]);
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        // 保存準備完了状態なら保存
-        if (saveReadyRef.current) {
-          handleSaveRef.current();
-          clearEnterTimer();
-          return;
-        }
-        // まだ長押しが完了していない場合 → 単押しなのでリマップ対象に追加
-        if (enterActiveRef.current) {
-          clearEnterTimer();
-          if (actionType === "remap" && !inputFocusedRef.current) {
-            const enterKeyCode = 13; // VK_RETURN
-            if (!targetKeys.includes(enterKeyCode)) {
-              setTargetKeys((prev) => [...prev, enterKeyCode]);
-            }
-          }
-          return;
-        }
-        clearEnterTimer();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [clearEnterTimer, actionType, targetKeys]);
-  // console.log(enterActiveRef.current);
   return (
     <div className="space-y-4 p-6">
       {/* キー表示 */}
@@ -279,58 +92,69 @@ export function KeyEditorForm({
 
       {/* アクション種別選択 */}
       <ActionTypeSelector
-        actionType={actionType}
-        onActionTypeChange={setActionType}
+        actionType={binding.actionType}
+        onActionTypeChange={binding.setActionType}
         triggerType={selectedTrigger}
       />
 
       {/* リマップ設定 */}
-      {actionType === "remap" && (
+      <Show condition={binding.actionType === "remap"}>
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
             <span className="text-muted-foreground">→</span>
-            {targetKeys.length > 0 ? (
-              <div className="flex gap-1">
-                {targetKeys.map((vk) => (
-                  <KeyDisplay
-                    key={vk}
-                    keyboardLayout={keyboardLayout}
-                    variant="primary"
-                    vkCode={vk}
-                  />
-                ))}
-              </div>
-            ) : (
-              <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground">
+            <Conditional condition={binding.targetKeys.length > 0}>
+              <Then as="div" className="flex gap-1">
+                <Mapped value={binding.targetKeys.map((vk) => ({ id: vk }))}>
+                  {({ id: vk }) => (
+                    <KeyDisplay
+                      key={vk}
+                      keyboardLayout={keyboardLayout}
+                      variant="primary"
+                      vkCode={vk}
+                    />
+                  )}
+                </Mapped>
+              </Then>
+              <Else
+                as="span"
+                className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground"
+              >
                 キーを長押して選択
-              </span>
-            )}
+              </Else>
+            </Conditional>
           </div>
-          <Button onClick={() => setTargetKeys([])} size="sm" variant="ghost">
+          <Button onClick={binding.clearTargetKeys} size="sm" variant="ghost">
             クリア
           </Button>
         </div>
-      )}
+      </Show>
 
       {/* レイヤー選択 */}
-      {(actionType === "layerToggle" || actionType === "layerMomentary") && (
+      <Show
+        condition={
+          binding.actionType === "layerToggle" ||
+          binding.actionType === "layerMomentary"
+        }
+      >
         <LayerSelector
-          description={getLayerDescription(actionType)}
+          description={getLayerDescription(binding.actionType)}
           layers={layers}
-          onLayerChange={setSelectedLayerId}
-          selectedLayerId={selectedLayerId}
+          onLayerChange={binding.setSelectedLayerId}
+          selectedLayerId={binding.selectedLayerId}
         />
-      )}
+      </Show>
 
       {/* ボタン */}
       <div className="flex justify-end gap-2 pt-2">
-        {hasExistingBinding ? (
+        <Show condition={binding.hasExistingBinding}>
           <Button onClick={handleRemove} variant="destructive">
             削除
           </Button>
-        ) : null}
+        </Show>
         <Button
-          disabled={actionType === "remap" && targetKeys.length === 0}
+          disabled={
+            binding.actionType === "remap" && binding.targetKeys.length === 0
+          }
           onClick={handleSave}
           variant="primary"
         >

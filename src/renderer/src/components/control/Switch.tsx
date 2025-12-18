@@ -13,17 +13,21 @@ interface DefineCaseProps<T> {
   when: T | undefined | null;
   children: (when: T) => React.ReactNode;
 }
-interface DefaultProps extends BaseProps {}
 
-export const Case: React.FC<CaseProps> = ({ children }) => <>{children}</>;
+interface DefaultProps<T extends JSX.ElementType = typeof React.Fragment>
+  extends BaseProps<T> {}
+
+export const Case = ({ children }: CaseProps) => <>{children}</>;
+
 export const DefineCase = <T,>({
   children,
   when,
 }: DefineCaseProps<T>): JSX.Element | false =>
   define(when) && <>{children(when)}</>;
-export const Default: React.FC<DefaultProps> = ({ children }) => (
-  <>{children}</>
-);
+
+export const Default = <T extends JSX.ElementType = typeof React.Fragment>({
+  children,
+}: DefaultProps<T>) => <>{children}</>;
 
 export const Switch = ({ children }: { children: JSX.Element[] }) => {
   const match = children.find(

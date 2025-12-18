@@ -32,7 +32,9 @@ export function setupKeyboardHook(sender: EventSender) {
     if (eventSender) {
       eventSender("key-event", { vkCode, isUp });
     }
+    console.log("input", vkCode);
 
+    // sendKey(vkCode, isUp);
     return isUp ? handleKeyUp(vkCode) : handleKeyDown(vkCode);
   });
 }

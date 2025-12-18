@@ -1,5 +1,6 @@
 import { sendKey } from "../native/sender";
 import { KeyStateManager } from "../state/keyState";
+import { layerState } from "../state/layerState";
 import { remapRules } from "../state/rules";
 import {
   addMomentaryLayer,
@@ -88,7 +89,7 @@ function processPendingHoldKeys() {
     if (remapKeys !== null) {
       // 複数キーを順番に送信
       for (const remapKey of remapKeys) {
-        sendKey(remapKey, false);
+        sendKey(remapKey, false, 3);
       }
       return;
     }
@@ -129,8 +130,19 @@ export function handleKeyDown(vkCode: number): number {
   processPendingHoldKeys();
 
   const bindings = remapRules.getBindings(vkCode);
-  if (bindings.length === 0) {
-    sendKey(vkCode, false);
+  if (bindings.filter(({ trigger }) => trigger !== "tap").length === 0) {
+    const layerId = layerState.getStack().at(-1);
+
+    const action = remapRules.getAction(vkCode, "tap");
+    if (action?.type === "remap") {
+      for (const key of action.keys) {
+        sendKey(key, false, 1);
+      }
+      return 1;
+    }
+    if (layerId === "base") {
+      sendKey(vkCode, false, 2);
+    }
     return 1;
   }
 

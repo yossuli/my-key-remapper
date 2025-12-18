@@ -6,8 +6,8 @@ import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
  * キー送信機能
  */
 
-export const sendKey = (vk: number, up: boolean) => {
-  console.log("sendkey", vk, up ? "up" : "down");
+export const sendKey = (vk: number, up: boolean, m?: any) => {
+  console.log("sendkey", vk, up ? "up" : "down", m);
 
   try {
     const input = {

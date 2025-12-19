@@ -1,7 +1,7 @@
 import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { sendKey } from "../native/sender";
-import { layerState } from "../state/layerState";
 import { remapRules } from "../state/rules";
+import { VK_LSHIFT, VK_RSHIFT } from "../utils/modifierKeys";
 
 /**
  * アクションの実行とレイヤー管理
@@ -51,6 +51,8 @@ export function handleTapOnlyBindings(
   }
 
   const action = remapRules.getAction(vkCode, "tap");
+
+  // tap アクションがある場合（修飾キーなしで送信）
   if (action?.type === "remap") {
     for (const key of action.keys) {
       sendKey(key, isUp, debugInfo);
@@ -58,7 +60,25 @@ export function handleTapOnlyBindings(
     return 1;
   }
 
-  const layerId = layerState.getStack().at(-1);
+  const layer = remapRules.getCurrentLayer();
+  const layerId = layer?.id;
+
+  // tap アクションがない場合、レイヤーの defaultModifiers を考慮
+  if (layer?.defaultModifiers?.shift) {
+    const shiftVk =
+      layer.defaultModifiers.shift === "right" ? VK_RSHIFT : VK_LSHIFT;
+    if (isUp) {
+      // keyUp: キーを離してから Shift を離す
+      sendKey(vkCode, true, debugInfo);
+      sendKey(shiftVk, true, debugInfo);
+    } else {
+      // keyDown: Shift を押してからキーを押す
+      sendKey(shiftVk, false, debugInfo);
+      sendKey(vkCode, false, debugInfo);
+    }
+    return 1;
+  }
+
   if (layerId === "base") {
     sendKey(vkCode, isUp, debugInfo);
     return 1;
@@ -81,7 +101,8 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
     return tapResult;
   }
 
-  const layerId = layerState.getStack().at(-1);
+  const layer = remapRules.getCurrentLayer();
+  const layerId = layer?.id;
   if (!action) {
     if (layerId === "base") {
       sendKey(vkCode, false);

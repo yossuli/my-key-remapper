@@ -139,6 +139,15 @@ export class RemapRules {
     const binding = bindings.find((b) => b.trigger === trigger);
     return binding?.action;
   }
+
+  /**
+   * 現在アクティブなレイヤーを取得
+   */
+  getCurrentLayer(): Layer | undefined {
+    const stack = layerState.getStack();
+    const layers = this.getLayers();
+    return layers.find((l) => l.id === stack.at(-1));
+  }
 }
 
 export const remapRules = new RemapRules();

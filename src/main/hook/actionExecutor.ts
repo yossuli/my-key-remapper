@@ -33,18 +33,38 @@ export function addMomentaryLayer(vkCode: number, layerId: string) {
 }
 
 /**
- * バインディングから指定トリガーのリマップ先キーを取得（複数キー対応）
+ * tap のみのバインディングを処理
+ * keyDown/keyUp の両方で再利用される共通ロジック
+ * @returns 処理した場合は 1、処理しなかった場合は null
  */
-export function getRemapKeys(
+export function handleTapOnlyBindings(
+  vkCode: number,
   bindings: KeyBinding[],
-  trigger: TriggerType
-): number[] | null {
-  for (const binding of bindings) {
-    if (binding.trigger === trigger && binding.action.type === "remap") {
-      return binding.action.keys;
+  isUp: boolean,
+  debugInfo?: number
+): number | null {
+  // tap 以外のトリガーがある場合は処理しない
+  for (const { trigger } of bindings) {
+    if (trigger !== "tap") {
+      return null;
     }
   }
-  return null;
+
+  const action = remapRules.getAction(vkCode, "tap");
+  if (action?.type === "remap") {
+    for (const key of action.keys) {
+      sendKey(key, isUp, debugInfo);
+    }
+    return 1;
+  }
+
+  const layerId = layerState.getStack().at(-1);
+  if (layerId === "base") {
+    sendKey(vkCode, isUp, debugInfo);
+    return 1;
+  }
+
+  return isUp ? null : 1;
 }
 
 /**
@@ -53,21 +73,15 @@ export function getRemapKeys(
 export function executeAction(vkCode: number, trigger_: TriggerType) {
   const action = remapRules.getAction(vkCode, trigger_);
   const bindings = remapRules.getBindings(vkCode);
-  const layerId = layerState.getStack().at(-1);
   console.log("executeAction", vkCode, trigger_, action, bindings);
-  if (bindings.filter(({ trigger }) => trigger !== "tap").length === 0) {
-    const _action = remapRules.getAction(vkCode, "tap");
-    if (_action?.type === "remap") {
-      for (const key of _action.keys) {
-        sendKey(key, true);
-      }
-      return 1;
-    }
-    if (layerId === "base") {
-      sendKey(vkCode, true);
-      return 1;
-    }
+
+  // tap のみのバインディングを先に処理
+  const tapResult = handleTapOnlyBindings(vkCode, bindings, true);
+  if (tapResult !== null) {
+    return tapResult;
   }
+
+  const layerId = layerState.getStack().at(-1);
   if (!action) {
     if (layerId === "base") {
       sendKey(vkCode, false);

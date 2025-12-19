@@ -1,10 +1,10 @@
 import { sendKey } from "../native/sender";
 import { KeyStateManager } from "../state/keyState";
-import { layerState } from "../state/layerState";
 import { remapRules } from "../state/rules";
 import {
   addMomentaryLayer,
   executeAction,
+  handleTapOnlyBindings,
   releaseMomentaryLayer,
 } from "./actionExecutor";
 
@@ -130,20 +130,11 @@ export function handleKeyDown(vkCode: number): number {
   processPendingHoldKeys();
 
   const bindings = remapRules.getBindings(vkCode);
-  if (bindings.filter(({ trigger }) => trigger !== "tap").length === 0) {
-    const layerId = layerState.getStack().at(-1);
 
-    const action = remapRules.getAction(vkCode, "tap");
-    if (action?.type === "remap") {
-      for (const key of action.keys) {
-        sendKey(key, false, 1);
-      }
-      return 1;
-    }
-    if (layerId === "base") {
-      sendKey(vkCode, false, 2);
-    }
-    return 1;
+  // tap のみのバインディングを先に処理
+  const tapResult = handleTapOnlyBindings(vkCode, bindings, false, 1);
+  if (tapResult !== null) {
+    return tapResult;
   }
 
   keyStateManager.onKeyDown(vkCode);

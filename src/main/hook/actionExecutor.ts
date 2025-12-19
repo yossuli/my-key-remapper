@@ -57,38 +57,33 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
   console.log("executeAction", vkCode, trigger_, action, bindings);
   if (bindings.filter(({ trigger }) => trigger !== "tap").length === 0) {
     const _action = remapRules.getAction(vkCode, "tap");
-    console.log(1);
     if (_action?.type === "remap") {
-      console.log(2);
       for (const key of _action.keys) {
-        sendKey(key, true, 1 + 6);
+        sendKey(key, true);
       }
       return 1;
     }
-    console.log(3);
     if (layerId === "base") {
-      sendKey(vkCode, true, 2 + 6);
+      sendKey(vkCode, true);
       return 1;
     }
   }
-  console.log(4);
   if (!action) {
     if (layerId === "base") {
-      sendKey(vkCode, false, 2 + 6);
-      sendKey(vkCode, true, 2 + 6);
+      sendKey(vkCode, false);
+      sendKey(vkCode, true);
       return 1;
     }
     return;
   }
-  console.log(5);
   switch (action.type) {
     case "remap":
       // 複数キーを順番にdown、逆順でup
       for (const key of action.keys) {
-        sendKey(key, false, 2 + 4);
+        sendKey(key, false);
       }
       for (const key of action.keys.toReversed()) {
-        sendKey(key, true, 3 + 4);
+        sendKey(key, true);
       }
       break;
     case "layerToggle":

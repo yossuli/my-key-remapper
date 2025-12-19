@@ -13,7 +13,7 @@ interface KeyDownCallbacks {
   /** 対象キーホールド時に呼ばれるコールバック */
   onHold?: () => void;
   /** 対象キー以外の場合に呼ばれるコールバック */
-  onOtherKey?: () => void;
+  onOtherKeyDown?: (e: KeyboardEvent) => void;
 }
 
 interface KeyUpCallbacks {
@@ -22,7 +22,7 @@ interface KeyUpCallbacks {
   /** 長押しの場合に呼ばれるコールバック */
   onHold?: () => void;
   /** 対象キー以外の場合に呼ばれるコールバック */
-  onOtherKey?: (e: KeyboardEvent) => void;
+  onOtherKeyUp?: (e: KeyboardEvent) => void;
 }
 
 interface UseKeyHoldActionReturn {
@@ -75,7 +75,7 @@ export function useKeyHoldAction({
     (e: KeyboardEvent, callbacks?: KeyDownCallbacks) => {
       // 対象キー以外ならコールバック呼び出しして終了
       if (e.key !== targetKey) {
-        callbacks?.onOtherKey?.();
+        callbacks?.onOtherKeyDown?.(e);
         return;
       }
 
@@ -102,7 +102,7 @@ export function useKeyHoldAction({
   const handleHoldKeyUp = useCallback(
     (e: KeyboardEvent, callbacks: KeyUpCallbacks): void => {
       if (e.key !== targetKey) {
-        callbacks.onOtherKey?.(e);
+        callbacks.onOtherKeyUp?.(e);
         return;
       }
 
@@ -121,7 +121,6 @@ export function useKeyHoldAction({
     },
     [clearTimer, targetKey]
   );
-  console.log(actionReadyRef.current);
   return {
     handleHoldKeyDown,
     handleHoldKeyUp,

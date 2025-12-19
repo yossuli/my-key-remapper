@@ -1,6 +1,6 @@
 // 保存・削除アクションのフック
 
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type {
   Action,
   ActionType,
@@ -11,6 +11,7 @@ import { objectiveSwitch } from "../utils/objectiveSwitch";
 
 interface UseKeyEditorActionsProps {
   state: BindingState;
+  targetVk: number | null;
   selectedTrigger: TriggerType;
   onSave: (trigger: TriggerType, action: Action) => void;
   onRemove: (trigger: TriggerType) => void;
@@ -18,6 +19,12 @@ interface UseKeyEditorActionsProps {
 }
 
 interface UseKeyEditorActionsReturn {
+  canSave: boolean;
+  holds: number[];
+  newTargetKeys: number[];
+  addHoldKeys: (e: KeyboardEvent) => void;
+  removeHoldKeys: (e: KeyboardEvent) => void;
+  removeKey: (keyCode: number) => void;
   handleSave: () => void;
   handleRemove: () => void;
 }
@@ -27,16 +34,77 @@ interface UseKeyEditorActionsReturn {
  */
 export function useKeyEditorActions({
   state: { actionType, targetKeys, selectedLayerId },
+  targetVk,
   selectedTrigger,
   onSave,
   onRemove,
   onClose,
 }: UseKeyEditorActionsProps): UseKeyEditorActionsReturn {
+  const [newTargetKeys, setNewTargetKeys] = useState<number[]>(targetKeys);
+  const [holds, setHolds] = useState<number[]>([]);
+
+  const computedTargetKeys = useMemo(() => {
+    if (newTargetKeys.length === 0) {
+      return targetKeys;
+    }
+    return newTargetKeys;
+  }, [newTargetKeys, targetKeys]);
+
+  const canSave = useMemo(
+    () =>
+      targetVk !== null &&
+      !(
+        actionType === "remap" &&
+        (computedTargetKeys.length === 0 ||
+          (computedTargetKeys.length === 1 &&
+            computedTargetKeys[0] === targetVk))
+      ),
+    [actionType, computedTargetKeys, targetVk]
+  );
+
+  const addHoldKeys = useCallback(
+    (e: KeyboardEvent) => {
+      setHolds((prev) => [...prev, e.keyCode]);
+      if (holds.length === 0) {
+        setNewTargetKeys([e.keyCode]);
+      } else {
+        setNewTargetKeys((prev) => [...prev, e.keyCode]);
+      }
+    },
+    [holds.length]
+  );
+
+  const remove = useCallback(
+    <T>(array: T[], item: T): T[] => array.filter((i) => i !== item),
+    []
+  );
+
+  const removeHoldKeys = useCallback(
+    (e: KeyboardEvent) => {
+      setHolds((prev) => remove(prev, e.keyCode));
+    },
+    [remove]
+  );
+
+  const removeKey = useCallback(
+    (keyCode: number) => {
+      setNewTargetKeys((prev) => remove(prev, keyCode));
+      setHolds((prev) => remove(prev, keyCode));
+    },
+    [remove]
+  );
+
   const handleSave = useCallback(() => {
+    if (!canSave) {
+      return;
+    }
     const action: Action = objectiveSwitch<ActionType, Action>(
       {
-        remap: () => ({ type: "remap", keys: targetKeys }),
-        layerToggle: () => ({ type: "layerToggle", layerId: selectedLayerId }),
+        remap: () => ({ type: "remap", keys: newTargetKeys }),
+        layerToggle: () => ({
+          type: "layerToggle",
+          layerId: selectedLayerId,
+        }),
         layerMomentary: () => ({
           type: "layerMomentary",
           layerId: selectedLayerId,
@@ -50,11 +118,12 @@ export function useKeyEditorActions({
     onClose();
   }, [
     actionType,
-    onClose,
-    onSave,
+    newTargetKeys,
     selectedLayerId,
     selectedTrigger,
-    targetKeys,
+    onClose,
+    onSave,
+    canSave,
   ]);
 
   const handleRemove = useCallback(() => {
@@ -62,5 +131,14 @@ export function useKeyEditorActions({
     onClose();
   }, [onClose, onRemove, selectedTrigger]);
 
-  return { handleSave, handleRemove };
+  return {
+    canSave,
+    holds,
+    newTargetKeys: computedTargetKeys,
+    addHoldKeys,
+    removeHoldKeys,
+    removeKey,
+    handleSave,
+    handleRemove,
+  };
 }

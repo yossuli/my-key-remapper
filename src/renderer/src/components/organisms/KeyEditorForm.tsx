@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   Action,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
 import { useBindingConfig } from "../../hooks/useBindingConfig";
+import { useEventHandler } from "../../hooks/useEventHandler";
 import { useKeyEditorActions } from "../../hooks/useKeyEditorAction";
-import { useRemapKeySelection } from "../../hooks/useRemapKeySelection";
+import { useKeyHoldAction } from "../../hooks/useKeyHoldAction";
 import type { LayoutType } from "../../types";
 import { getLayerDescription } from "../../utils/getLayerDescription";
 import { Button } from "../atoms/Button";
 import { WithRemoveBadge } from "../atoms/RemoveBadge";
-import { Mapped } from "../control/Mapped";
+import { HandleEmpty } from "../control/HandleEmpty";
 import { Show } from "../control/Show";
-import { Conditional, Else, Then } from "../control/Ternary";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
@@ -38,39 +38,94 @@ export function KeyEditorForm({
   onRemove,
   onClose,
 }: KeyEditorFormProps) {
-  // トリガー選択状態
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-
-  // バインディング設定
+  console.log(targetVk);
   const binding = useBindingConfig({
     targetVk,
     layerId,
     defaultLayerId: layers[0]?.id || "",
   });
-  const { actionType, selectedLayerId, targetKeys, hasExistingBinding } =
-    binding.state;
-  // トリガー変更時
-  const handleTriggerChange = (newTrigger: TriggerType) => {
-    setSelectedTrigger(newTrigger);
-    binding.loadBindingForTrigger(newTrigger);
-  };
+  const {
+    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
+    clearTargetKeys,
+    setSelectedLayerId,
+    loadBindingForTrigger,
+    setActionType,
+  } = binding;
 
-  // 保存・削除アクション
-  const { handleSave, handleRemove } = useKeyEditorActions({
-    ...binding,
+  const {
+    newTargetKeys,
+    canSave,
+    addHoldKeys,
+    removeHoldKeys,
+    removeKey,
+    handleSave,
+    handleRemove,
+  } = useKeyEditorActions({
+    state: {
+      actionType,
+      selectedLayerId,
+      targetKeys,
+      hasExistingBinding,
+    },
+    targetVk,
     selectedTrigger,
     onSave,
     onRemove,
     onClose,
   });
 
-  // リマップキー選択（Enter長押しで保存も担当）
-  useRemapKeySelection({
-    enabled: actionType === "remap",
-    targetKeys,
-    onAddKey: binding.addTargetKey,
-    onEnterHold: handleSave,
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
+    targetKey: "Enter",
   });
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (actionType !== "remap") {
+        return;
+      }
+
+      handleHoldKeyDown(e, {
+        onOtherKeyDown() {
+          addHoldKeys(e);
+        },
+        onHold() {
+          handleSave();
+        },
+      });
+    },
+    [actionType, handleHoldKeyDown, handleSave, addHoldKeys]
+  );
+
+  const onKeyUp = useCallback(
+    (e: KeyboardEvent) => {
+      handleHoldKeyUp(e, {
+        onTap() {
+          const enterKeyCode = 13;
+          if (!targetKeys.includes(enterKeyCode)) {
+            addHoldKeys(e);
+          }
+        },
+        onOtherKeyUp() {
+          removeHoldKeys(e);
+        },
+      });
+    },
+    [handleHoldKeyUp, targetKeys, addHoldKeys, removeHoldKeys]
+  );
+
+  useEventHandler(
+    [
+      { type: "keydown", handler: onKeyDown },
+      { type: "keyup", handler: onKeyUp },
+    ],
+    [onKeyDown, onKeyUp]
+  );
+
+  const handleTriggerChange = (newTrigger: TriggerType) => {
+    setSelectedTrigger(newTrigger);
+    loadBindingForTrigger(newTrigger);
+  };
   return (
     <div className="space-y-4 p-6">
       {/* キー表示 */}
@@ -87,7 +142,7 @@ export function KeyEditorForm({
       {/* アクション種別選択 */}
       <ActionTypeSelector
         actionType={actionType}
-        onActionTypeChange={binding.setActionType}
+        onActionTypeChange={setActionType}
         triggerType={selectedTrigger}
       />
 
@@ -97,34 +152,25 @@ export function KeyEditorForm({
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
             <KeyDisplay layout={layout} vkCode={targetVk} />
             <span className="text-muted-foreground">→</span>
-            <Conditional condition={targetKeys.length > 0}>
-              <Then as="div" className="flex gap-1">
-                <Mapped value={targetKeys.map((vk) => ({ id: vk }))}>
-                  {({ id: vk }) => (
-                    <WithRemoveBadge
-                      onRemove={() => {
-                        // TODO: 個別キー削除のロジックを実装
-                        console.log("Remove key:", vk);
-                      }}
-                    >
-                      <KeyDisplay
-                        layout={layout}
-                        variant="primary"
-                        vkCode={vk}
-                      />
-                    </WithRemoveBadge>
-                  )}
-                </Mapped>
-              </Then>
-              <Else
-                as="span"
-                className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground"
-              >
-                キーを長押して選択
-              </Else>
-            </Conditional>
+            <HandleEmpty
+              array={newTargetKeys.map((vk) => ({ id: vk }))}
+              empty={
+                <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground">
+                  キーを長押して選択
+                </span>
+              }
+            >
+              {({ id: vk }) => (
+                <WithRemoveBadge
+                  disabled={newTargetKeys.length === 1}
+                  onRemove={() => removeKey(vk)}
+                >
+                  <KeyDisplay layout={layout} variant="primary" vkCode={vk} />
+                </WithRemoveBadge>
+              )}
+            </HandleEmpty>
           </div>
-          <Button onClick={binding.clearTargetKeys} size="sm" variant="ghost">
+          <Button onClick={clearTargetKeys} size="sm" variant="ghost">
             クリア
           </Button>
         </div>
@@ -139,7 +185,7 @@ export function KeyEditorForm({
         <LayerSelector
           description={getLayerDescription(actionType)}
           layers={layers}
-          onLayerChange={binding.setSelectedLayerId}
+          onLayerChange={setSelectedLayerId}
           selectedLayerId={selectedLayerId}
         />
       </Show>
@@ -151,11 +197,7 @@ export function KeyEditorForm({
             削除
           </Button>
         </Show>
-        <Button
-          disabled={actionType === "remap" && targetKeys.length === 0}
-          onClick={handleSave}
-          variant="primary"
-        >
+        <Button disabled={!canSave} onClick={handleSave} variant="primary">
           保存
         </Button>
       </div>

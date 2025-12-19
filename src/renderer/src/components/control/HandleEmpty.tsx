@@ -5,7 +5,7 @@ import { Conditional, Else, Then } from "./Ternary";
 interface HandleEmptyProps<T> {
   array: T[];
   empty: JSX.Element;
-  children: (value: T) => JSX.Element;
+  children: (value: T, index: number, array: T[]) => JSX.Element;
 }
 
 export const HandleEmpty = <T extends { id: string | number }>({
@@ -15,8 +15,8 @@ export const HandleEmpty = <T extends { id: string | number }>({
 }: HandleEmptyProps<T>) => (
   <Conditional condition={array.length === 0}>
     <Then>{empty}</Then>
-    <Mapped as={Else} value={array}>
-      {(elm) => children(elm)}
-    </Mapped>
+    <Else>
+      <Mapped value={array}>{(elm, i) => children(elm, i, array)}</Mapped>
+    </Else>
   </Conditional>
 );

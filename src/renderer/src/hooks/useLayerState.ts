@@ -9,10 +9,21 @@ import type {
 import { remove, upsert } from "../utils/handleMapping";
 import { useIpc } from "./useIpc";
 
+interface UseLayerStateReturn {
+  layers: Layer[];
+  layerId: string;
+  setLayerId: React.Dispatch<React.SetStateAction<string>>;
+  currentBindings: Layer["bindings"];
+  addLayer: (newLayerId: string) => void;
+  removeLayer: (targetLayerId: string) => void;
+  saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
+  removeMapping: (from: number, trigger: TriggerType) => void;
+}
+
 /**
  * レイヤーとマッピングを管理するカスタムフック
  */
-export function useLayerState() {
+export function useLayerState(): UseLayerStateReturn {
   const { send, invoke } = useIpc();
   const [layers, setLayers] = useState<Layer[]>([]);
   const [layerId, setLayerId] = useState<string>("base");

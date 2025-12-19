@@ -6,30 +6,32 @@ import type {
   ActionType,
   TriggerType,
 } from "../../../shared/types/remapConfig";
+import type { BindingState } from "../utils/bindingState";
 import { objectiveSwitch } from "../utils/objectiveSwitch";
 
 interface UseKeyEditorActionsProps {
-  actionType: ActionType;
-  targetKeys: number[];
-  selectedLayerId: string;
+  state: BindingState;
   selectedTrigger: TriggerType;
   onSave: (trigger: TriggerType, action: Action) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
 }
 
+interface UseKeyEditorActionsReturn {
+  handleSave: () => void;
+  handleRemove: () => void;
+}
+
 /**
  * キーエディターの保存・削除アクションフック
  */
 export function useKeyEditorActions({
-  actionType,
-  targetKeys,
-  selectedLayerId,
+  state: { actionType, targetKeys, selectedLayerId },
   selectedTrigger,
   onSave,
   onRemove,
   onClose,
-}: UseKeyEditorActionsProps) {
+}: UseKeyEditorActionsProps): UseKeyEditorActionsReturn {
   const handleSave = useCallback(() => {
     const action: Action = objectiveSwitch<ActionType, Action>(
       {

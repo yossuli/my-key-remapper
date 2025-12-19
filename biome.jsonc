@@ -15,14 +15,18 @@
         }
       },
       "style": {
-        "useSingleVarDeclarator": "error",
+        "noMagicNumbers": "error",
+        "useBlockStatements": {
+          "level": "error",
+          "fix": "safe"
+        },
         "useConsistentTypeDefinitions": {
           "level": "error",
           "options": {
             "style": "interface"
           }
         },
-        "noMagicNumbers": "error",
+        "useSingleVarDeclarator": "error",
         "useFilenamingConvention": {
           "level": "error",
           "options": {

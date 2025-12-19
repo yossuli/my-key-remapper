@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/useFilenamingConvention: <explanation> */
 import { motion } from "framer-motion";
 import { KEY_SIZE_REM } from "../../../../shared/constants/index";
 import type {
@@ -5,16 +6,17 @@ import type {
   KeyBinding,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
-import type { KeyboardLayout, KeyDefinition } from "../../types";
+import type { KeyDefinition, LayoutType } from "../../types";
 import { cn } from "../../utils/cn";
 import { getKeyLabel } from "../../utils/getKeyLabel";
 
 interface KeyButtonProps {
   keyDef: KeyDefinition;
   bindings?: KeyBinding[];
-  keyboardLayout: KeyboardLayout;
+  layout: LayoutType;
   isBaseLayer: boolean;
   selectedTrigger: TriggerType;
+  isQuickEditing?: boolean; // クイック設定モードで入力待ち状態のキー
   onClick: (vk: number) => void;
 }
 
@@ -24,13 +26,13 @@ interface KeyButtonProps {
 function getDisplayLabel(
   action: Action | undefined,
   defaultLabel: string,
-  keyboardLayout: KeyboardLayout
+  layout: LayoutType
 ): string {
   if (!action) {
     return defaultLabel;
   }
   if ("keys" in action) {
-    return action.keys.map((vk) => getKeyLabel(vk, keyboardLayout)).join("+");
+    return getKeyLabel(action.keys, layout);
   }
   if (action.type === "layerToggle") {
     return `[${action.layerId}]`;
@@ -47,9 +49,10 @@ function getDisplayLabel(
 export function KeyButton({
   keyDef,
   bindings,
-  keyboardLayout,
+  layout,
   isBaseLayer,
   selectedTrigger,
+  isQuickEditing = false,
   onClick,
 }: KeyButtonProps) {
   const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
@@ -61,11 +64,7 @@ export function KeyButton({
   const hasBindingForTrigger = triggerAction !== undefined;
 
   // 表示ラベルを決定
-  const displayLabel = getDisplayLabel(
-    triggerAction,
-    keyDef.label,
-    keyboardLayout
-  );
+  const displayLabel = getDisplayLabel(triggerAction, keyDef.label, layout);
 
   // カスタムレイヤーでバインディングがないキーは薄く表示
   const isInactive = !(isBaseLayer || hasBindingForTrigger);
@@ -73,18 +72,32 @@ export function KeyButton({
 
   return (
     <motion.button
+      // biome-ignore lint/style/noMagicNumbers: アニメーションの値なぞマジックでよい
+      animate={isQuickEditing ? { scale: [1, 1.05, 1] } : {}}
       className={cn(
         "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
         isActive
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-foreground hover:bg-muted",
-        isInactive ? "opacity-30" : ""
+        isInactive ? "opacity-30" : "",
+        isQuickEditing
+          ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-background"
+          : ""
       )}
       onClick={() => onClick(baseVk)}
+      onKeyDown={(e) => {
+        // キーボード操作を無効化（Enter長押し後の誤発火防止）
+        e.preventDefault();
+      }}
       style={{
         width: `${(keyDef.width || 1) * KEY_SIZE_REM}rem`,
         height: "3rem",
       }}
+      transition={
+        isQuickEditing
+          ? { duration: 0.8, repeat: Number.POSITIVE_INFINITY }
+          : {}
+      }
       type="button"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

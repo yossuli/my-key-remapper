@@ -1,17 +1,17 @@
-import type { KeyboardLayout } from "../../types";
+import type { LayoutType } from "../../types";
 import { getKeyLabel } from "../../utils/getKeyLabel";
 import { Badge } from "../atoms/Badge";
 
 interface KeyDisplayProps {
   vkCode: number;
-  keyboardLayout: KeyboardLayout;
+  layout: LayoutType;
   variant?: "default" | "primary" | "accent";
   size?: "sm" | "md" | "lg";
 }
 
 export function KeyDisplay({
   vkCode,
-  keyboardLayout,
+  layout,
   variant = "default",
   size = "md",
 }: KeyDisplayProps) {
@@ -23,7 +23,7 @@ export function KeyDisplay({
 
   return (
     <Badge className={sizeStyles[size]} variant={variant}>
-      {getKeyLabel(vkCode, keyboardLayout)}
+      {getKeyLabel([vkCode], layout)}
     </Badge>
   );
 }

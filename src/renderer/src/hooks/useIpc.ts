@@ -5,11 +5,24 @@ import { useCallback, useEffect, useRef } from "react";
 
 type IpcCallback = (...args: unknown[]) => void;
 
+interface UseIpcReturn {
+  // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的
+  send: (channel: string, ...args: any[]) => void;
+  invoke: <T = unknown>(
+    channel: string,
+    // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的
+    ...args: any[]
+  ) => Promise<T | undefined>;
+  on: (channel: string, callback: IpcCallback) => void;
+  off: (channel: string, callback: IpcCallback) => void;
+  isAvailable: boolean;
+}
+
 /**
  * IPC通信用のカスタムフック
  * Electronの有無に関わらず安全に使用可能
  */
-export function useIpc() {
+export function useIpc(): UseIpcReturn {
   const ipc = window.electron?.ipcRenderer;
 
   const send = useCallback(
@@ -50,7 +63,7 @@ export function useIpc() {
  * IPCイベントのサブスクリプション用フック
  * マウント時に自動でon/offを管理
  */
-export function useIpcEvent(channel: string, callback: IpcCallback) {
+export function useIpcEvent(channel: string, callback: IpcCallback): void {
   const { on, off } = useIpc();
   const callbackRef = useRef(callback);
 

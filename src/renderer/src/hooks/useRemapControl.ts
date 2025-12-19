@@ -3,10 +3,19 @@
 import { useCallback, useState } from "react";
 import { useIpc } from "./useIpc";
 
+interface UseRemapControlReturn {
+  isActive: boolean;
+  setIsActive: (active: boolean) => void;
+  toggleActive: () => void;
+  setRemapEnabled: (enabled: boolean) => void;
+  enableRemap: () => void;
+  disableRemap: () => void;
+}
+
 /**
  * リマップ機能の有効/無効を制御するカスタムフック
  */
-export function useRemapControl() {
+export function useRemapControl(): UseRemapControlReturn {
   const { send } = useIpc();
   const [isActive, setIsActiveState] = useState(true);
 

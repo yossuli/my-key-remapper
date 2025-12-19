@@ -5,24 +5,24 @@ import type {
   TriggerType,
 } from "../../../../shared/types/remapConfig";
 import { useBindingConfig } from "../../hooks/useBindingConfig";
-import { useEnterToSave } from "../../hooks/useEnterToSave";
-import { useKeyEditorActions } from "../../hooks/useKeyEditorState";
+import { useKeyEditorActions } from "../../hooks/useKeyEditorAction";
 import { useRemapKeySelection } from "../../hooks/useRemapKeySelection";
-import type { KeyboardLayout } from "../../types";
+import type { LayoutType } from "../../types";
 import { getLayerDescription } from "../../utils/getLayerDescription";
 import { Button } from "../atoms/Button";
+import { WithRemoveBadge } from "../atoms/RemoveBadge";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
 import { Conditional, Else, Then } from "../control/Ternary";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
-import { TriggerSelector } from "../molecules/TriggerSelector";
+import { TriggerTabs } from "../molecules/TriggerTabs";
 
 interface KeyEditorFormProps {
   targetVk: number;
   layerId: string;
-  keyboardLayout: KeyboardLayout;
+  layout: LayoutType;
   layers: Pick<Layer, "id">[];
   onSave: (trigger: TriggerType, action: Action) => void;
   onRemove: (trigger: TriggerType) => void;
@@ -32,7 +32,7 @@ interface KeyEditorFormProps {
 export function KeyEditorForm({
   targetVk,
   layerId,
-  keyboardLayout,
+  layout,
   layers,
   onSave,
   onRemove,
@@ -47,7 +47,8 @@ export function KeyEditorForm({
     layerId,
     defaultLayerId: layers[0]?.id || "",
   });
-
+  const { actionType, selectedLayerId, targetKeys, hasExistingBinding } =
+    binding.state;
   // トリガー変更時
   const handleTriggerChange = (newTrigger: TriggerType) => {
     setSelectedTrigger(newTrigger);
@@ -63,55 +64,55 @@ export function KeyEditorForm({
     onClose,
   });
 
-  // Enter長押しで保存
-  const { isEnterActive } = useEnterToSave({
-    onSave: handleSave,
-    holdMs: 1000,
-  });
-
-  // リマップキー選択
+  // リマップキー選択（Enter長押しで保存も担当）
   useRemapKeySelection({
-    enabled: binding.actionType === "remap",
-    targetKeys: binding.targetKeys,
+    enabled: actionType === "remap",
+    targetKeys,
     onAddKey: binding.addTargetKey,
-    handleEnterTap: !isEnterActive(),
+    onEnterHold: handleSave,
   });
-
   return (
     <div className="space-y-4 p-6">
       {/* キー表示 */}
       <div className="flex items-center justify-center gap-4 font-bold text-2xl">
-        <KeyDisplay keyboardLayout={keyboardLayout} vkCode={targetVk} />
+        <KeyDisplay layout={layout} vkCode={targetVk} />
       </div>
 
       {/* トリガー選択 */}
-      <TriggerSelector
+      <TriggerTabs
         onTriggerChange={handleTriggerChange}
         selectedTrigger={selectedTrigger}
       />
 
       {/* アクション種別選択 */}
       <ActionTypeSelector
-        actionType={binding.actionType}
+        actionType={actionType}
         onActionTypeChange={binding.setActionType}
         triggerType={selectedTrigger}
       />
 
       {/* リマップ設定 */}
-      <Show condition={binding.actionType === "remap"}>
+      <Show condition={actionType === "remap"}>
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
+            <KeyDisplay layout={layout} vkCode={targetVk} />
             <span className="text-muted-foreground">→</span>
-            <Conditional condition={binding.targetKeys.length > 0}>
+            <Conditional condition={targetKeys.length > 0}>
               <Then as="div" className="flex gap-1">
-                <Mapped value={binding.targetKeys.map((vk) => ({ id: vk }))}>
+                <Mapped value={targetKeys.map((vk) => ({ id: vk }))}>
                   {({ id: vk }) => (
-                    <KeyDisplay
-                      key={vk}
-                      keyboardLayout={keyboardLayout}
-                      variant="primary"
-                      vkCode={vk}
-                    />
+                    <WithRemoveBadge
+                      onRemove={() => {
+                        // TODO: 個別キー削除のロジックを実装
+                        console.log("Remove key:", vk);
+                      }}
+                    >
+                      <KeyDisplay
+                        layout={layout}
+                        variant="primary"
+                        vkCode={vk}
+                      />
+                    </WithRemoveBadge>
                   )}
                 </Mapped>
               </Then>
@@ -132,29 +133,26 @@ export function KeyEditorForm({
       {/* レイヤー選択 */}
       <Show
         condition={
-          binding.actionType === "layerToggle" ||
-          binding.actionType === "layerMomentary"
+          actionType === "layerToggle" || actionType === "layerMomentary"
         }
       >
         <LayerSelector
-          description={getLayerDescription(binding.actionType)}
+          description={getLayerDescription(actionType)}
           layers={layers}
           onLayerChange={binding.setSelectedLayerId}
-          selectedLayerId={binding.selectedLayerId}
+          selectedLayerId={selectedLayerId}
         />
       </Show>
 
       {/* ボタン */}
       <div className="flex justify-end gap-2 pt-2">
-        <Show condition={binding.hasExistingBinding}>
+        <Show condition={hasExistingBinding}>
           <Button onClick={handleRemove} variant="destructive">
             削除
           </Button>
         </Show>
         <Button
-          disabled={
-            binding.actionType === "remap" && binding.targetKeys.length === 0
-          }
+          disabled={actionType === "remap" && targetKeys.length === 0}
           onClick={handleSave}
           variant="primary"
         >

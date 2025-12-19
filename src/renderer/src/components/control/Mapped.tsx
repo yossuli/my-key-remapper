@@ -2,13 +2,13 @@ import type { JSX } from "react";
 import React from "react";
 import type { _BaseProps } from ".";
 
-interface MappedProps<
+type MappedProps<
   T extends { id: string | number },
   U extends JSX.ElementType = typeof React.Fragment,
-> extends _BaseProps<U> {
+> = {
   value: T[];
   children: (item: T, index: number, array: T[]) => React.ReactNode;
-}
+} & _BaseProps<U>;
 
 export const Mapped = <
   T extends { id: string | number },
@@ -22,7 +22,11 @@ export const Mapped = <
   const Tag = as ?? React.Fragment;
   return (
     <Tag {...props}>
-      {value.map((item, index) => children(item, index, value))}
+      {value.map((item, index) => (
+        <React.Fragment key={item.id}>
+          {children(item, index, value)}
+        </React.Fragment>
+      ))}
     </Tag>
   );
 };

@@ -19,6 +19,16 @@ interface UseBindingConfigProps {
   defaultLayerId: string;
 }
 
+interface UseBindingConfigReturn {
+  state: BindingState;
+  setActionType: (actionType: ActionType) => void;
+  setTargetKeys: (targetKeys: number[]) => void;
+  addTargetKey: (keyCode: number) => void;
+  clearTargetKeys: () => void;
+  setSelectedLayerId: (selectedLayerId: string) => void;
+  loadBindingForTrigger: (trigger: TriggerType) => Promise<void>;
+}
+
 /**
  * 特定キーのバインディング設定を読み込むフック
  */
@@ -26,7 +36,7 @@ export function useBindingConfig({
   targetVk,
   layerId,
   defaultLayerId,
-}: UseBindingConfigProps) {
+}: UseBindingConfigProps): UseBindingConfigReturn {
   const getMappings = useGetMappings();
   const [state, setState] = useState<BindingState>(() =>
     createInitialBindingState(defaultLayerId)
@@ -97,7 +107,7 @@ export function useBindingConfig({
   }, []);
 
   return {
-    ...state,
+    state,
     setActionType,
     setTargetKeys,
     addTargetKey,

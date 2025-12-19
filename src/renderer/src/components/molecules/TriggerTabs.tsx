@@ -29,7 +29,7 @@ interface TriggerSelectorProps {
   size?: "compact" | "default";
 }
 
-export function TriggerSelector({
+export function TriggerTabs({
   selectedTrigger,
   onTriggerChange,
   size = "default",

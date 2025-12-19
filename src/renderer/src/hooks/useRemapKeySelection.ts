@@ -1,13 +1,18 @@
 // リマップキー選択ロジックのフック
 
 import { useCallback, useEffect, useRef } from "react";
+import { useKeyHoldAction } from "./useKeyHoldAction";
 
 interface UseRemapKeySelectionProps {
   enabled: boolean;
   targetKeys: number[];
   onAddKey: (keyCode: number) => void;
-  /** Enter単押し時にEnterキーを追加するか */
-  handleEnterTap?: boolean;
+  /** Enter長押し時に実行するアクション */
+  onEnterHold: () => void;
+}
+
+interface UseRemapKeySelectionReturn {
+  setInputFocused: (focused: boolean) => void;
 }
 
 /**
@@ -17,62 +22,72 @@ export function useRemapKeySelection({
   enabled,
   targetKeys,
   onAddKey,
-  handleEnterTap = true,
-}: UseRemapKeySelectionProps) {
+  onEnterHold,
+}: UseRemapKeySelectionProps): UseRemapKeySelectionReturn {
   const inputFocusedRef = useRef(false);
-  const enterTapPendingRef = useRef(false);
 
   // 入力フォーカス状態を設定
   const setInputFocused = useCallback((focused: boolean) => {
     inputFocusedRef.current = focused;
   }, []);
 
+  // Enter キーの長押し/単押しハンドラー
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
+    targetKey: "Enter",
+  });
+
   useEffect(() => {
     if (!enabled) {
       return;
     }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       // 入力中は無視
       if (inputFocusedRef.current) {
         return;
       }
 
-      // Escapeは無視
+      // Escape, Tab は無視
       if (e.key === "Escape" || e.key === "Tab") {
         return;
       }
 
-      // Enterキーは別途処理
-      if (e.key === "Enter") {
-        enterTapPendingRef.current = true;
-        return;
-      }
-
-      // キーを追加
-      if (e.keyCode && !targetKeys.includes(e.keyCode)) {
-        onAddKey(e.keyCode);
-      }
+      // Enter キーは長押しハンドラーで処理、それ以外はキーを追加
+      handleHoldKeyDown(e, {
+        onOtherKey() {
+          if (e.keyCode && !targetKeys.includes(e.keyCode)) {
+            onAddKey(e.keyCode);
+          }
+        },
+        onHold: onEnterHold,
+      });
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      // Enter単押しの場合、Enterキーを追加
-      if (e.key === "Enter" && handleEnterTap && enterTapPendingRef.current) {
-        enterTapPendingRef.current = false;
-        const enterKeyCode = 13;
-        if (!(targetKeys.includes(enterKeyCode) || inputFocusedRef.current)) {
-          onAddKey(enterKeyCode);
-        }
-      }
+    const onKeyUp = (e: KeyboardEvent) => {
+      handleHoldKeyUp(e, {
+        onTap() {
+          const enterKeyCode = 13;
+          if (!(targetKeys.includes(enterKeyCode) || inputFocusedRef.current)) {
+            onAddKey(enterKeyCode);
+          }
+        },
+      });
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("keyup", handleKeyUp);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
     };
-  }, [enabled, targetKeys, onAddKey, handleEnterTap]);
+  }, [
+    enabled,
+    targetKeys,
+    onAddKey,
+    onEnterHold,
+    handleHoldKeyDown,
+    handleHoldKeyUp,
+  ]);
 
   return {
     setInputFocused,

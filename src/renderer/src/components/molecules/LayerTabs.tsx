@@ -1,10 +1,10 @@
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { Layer } from "../../../../shared/types/remapConfig";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { WithRemoveBadge } from "../atoms/RemoveBadge";
 import { Mapped } from "../control/Mapped";
-import { Show } from "../control/Show";
 import { Conditional, Else, Then } from "../control/Ternary";
 
 interface LayerTabsProps {
@@ -51,27 +51,28 @@ export function LayerTabs({
         value={layers}
       >
         {({ id }) => (
-          <div className="group relative" key={id}>
-            <Button
-              onClick={() => onLayerChange(id)}
-              size="sm"
-              variant={activeLayerId === id ? "primary" : "ghost"}
-            >
-              {id.charAt(0).toUpperCase() + id.slice(1)}
-            </Button>
-            <Show condition={id !== "base"}>
-              <button
-                className="-top-1 -right-1 absolute hidden rounded-full bg-destructive p-0.5 text-destructive-foreground group-hover:block"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveLayer(id);
-                }}
-                type="button"
+          <Conditional condition={id !== "base"} key={id}>
+            <Then>
+              <WithRemoveBadge onRemove={() => onRemoveLayer(id)}>
+                <Button
+                  onClick={() => onLayerChange(id)}
+                  size="sm"
+                  variant={activeLayerId === id ? "primary" : "ghost"}
+                >
+                  {id.charAt(0).toUpperCase() + id.slice(1)}
+                </Button>
+              </WithRemoveBadge>
+            </Then>
+            <Else>
+              <Button
+                onClick={() => onLayerChange(id)}
+                size="sm"
+                variant={activeLayerId === id ? "primary" : "ghost"}
               >
-                <X className="h-3 w-3" />
-              </button>
-            </Show>
-          </div>
+                {id.charAt(0).toUpperCase() + id.slice(1)}
+              </Button>
+            </Else>
+          </Conditional>
         )}
       </Mapped>
 

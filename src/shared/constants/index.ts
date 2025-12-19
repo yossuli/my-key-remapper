@@ -1,24 +1,28 @@
-import type { KeyboardLayout, LayerType, LayoutType } from "../types";
+import type {
+  KeyboardLayout,
+  LayerType,
+  LayoutType,
+} from "../../../src/renderer/src/types/index";
 
-import { KEYBOARD_LAYOUT_JIS, KEYBOARD_LAYOUT_JIS_CUSTOM } from "./JIS";
-import { KEYBOARD_LAYOUT_US, KEYBOARD_LAYOUT_US_CUSTOM } from "./US";
+import { KEYBOARD_LAYOUT_JIS, KEYBOARD_LAYOUT_JIS_SHIFT } from "./JIS";
+import { KEYBOARD_LAYOUT_US, KEYBOARD_LAYOUT_US_SHIFT } from "./US";
 
 export const KEY_SIZE_REM = 3;
 
-const KEYBOARD_LAYOUT_BASE = {
+export const KEYBOARD_LAYOUT_BASE = {
   JIS: KEYBOARD_LAYOUT_JIS,
   US: KEYBOARD_LAYOUT_US,
 } as const satisfies Record<LayoutType, KeyboardLayout>;
 
-const KEY_0BOARD_LAYOUT_CUSTOM = {
-  JIS: KEYBOARD_LAYOUT_JIS_CUSTOM,
-  US: KEYBOARD_LAYOUT_US_CUSTOM,
+export const KEYBOARD_LAYOUT_SHIFT = {
+  JIS: KEYBOARD_LAYOUT_JIS_SHIFT,
+  US: KEYBOARD_LAYOUT_US_SHIFT,
 } as const satisfies Record<LayoutType, KeyboardLayout>;
 
 export const KEYBOARD_LAYOUT = {
   base: KEYBOARD_LAYOUT_BASE,
-  custom: KEY_0BOARD_LAYOUT_CUSTOM,
-} as const satisfies Record<LayerType, Record<LayoutType, KeyboardLayout>>;
+  shift: KEYBOARD_LAYOUT_US_SHIFT,
+} as const satisfies Record<string, Record<LayoutType, KeyboardLayout>>;
 
 export const SWITCH_LAYOUT_RULE = {
   JIS: "US",

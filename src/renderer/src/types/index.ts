@@ -1,7 +1,7 @@
 export interface KeyDefinition {
   id: number;
   label: string;
-  vk: number | [number, number];
+  vk: number | number[];
   /** 幅（1 = 標準キー） */
   width?: number;
   /** CSSグリッドのエリア指定用 */

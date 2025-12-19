@@ -11,6 +11,7 @@
     "preview": "electron-vite preview",
     "lint": "ultracite lint",
     "format": "ultracite format",
+    "typecheck": "tsc --noEmit",
     "ultracite:fix": "npx ultracite fix",
     "ultracite:check": "npx ultracite check",
     "ultracite:doctor": "npx ultracite doctor",

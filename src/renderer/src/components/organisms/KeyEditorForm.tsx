@@ -53,31 +53,9 @@ export function KeyEditorForm({
     setActionType,
   } = binding;
 
-  const {
-    newTargetKeys,
-    canSave,
-    addHoldKeys,
-    removeHoldKeys,
-    removeKey,
-    handleSave,
-    handleRemove,
-  } = useKeyEditorActions({
-    state: {
-      actionType,
-      selectedLayerId,
-      targetKeys,
-      hasExistingBinding,
-    },
-    targetVk,
-    selectedTrigger,
-    onSave,
-    onRemove,
-    onClose,
-  });
+  const { newTargetKeys, canSave, addHoldKeys, removeHoldKeys, removeKey, handleSave, handleRemove } = useKeyEditorActions({state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
-  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
-    targetKey: "Enter",
-  });
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: "Enter" }); // biome-ignore format: 引数に関心はない
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {

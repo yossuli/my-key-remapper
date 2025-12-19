@@ -98,7 +98,6 @@ export function useBindingConfig({
     }));
   }, []);
 
-
   const clearTargetKeys = useCallback(() => {
     setState((prev) => ({ ...prev, targetKeys: [] }));
   }, []);

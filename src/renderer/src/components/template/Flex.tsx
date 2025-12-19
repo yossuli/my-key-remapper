@@ -30,10 +30,7 @@ export const Row = <T extends React.ElementType = "div">({
 }: FlexProps<T>) => {
   const Tag = as || "div";
   return (
-    <Tag
-      className={cn("flex flex-row items-center", className)}
-      {...props}
-    >
+    <Tag className={cn("flex flex-row items-center", className)} {...props}>
       {children}
     </Tag>
   );

@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 
 interface UseKeyHoldActionProps {
   /** 対象キー（例: "Enter", "Space" など） */
-  targetKey: KeyboardEvent["key"];
+  targetKey: number;
   /** 長押し判定時間（ミリ秒） */
   holdMs?: number;
 }
@@ -13,7 +13,7 @@ interface KeyDownCallbacks {
   /** 対象キーホールド時に呼ばれるコールバック */
   onHold?: () => void;
   /** 対象キー以外の場合に呼ばれるコールバック */
-  onOtherKeyDown?: (e: KeyboardEvent) => void;
+  onOtherKeyDown?: (e: number) => void;
 }
 
 interface KeyUpCallbacks {
@@ -22,22 +22,22 @@ interface KeyUpCallbacks {
   /** 長押しの場合に呼ばれるコールバック */
   onHold?: () => void;
   /** 対象キー以外の場合に呼ばれるコールバック */
-  onOtherKeyUp?: (e: KeyboardEvent) => void;
+  onOtherKeyUp?: (e: number) => void;
 }
 
 interface UseKeyHoldActionReturn {
   /**
    * keydown ハンドラー。
-   * @param e - KeyboardEvent
+   * @param e - number
    * @param callbacks - コールバックオブジェクト
    */
-  handleHoldKeyDown: (e: KeyboardEvent, callbacks?: KeyDownCallbacks) => void;
+  handleHoldKeyDown: (e: number, callbacks?: KeyDownCallbacks) => void;
   /**
    * keyup ハンドラー。
-   * @param e - KeyboardEvent
+   * @param e - number
    * @param callbacks - コールバックオブジェクト
    */
-  handleHoldKeyUp: (e: KeyboardEvent, callbacks: KeyUpCallbacks) => void;
+  handleHoldKeyUp: (e: number, callbacks: KeyUpCallbacks) => void;
   clearTimer: () => void;
   isActionReady: () => boolean;
   isKeyActive: () => boolean;
@@ -72,9 +72,9 @@ export function useKeyHoldAction({
 
   // keydown ハンドラー
   const handleHoldKeyDown = useCallback(
-    (e: KeyboardEvent, callbacks?: KeyDownCallbacks) => {
+    (e: number, callbacks?: KeyDownCallbacks) => {
       // 対象キー以外ならコールバック呼び出しして終了
-      if (e.key !== targetKey) {
+      if (e !== targetKey) {
         callbacks?.onOtherKeyDown?.(e);
         return;
       }
@@ -100,8 +100,8 @@ export function useKeyHoldAction({
 
   // keyup ハンドラー
   const handleHoldKeyUp = useCallback(
-    (e: KeyboardEvent, callbacks: KeyUpCallbacks): void => {
-      if (e.key !== targetKey) {
+    (e: number, callbacks: KeyUpCallbacks): void => {
+      if (e !== targetKey) {
         callbacks.onOtherKeyUp?.(e);
         return;
       }

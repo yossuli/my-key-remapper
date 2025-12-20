@@ -6,6 +6,7 @@ import type { Action, TriggerType } from "../../../shared/types/remapConfig";
 import type { KeyboardLayout } from "../types";
 import { getNextKeyVk } from "../utils/getNextKeyVk";
 import { useKeyEditorActions } from "./useKeyEditorAction";
+import { useKeyEventInput } from "./useKeyEventInput";
 
 interface UseQuickRemapOptions {
   enabled: boolean;
@@ -42,7 +43,7 @@ export function useQuickRemap({
 }: UseQuickRemapOptions): UseQuickRemapReturn {
   const [editingKey, setEditingKey] = useState<number | null>(null);
 
-  const { canSave, holds, addHoldKeys, removeHoldKeys, handleSave } =
+  const { canSave, holds, addHoldKey, removeHoldKey, handleSave } =
     useKeyEditorActions({
       state: {
         actionType: "remap",
@@ -54,6 +55,7 @@ export function useQuickRemap({
       selectedTrigger,
       onSave: (trigger: TriggerType, action: Action) => {
         if (editingKey !== null) {
+          console.log("save", editingKey, trigger, action);
           onSaveMapping(editingKey, trigger, action);
         }
       },
@@ -75,55 +77,39 @@ export function useQuickRemap({
     setEditingKey(null);
   }, []);
 
-  // キー押下検知（入力待ち状態のとき）
-  useEffect(() => {
-    if (!enabled || editingKey === null) {
-      return;
-    }
+  // IPC経由でキー入力を受け取る
+  const handleKeyDown = useCallback(
+    (vkCode: number) => {
+      addHoldKey(vkCode);
+    },
+    [addHoldKey]
+  );
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // キーを追加
-      addHoldKeys(e);
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+  const handleKeyUp = useCallback(
+    (vkCode: number) => {
       // 今離すキーが holds の最後の 1 つなら保存を実行
-      if (holds.length === 1 && holds[0] === e.keyCode) {
+      if (holds.length === 1 && holds[0] === vkCode) {
         if (canSave) {
           handleSave();
         }
         // 次のキーに移動（行末なら null で編集終了）
-        const nextVk = getNextKeyVk(keyboardLayout, editingKey);
-        setEditingKey(nextVk);
+        if (editingKey !== null) {
+          const nextVk = getNextKeyVk(keyboardLayout, editingKey);
+          setEditingKey(nextVk);
+        }
       }
 
       // キーを除去
-      removeHoldKeys(e);
-    };
+      removeHoldKey(vkCode);
+    },
+    [holds, canSave, handleSave, keyboardLayout, editingKey, removeHoldKey]
+  );
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [
-    enabled,
-    editingKey,
-    addHoldKeys,
-    removeHoldKeys,
-    holds,
-    canSave,
-    handleSave,
-    keyboardLayout,
-  ]);
+  useKeyEventInput({
+    enabled: enabled && editingKey !== null,
+    onKeyDown: handleKeyDown,
+    onKeyUp: handleKeyUp,
+  });
 
   // モードが無効になったら編集中状態をクリア
   useEffect(() => {

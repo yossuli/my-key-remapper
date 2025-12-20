@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/useFilenamingConvention: <explanation> */
 import { motion } from "framer-motion";
 import { KEY_SIZE_REM } from "../../../../shared/constants/index";
 import type {

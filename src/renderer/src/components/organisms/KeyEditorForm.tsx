@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
+import { VK } from "../../../../shared/constants/vk";
 import type {
   Action,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
 import { useBindingConfig } from "../../hooks/useBindingConfig";
-import { useEventHandler } from "../../hooks/useEventHandler";
 import { useKeyEditorActions } from "../../hooks/useKeyEditorAction";
+import { useKeyEventInput } from "../../hooks/useKeyEventInput";
 import { useKeyHoldAction } from "../../hooks/useKeyHoldAction";
 import type { LayoutType } from "../../types";
 import { getLayerDescription } from "../../utils/getLayerDescription";
@@ -24,6 +25,7 @@ interface KeyEditorFormProps {
   layerId: string;
   layout: LayoutType;
   layers: Pick<Layer, "id">[];
+  trigger: TriggerType;
   onSave: (trigger: TriggerType, action: Action) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
@@ -52,52 +54,50 @@ export function KeyEditorForm({
     setActionType,
   } = binding;
 
-  const { newTargetKeys, canSave, addHoldKeys, removeHoldKeys, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
-  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: "Enter" }); // biome-ignore format: 引数に関心はない
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: VK.ENTER }); // biome-ignore format: 引数に関心はない
 
   const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+    (e: number) => {
       if (actionType !== "remap") {
         return;
       }
 
       handleHoldKeyDown(e, {
         onOtherKeyDown() {
-          addHoldKeys(e);
+          addHoldKey(e);
         },
         onHold() {
           handleSave();
         },
       });
     },
-    [actionType, handleHoldKeyDown, handleSave, addHoldKeys]
+    [actionType, handleHoldKeyDown, handleSave, addHoldKey]
   );
 
   const onKeyUp = useCallback(
-    (e: KeyboardEvent) => {
+    (e: number) => {
       handleHoldKeyUp(e, {
         onTap() {
           const enterKeyCode = 13;
           if (!targetKeys.includes(enterKeyCode)) {
-            addHoldKeys(e);
+            addHoldKey(e);
           }
         },
         onOtherKeyUp() {
-          removeHoldKeys(e);
+          removeHoldKey(e);
         },
       });
     },
-    [handleHoldKeyUp, targetKeys, addHoldKeys, removeHoldKeys]
+    [handleHoldKeyUp, targetKeys, addHoldKey, removeHoldKey]
   );
 
-  useEventHandler(
-    [
-      { type: "keydown", handler: onKeyDown },
-      { type: "keyup", handler: onKeyUp },
-    ],
-    [onKeyDown, onKeyUp]
-  );
+  useKeyEventInput({
+    enabled: true,
+    onKeyDown,
+    onKeyUp,
+  });
 
   const handleTriggerChange = (newTrigger: TriggerType) => {
     setSelectedTrigger(newTrigger);

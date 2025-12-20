@@ -42,8 +42,8 @@ export function KeyboardGrid({
                 keyDef={keyDef}
                 layout={layout}
                 onClick={onKeyClick}
-                selectedTrigger={selectedTrigger}
                 onRemove={() => onRemoveMapping(baseVk)}
+                selectedTrigger={selectedTrigger}
               />
             );
           }}

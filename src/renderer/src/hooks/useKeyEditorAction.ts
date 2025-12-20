@@ -22,8 +22,8 @@ interface UseKeyEditorActionsReturn {
   canSave: boolean;
   holds: number[];
   newTargetKeys: number[];
-  addHoldKeys: (e: KeyboardEvent) => void;
-  removeHoldKeys: (e: KeyboardEvent) => void;
+  addHoldKey: (vkCode: number) => void;
+  removeHoldKey: (vkCode: number) => void;
   removeKey: (keyCode: number) => void;
   resetState: () => void;
   handleSave: () => void;
@@ -63,26 +63,26 @@ export function useKeyEditorActions({
     [actionType, computedTargetKeys, targetVk]
   );
 
-  const addHoldKeys = useCallback(
-    (e: KeyboardEvent) => {
-      setHolds((prev) => [...prev, e.keyCode]);
-      if (holds.length === 0) {
-        setNewTargetKeys([e.keyCode]);
-      } else {
-        setNewTargetKeys((prev) => [...prev, e.keyCode]);
-      }
-    },
-    [holds.length]
-  );
-
   const remove = useCallback(
     <T>(array: T[], item: T): T[] => array.filter((i) => i !== item),
     []
   );
 
-  const removeHoldKeys = useCallback(
-    (e: KeyboardEvent) => {
-      setHolds((prev) => remove(prev, e.keyCode));
+  const addHoldKey = useCallback(
+    (vkCode: number) => {
+      setHolds((prev) => [...remove(prev, vkCode), vkCode]);
+      if (holds.length === 0) {
+        setNewTargetKeys([vkCode]);
+      } else {
+        setNewTargetKeys((prev) => [...remove(prev, vkCode), vkCode]);
+      }
+    },
+    [holds.length, remove]
+  );
+
+  const removeHoldKey = useCallback(
+    (vkCode: number) => {
+      setHolds((prev) => remove(prev, vkCode));
     },
     [remove]
   );
@@ -142,8 +142,8 @@ export function useKeyEditorActions({
     canSave,
     holds,
     newTargetKeys: computedTargetKeys,
-    addHoldKeys,
-    removeHoldKeys,
+    addHoldKey,
+    removeHoldKey,
     removeKey,
     resetState,
     handleSave,

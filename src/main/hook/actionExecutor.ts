@@ -16,6 +16,7 @@ const momentaryLayerKeys = new Map<number, string>();
 export function releaseMomentaryLayer(vkCode: number) {
   const layerId = momentaryLayerKeys.get(vkCode);
   if (layerId) {
+    console.log("releaseMomentaryLayer");
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
   }
@@ -27,6 +28,7 @@ export function releaseMomentaryLayer(vkCode: number) {
 export function addMomentaryLayer(vkCode: number, layerId: string) {
   const isLayerSetCurrent = momentaryLayerKeys.get(vkCode);
   if (isLayerSetCurrent === undefined) {
+    console.log("addMomentaryLayer");
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
   }
@@ -40,8 +42,7 @@ export function addMomentaryLayer(vkCode: number, layerId: string) {
 export function handleTapOnlyBindings(
   vkCode: number,
   bindings: KeyBinding[],
-  isUp: boolean,
-  debugInfo?: number
+  isUp: boolean
 ): number | null {
   // tap 以外のトリガーがある場合は処理しない
   for (const { trigger } of bindings) {
@@ -55,7 +56,7 @@ export function handleTapOnlyBindings(
   // tap アクションがある場合（修飾キーなしで送信）
   if (action?.type === "remap") {
     for (const key of action.keys) {
-      sendKey(key, isUp, debugInfo);
+      sendKey(key, isUp);
     }
     return 1;
   }
@@ -69,18 +70,18 @@ export function handleTapOnlyBindings(
       layer.defaultModifiers.shift === "right" ? VK_RSHIFT : VK_LSHIFT;
     if (isUp) {
       // keyUp: キーを離してから Shift を離す
-      sendKey(vkCode, true, debugInfo);
-      sendKey(shiftVk, true, debugInfo);
+      sendKey(vkCode, true);
+      sendKey(shiftVk, true);
     } else {
       // keyDown: Shift を押してからキーを押す
-      sendKey(shiftVk, false, debugInfo);
-      sendKey(vkCode, false, debugInfo);
+      sendKey(shiftVk, false);
+      sendKey(vkCode, false);
     }
     return 1;
   }
 
   if (layerId === "base") {
-    sendKey(vkCode, isUp, debugInfo);
+    sendKey(vkCode, isUp);
     return 1;
   }
 

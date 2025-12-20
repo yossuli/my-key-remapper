@@ -89,7 +89,7 @@ function processPendingHoldKeys() {
     if (remapKeys !== null) {
       // 複数キーを順番に送信
       for (const remapKey of remapKeys) {
-        sendKey(remapKey, false, 3);
+        sendKey(remapKey, false);
       }
       return;
     }
@@ -132,7 +132,7 @@ export function handleKeyDown(vkCode: number): number {
   const bindings = remapRules.getBindings(vkCode);
 
   // tap のみのバインディングを先に処理
-  const tapResult = handleTapOnlyBindings(vkCode, bindings, false, 1);
+  const tapResult = handleTapOnlyBindings(vkCode, bindings, false);
   if (tapResult !== null) {
     return tapResult;
   }

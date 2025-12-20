@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   KEYBOARD_LAYOUT,
   SWITCH_LAYOUT_RULE,
@@ -6,7 +6,6 @@ import {
 import type { TriggerType } from "../../../../shared/types/remapConfig";
 import { useKeyEventLog } from "../../hooks/useKeyEventLog";
 import { useLayerState } from "../../hooks/useLayerState";
-import { useQuickRemap } from "../../hooks/useQuickRemap";
 import { useRemapControl } from "../../hooks/useRemapControl";
 import type { LayoutType } from "../../types";
 import { AppHeader } from "../organisms/AppHeader";
@@ -36,36 +35,12 @@ export function KeyRemapperPage() {
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [layout, setLayout] = useState<LayoutType>("JIS");
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-  const [isQuickEditMode, setIsQuickEditMode] = useState(false);
 
   // キーボードレイアウト
   const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT.base[layout], [layout]);
 
-  // クイック設定モード
-  const { editingKey: quickEditingKey, startEditing: startQuickEditing } =
-    useQuickRemap({
-      enabled: isQuickEditMode,
-      selectedTrigger,
-      onSaveMapping: saveMapping,
-    });
-
   const toggleLayout = () => {
     setLayout((prev) => SWITCH_LAYOUT_RULE[prev]);
-  };
-
-  const toggleQuickEditMode = useCallback(() => {
-    setIsQuickEditMode((prev) => !prev);
-  }, []);
-
-  const handleKeyClick = (vk: number) => {
-    // クイック設定モードの場合は即座にリマップ設定待ち状態に
-    if (isQuickEditMode) {
-      startQuickEditing(vk);
-      return;
-    }
-    // 通常モードの場合はモーダルを開く
-    disableRemap();
-    setEditingKey(vk);
   };
 
   const handleCloseEditor = () => {
@@ -82,21 +57,22 @@ export function KeyRemapperPage() {
         <Main>
           <KeyRemapSection
             bindings={currentBindings}
+            disableRemap={disableRemap}
+            enableRemap={enableRemap}
             isBaseLayer={layerId === "base"}
-            isQuickEditMode={isQuickEditMode}
             keyboardLayout={keyboardLayout}
             layerId={layerId}
             layers={layers}
             layout={layout}
             onAddLayer={addLayer}
-            onKeyClick={handleKeyClick}
             onLayerChange={setLayerId}
             onLayoutToggle={toggleLayout}
             onRemoveLayer={removeLayer}
-            onToggleQuickEditMode={toggleQuickEditMode}
+            onSaveMapping={saveMapping}
+            onRemoveMapping={(from) => removeMapping(from, "tap")}
             onTriggerChange={setSelectedTrigger}
-            quickEditingKey={quickEditingKey}
             selectedTrigger={selectedTrigger}
+            setEditingKey={setEditingKey}
           />
         </Main>
         <Side>

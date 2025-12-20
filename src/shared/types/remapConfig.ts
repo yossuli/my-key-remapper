@@ -125,6 +125,10 @@ export interface Layer {
   bindings: Record<number, KeyBinding[]>;
   /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する */
   passThroughKeys?: number[];
+  /** レイヤーアクティブ時にデフォルトで送信する修飾キー（tap アクションが設定されているキーは除外） */
+  defaultModifiers?: {
+    shift?: boolean | "left" | "right";
+  };
 }
 
 // =====================================
@@ -153,12 +157,36 @@ export interface RemapConfig {
 /**
  * デフォルト設定
  */
+/** VK_LSHIFT */
+const VK_LSHIFT = 160;
+/** VK_RSHIFT */
+const VK_RSHIFT = 161;
+
 export const DEFAULT_REMAP_CONFIG: RemapConfig = {
   version: 1,
   layers: [
     {
       id: "base",
+      bindings: {
+        // Shift 長押しで shift レイヤーを有効化
+        [VK_LSHIFT]: [
+          {
+            trigger: "hold",
+            action: { type: "layerMomentary", layerId: "shift" },
+          },
+        ],
+        [VK_RSHIFT]: [
+          {
+            trigger: "hold",
+            action: { type: "layerMomentary", layerId: "shift" },
+          },
+        ],
+      },
+    },
+    {
+      id: "shift",
       bindings: {},
+      defaultModifiers: { shift: true },
     },
   ] satisfies RemapConfig["layers"],
   globalSettings: {

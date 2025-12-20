@@ -39,7 +39,6 @@ export function KeyEditorForm({
   onClose,
 }: KeyEditorFormProps) {
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-  console.log(targetVk);
   const binding = useBindingConfig({
     targetVk,
     layerId,
@@ -53,7 +52,7 @@ export function KeyEditorForm({
     setActionType,
   } = binding;
 
-  const { newTargetKeys, canSave, addHoldKeys, removeHoldKeys, removeKey, handleSave, handleRemove } = useKeyEditorActions({state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+  const { newTargetKeys, canSave, addHoldKeys, removeHoldKeys, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
   const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: "Enter" }); // biome-ignore format: 引数に関心はない
 
@@ -106,25 +105,18 @@ export function KeyEditorForm({
   };
   return (
     <div className="space-y-4 p-6">
-      {/* キー表示 */}
       <div className="flex items-center justify-center gap-4 font-bold text-2xl">
         <KeyDisplay layout={layout} vkCode={targetVk} />
       </div>
-
-      {/* トリガー選択 */}
       <TriggerTabs
         onTriggerChange={handleTriggerChange}
         selectedTrigger={selectedTrigger}
       />
-
-      {/* アクション種別選択 */}
       <ActionTypeSelector
         actionType={actionType}
         onActionTypeChange={setActionType}
         triggerType={selectedTrigger}
       />
-
-      {/* リマップ設定 */}
       <Show condition={actionType === "remap"}>
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-4 font-bold text-xl">
@@ -153,8 +145,6 @@ export function KeyEditorForm({
           </Button>
         </div>
       </Show>
-
-      {/* レイヤー選択 */}
       <Show
         condition={
           actionType === "layerToggle" || actionType === "layerMomentary"
@@ -167,8 +157,6 @@ export function KeyEditorForm({
           selectedLayerId={selectedLayerId}
         />
       </Show>
-
-      {/* ボタン */}
       <div className="flex justify-end gap-2 pt-2">
         <Show condition={hasExistingBinding}>
           <Button onClick={handleRemove} variant="destructive">

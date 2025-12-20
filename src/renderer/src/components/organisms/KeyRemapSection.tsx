@@ -1,9 +1,17 @@
 import { Settings, Zap } from "lucide-react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import type {
+  Action,
   KeyBinding,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
+import { useQuickRemap } from "../../hooks/useQuickRemap";
 import type { KeyboardLayout, LayoutType } from "../../types";
 import { cn } from "../../utils/cn";
 import { Button } from "../atoms/Button";
@@ -22,15 +30,16 @@ interface KeyRemapSectionProps {
   bindings: Record<number, KeyBinding[]>;
   isBaseLayer: boolean;
   selectedTrigger: TriggerType;
-  isQuickEditMode: boolean;
-  quickEditingKey: number | null;
+  disableRemap: () => void;
+  enableRemap: () => void;
   onLayerChange: (layerId: string) => void;
   onAddLayer: (layerId: string) => void;
   onRemoveLayer: (layerId: string) => void;
+  onRemoveMapping: (from: number) => void;
+  onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
   onLayoutToggle: () => void;
-  onKeyClick: (vk: number) => void;
   onTriggerChange: (trigger: TriggerType) => void;
-  onToggleQuickEditMode: () => void;
+  setEditingKey: Dispatch<SetStateAction<number | null>>;
 }
 
 export function KeyRemapSection({
@@ -41,16 +50,54 @@ export function KeyRemapSection({
   bindings,
   isBaseLayer,
   selectedTrigger,
-  isQuickEditMode,
-  quickEditingKey,
+  disableRemap,
+  enableRemap,
   onLayerChange,
   onAddLayer,
+  onSaveMapping,
   onRemoveLayer,
+  onRemoveMapping,
   onLayoutToggle,
-  onKeyClick,
   onTriggerChange,
-  onToggleQuickEditMode,
+  setEditingKey,
 }: KeyRemapSectionProps) {
+  const [isQuickEditMode, setIsQuickEditMode] = useState(false);
+
+  // クイック設定モード
+  const { editingKey: quickEditingKey, startEditing: startQuickEditing } =
+    useQuickRemap({
+      enabled: isQuickEditMode,
+      hasExistingBinding: false,
+      selectedLayerId: layerId,
+      targetKeys: [],
+      selectedTrigger,
+      onSaveMapping,
+    });
+
+  const onKeyClick = (vk: number) => {
+    // クイック設定モードの場合は即座にリマップ設定待ち状態に
+    if (isQuickEditMode) {
+      startQuickEditing(vk);
+      return;
+    }
+    // 通常モードの場合はモーダルを開く
+    disableRemap();
+    setEditingKey(vk);
+  };
+
+  const onToggleQuickEditMode = useCallback(() => {
+    setIsQuickEditMode((prev) => {
+      const next = !prev;
+      // クイックモード開始時はリマップを無効化、終了時は有効化
+      if (next) {
+        disableRemap();
+      } else {
+        enableRemap();
+      }
+      return next;
+    });
+  }, [disableRemap, enableRemap]);
+
   return (
     <section className="space-y-4">
       <Row className="justify-between gap-4">
@@ -89,6 +136,7 @@ export function KeyRemapSection({
           keyboardLayout={keyboardLayout}
           layout={layout}
           onKeyClick={onKeyClick}
+          onRemoveMapping={onRemoveMapping}
           quickEditingKey={quickEditingKey}
           selectedTrigger={selectedTrigger}
         />

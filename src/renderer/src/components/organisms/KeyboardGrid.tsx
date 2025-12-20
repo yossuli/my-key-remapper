@@ -11,6 +11,7 @@ interface KeyboardGridProps {
   selectedTrigger: TriggerType;
   quickEditingKey?: number | null; // クイック設定モードで入力待ち中のキー
   onKeyClick: (vk: number) => void;
+  onRemoveMapping: (from: number) => void;
 }
 
 export function KeyboardGrid({
@@ -21,6 +22,7 @@ export function KeyboardGrid({
   selectedTrigger,
   quickEditingKey,
   onKeyClick,
+  onRemoveMapping,
 }: KeyboardGridProps) {
   return (
     <Mapped
@@ -41,6 +43,7 @@ export function KeyboardGrid({
                 layout={layout}
                 onClick={onKeyClick}
                 selectedTrigger={selectedTrigger}
+                onRemove={() => onRemoveMapping(baseVk)}
               />
             );
           }}

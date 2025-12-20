@@ -9,6 +9,7 @@ import type {
 import type { KeyDefinition, LayoutType } from "../../types";
 import { cn } from "../../utils/cn";
 import { getKeyLabel } from "../../utils/getKeyLabel";
+import { WithRemoveBadge } from "./RemoveBadge";
 
 interface KeyButtonProps {
   keyDef: KeyDefinition;
@@ -18,6 +19,7 @@ interface KeyButtonProps {
   selectedTrigger: TriggerType;
   isQuickEditing?: boolean; // クイック設定モードで入力待ち状態のキー
   onClick: (vk: number) => void;
+  onRemove: () => void;
 }
 
 /**
@@ -54,6 +56,7 @@ export function KeyButton({
   selectedTrigger,
   isQuickEditing = false,
   onClick,
+  onRemove,
 }: KeyButtonProps) {
   const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
 
@@ -71,38 +74,40 @@ export function KeyButton({
   const isActive = hasBindingForTrigger && isBaseLayer;
 
   return (
-    <motion.button
-      // biome-ignore lint/style/noMagicNumbers: アニメーションの値なぞマジックでよい
-      animate={isQuickEditing ? { scale: [1, 1.05, 1] } : {}}
-      className={cn(
-        "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
-        isActive
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-background text-foreground hover:bg-muted",
-        isInactive ? "opacity-30" : "",
-        isQuickEditing
-          ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-background"
-          : ""
-      )}
-      onClick={() => onClick(baseVk)}
-      onKeyDown={(e) => {
-        // キーボード操作を無効化（Enter長押し後の誤発火防止）
-        e.preventDefault();
-      }}
-      style={{
-        width: `${(keyDef.width || 1) * KEY_SIZE_REM}rem`,
-        height: "3rem",
-      }}
-      transition={
-        isQuickEditing
-          ? { duration: 0.8, repeat: Number.POSITIVE_INFINITY }
-          : {}
-      }
-      type="button"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {displayLabel}
-    </motion.button>
+    <WithRemoveBadge disabled={!isActive} onRemove={onRemove}>
+      <motion.button
+        // biome-ignore lint/style/noMagicNumbers: アニメーションの値なぞマジックでよい
+        animate={isQuickEditing ? { scale: [1, 1.05, 1] } : {}}
+        className={cn(
+          "flex items-center justify-center rounded-md border font-medium text-sm shadow-sm transition-colors",
+          isActive
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border bg-background text-foreground hover:bg-muted",
+          isInactive ? "opacity-30" : "",
+          isQuickEditing
+            ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-background"
+            : ""
+        )}
+        onClick={() => onClick(baseVk)}
+        onKeyDown={(e) => {
+          // キーボード操作を無効化（Enter長押し後の誤発火防止）
+          e.preventDefault();
+        }}
+        style={{
+          width: `${(keyDef.width || 1) * KEY_SIZE_REM}rem`,
+          height: "3rem",
+        }}
+        transition={
+          isQuickEditing
+            ? { duration: 0.8, repeat: Number.POSITIVE_INFINITY }
+            : {}
+        }
+        type="button"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {displayLabel}
+      </motion.button>
+    </WithRemoveBadge>
   );
 }

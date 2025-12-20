@@ -14,8 +14,8 @@ interface UseKeyEditorActionsProps {
   targetVk: number | null;
   selectedTrigger: TriggerType;
   onSave: (trigger: TriggerType, action: Action) => void;
-  onRemove: (trigger: TriggerType) => void;
-  onClose: () => void;
+  onRemove?: (trigger: TriggerType) => void;
+  onClose?: () => void;
 }
 
 interface UseKeyEditorActionsReturn {
@@ -25,6 +25,7 @@ interface UseKeyEditorActionsReturn {
   addHoldKeys: (e: KeyboardEvent) => void;
   removeHoldKeys: (e: KeyboardEvent) => void;
   removeKey: (keyCode: number) => void;
+  resetState: () => void;
   handleSave: () => void;
   handleRemove: () => void;
 }
@@ -94,6 +95,12 @@ export function useKeyEditorActions({
     [remove]
   );
 
+  // 状態をリセット
+  const resetState = useCallback(() => {
+    setNewTargetKeys([]);
+    setHolds([]);
+  }, []);
+
   const handleSave = useCallback(() => {
     if (!canSave) {
       return;
@@ -115,7 +122,7 @@ export function useKeyEditorActions({
     );
 
     onSave(selectedTrigger, action);
-    onClose();
+    onClose?.();
   }, [
     actionType,
     newTargetKeys,
@@ -127,8 +134,8 @@ export function useKeyEditorActions({
   ]);
 
   const handleRemove = useCallback(() => {
-    onRemove(selectedTrigger);
-    onClose();
+    onRemove?.(selectedTrigger);
+    onClose?.();
   }, [onClose, onRemove, selectedTrigger]);
 
   return {
@@ -138,6 +145,7 @@ export function useKeyEditorActions({
     addHoldKeys,
     removeHoldKeys,
     removeKey,
+    resetState,
     handleSave,
     handleRemove,
   };

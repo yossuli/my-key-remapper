@@ -124,11 +124,18 @@ export class RemapRules {
    * 指定キーのバインディングを取得（現在有効なレイヤーのみ、なければ何もしない）
    */
   getBindings(keyCode: number): KeyBinding[] {
-    const stack = layerState.getStack();
+    const stacks = layerState.getStack().toReversed();
     const layers = this.getLayers();
 
-    const layer = layers.find((l) => l.id === stack.at(-1));
+    const layer = layers.find((l) => l.id === stacks.at(-1));
     return layer?.bindings[keyCode] ?? [];
+    // for (const stack of stacks) {
+    //   const layer = layers.find((l) => l.id === stack);
+    //   if (layer) {
+    //     return layer.bindings[keyCode] ?? [];
+    //   }
+    // }
+    // return [];
   }
 
   /**

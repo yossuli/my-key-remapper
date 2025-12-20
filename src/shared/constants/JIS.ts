@@ -82,7 +82,7 @@ export const KEYBOARD_LAYOUT_JIS: KeyboardLayout = [
   {
     id: 5,
     row: [
-      { id: 58, label: "Shift", vk: VK.SHIFT, width: 2.3 },
+      { id: 58, label: "Shift", vk: VK.LSHIFT, width: 2.3 },
       { id: 59, label: "z", vk: VK.KEY_Z },
       { id: 60, label: "x", vk: VK.KEY_X },
       { id: 61, label: "c", vk: VK.KEY_C },

@@ -1,7 +1,7 @@
+import { VK } from "../../shared/constants";
 import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { sendKey } from "../native/sender";
 import { remapRules } from "../state/rules";
-import { VK_LSHIFT, VK_RSHIFT } from "../utils/modifierKeys";
 
 /**
  * アクションの実行とレイヤー管理
@@ -56,32 +56,31 @@ export function handleTapOnlyBindings(
   // tap アクションがある場合（修飾キーなしで送信）
   if (action?.type === "remap") {
     for (const key of action.keys) {
-      sendKey(key, isUp);
+      sendKey(key, isUp, 1);
     }
     return 1;
   }
 
   const layer = remapRules.getCurrentLayer();
   const layerId = layer?.id;
+  console.log("layer", layerId);
 
   // tap アクションがない場合、レイヤーの defaultModifiers を考慮
-  if (layer?.defaultModifiers?.shift) {
-    const shiftVk =
-      layer.defaultModifiers.shift === "right" ? VK_RSHIFT : VK_LSHIFT;
+  if (layerId === "shift") {
     if (isUp) {
       // keyUp: キーを離してから Shift を離す
-      sendKey(vkCode, true);
-      sendKey(shiftVk, true);
+      sendKey(vkCode, true, 2);
+      sendKey(VK.SHIFT, true, 3);
     } else {
       // keyDown: Shift を押してからキーを押す
-      sendKey(shiftVk, false);
-      sendKey(vkCode, false);
+      sendKey(VK.SHIFT, false, 4);
+      sendKey(vkCode, false, 5);
     }
     return 1;
   }
 
   if (layerId === "base") {
-    sendKey(vkCode, isUp);
+    sendKey(vkCode, isUp, 6);
     return 1;
   }
 
@@ -94,7 +93,7 @@ export function handleTapOnlyBindings(
 export function executeAction(vkCode: number, trigger_: TriggerType) {
   const action = remapRules.getAction(vkCode, trigger_);
   const bindings = remapRules.getBindings(vkCode);
-  console.log("executeAction", vkCode, trigger_, action, bindings);
+  console.log("executeAction", vkCode);
 
   // tap のみのバインディングを先に処理
   const tapResult = handleTapOnlyBindings(vkCode, bindings, true);
@@ -106,8 +105,8 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
   const layerId = layer?.id;
   if (!action) {
     if (layerId === "base") {
-      sendKey(vkCode, false);
-      sendKey(vkCode, true);
+      sendKey(vkCode, false, 7);
+      sendKey(vkCode, true, 8);
       return 1;
     }
     return;
@@ -116,10 +115,10 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
     case "remap":
       // 複数キーを順番にdown、逆順でup
       for (const key of action.keys) {
-        sendKey(key, false);
+        sendKey(key, false, 9);
       }
       for (const key of action.keys.toReversed()) {
-        sendKey(key, true);
+        sendKey(key, true, 10);
       }
       break;
     case "layerToggle":

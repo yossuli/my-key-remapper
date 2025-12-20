@@ -16,7 +16,6 @@ const momentaryLayerKeys = new Map<number, string>();
 export function releaseMomentaryLayer(vkCode: number) {
   const layerId = momentaryLayerKeys.get(vkCode);
   if (layerId) {
-    console.log("releaseMomentaryLayer");
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
   }
@@ -28,9 +27,37 @@ export function releaseMomentaryLayer(vkCode: number) {
 export function addMomentaryLayer(vkCode: number, layerId: string) {
   const isLayerSetCurrent = momentaryLayerKeys.get(vkCode);
   if (isLayerSetCurrent === undefined) {
-    console.log("addMomentaryLayer");
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
+  }
+}
+
+/**
+ * 指定キーがモーメンタリーレイヤーを発動中かどうか
+ */
+export function isLayerMomentaryKey(vkCode: number): boolean {
+  return momentaryLayerKeys.has(vkCode);
+}
+
+/**
+ * 現在のレイヤーに応じた修飾キー付きでキーを送信
+ */
+function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
+  const layer = remapRules.getCurrentLayer();
+  const layerId = layer?.id;
+
+  if (layerId === "shift") {
+    if (isUp) {
+      // keyUp: キーを離してから Shift を離す
+      sendKey(vkCode, true, 2);
+      sendKey(VK.SHIFT, true, 3);
+    } else {
+      // keyDown: Shift を押してからキーを押す
+      sendKey(VK.SHIFT, false, 4);
+      sendKey(vkCode, false, 5);
+    }
+  } else {
+    sendKey(vkCode, isUp, 6);
   }
 }
 
@@ -61,30 +88,9 @@ export function handleTapOnlyBindings(
     return 1;
   }
 
-  const layer = remapRules.getCurrentLayer();
-  const layerId = layer?.id;
-  console.log("layer", layerId);
-
-  // tap アクションがない場合、レイヤーの defaultModifiers を考慮
-  if (layerId === "shift") {
-    if (isUp) {
-      // keyUp: キーを離してから Shift を離す
-      sendKey(vkCode, true, 2);
-      sendKey(VK.SHIFT, true, 3);
-    } else {
-      // keyDown: Shift を押してからキーを押す
-      sendKey(VK.SHIFT, false, 4);
-      sendKey(vkCode, false, 5);
-    }
-    return 1;
-  }
-
-  if (layerId === "base") {
-    sendKey(vkCode, isUp, 6);
-    return 1;
-  }
-
-  return isUp ? null : 1;
+  // tap アクションがない場合、レイヤーの修飾キーを付与して送信
+  sendKeyWithLayerModifiers(vkCode, isUp);
+  return 1;
 }
 
 /**
@@ -93,7 +99,6 @@ export function handleTapOnlyBindings(
 export function executeAction(vkCode: number, trigger_: TriggerType) {
   const action = remapRules.getAction(vkCode, trigger_);
   const bindings = remapRules.getBindings(vkCode);
-  console.log("executeAction", vkCode);
 
   // tap のみのバインディングを先に処理
   const tapResult = handleTapOnlyBindings(vkCode, bindings, true);
@@ -104,9 +109,10 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
   const layer = remapRules.getCurrentLayer();
   const layerId = layer?.id;
   if (!action) {
-    if (layerId === "base") {
-      sendKey(vkCode, false, 7);
-      sendKey(vkCode, true, 8);
+    // アクションがない場合、レイヤーの修飾キーを付与して送信
+    if (layerId === "base" || layerId === "shift") {
+      sendKeyWithLayerModifiers(vkCode, false);
+      sendKeyWithLayerModifiers(vkCode, true);
       return 1;
     }
     return;

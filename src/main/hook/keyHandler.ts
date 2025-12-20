@@ -5,6 +5,7 @@ import {
   addMomentaryLayer,
   executeAction,
   handleTapOnlyBindings,
+  isLayerMomentaryKey,
   releaseMomentaryLayer,
 } from "./actionExecutor";
 
@@ -59,34 +60,29 @@ export function setupTriggerCallback() {
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 早さ優先
 function processPendingHoldKeys(): void {
   const holdKeys = keyStateManager.getPendingHoldKeys();
-  console.log(holdKeys);
   for (const key of holdKeys) {
-    console.log(1);
+    // 既にモーメンタリーレイヤーを発動中のキーはスキップ
+    if (isLayerMomentaryKey(key)) {
+      continue;
+    }
     const bindings = remapRules.getBindings(key);
-    console.log(bindings);
     let holdRemapKeys: number[] | null = null;
     let tapRemapKeys: number[] | null = null;
 
     for (const binding of bindings) {
-      console.log(2);
       const { trigger, action } = binding;
 
       // holdトリガーのlayerMomentaryは最優先で即時return
       if (trigger === "hold" && action.type === "layerMomentary") {
-        console.log(3);
         addMomentaryLayer(key, action.layerId);
-        console.log("hold layer momentary", key, action.layerId);
         return;
       }
 
       // holdとtapのremapキーを記録
       if (action.type === "remap") {
-        console.log(4);
         if (trigger === "hold" && holdRemapKeys === null) {
-          console.log(5);
           holdRemapKeys = action.keys;
         } else if (trigger === "tap" && tapRemapKeys === null) {
-          console.log(6);
           tapRemapKeys = action.keys;
         }
       }

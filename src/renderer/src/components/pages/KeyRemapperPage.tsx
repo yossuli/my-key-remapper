@@ -68,8 +68,8 @@ export function KeyRemapperPage() {
             onLayerChange={setLayerId}
             onLayoutToggle={toggleLayout}
             onRemoveLayer={removeLayer}
+            onRemoveMapping={(from) => removeMapping(from, selectedTrigger)}
             onSaveMapping={saveMapping}
-            onRemoveMapping={(from) => removeMapping(from, "tap")}
             onTriggerChange={setSelectedTrigger}
             selectedTrigger={selectedTrigger}
             setEditingKey={setEditingKey}
@@ -94,6 +94,7 @@ export function KeyRemapperPage() {
             onRemove={(trigger) => removeMapping(e, trigger)}
             onSave={(trigger, action) => saveMapping(e, trigger, action)}
             targetVk={e}
+            trigger={selectedTrigger}
           />
         )}
       </ModalLayout>

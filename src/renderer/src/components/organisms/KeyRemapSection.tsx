@@ -71,6 +71,7 @@ export function KeyRemapSection({
       selectedLayerId: layerId,
       targetKeys: [],
       selectedTrigger,
+      keyboardLayout,
       onSaveMapping,
     });
 

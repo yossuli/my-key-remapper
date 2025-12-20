@@ -3,6 +3,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Action, TriggerType } from "../../../shared/types/remapConfig";
+import type { KeyboardLayout } from "../types";
+import { getNextKeyVk } from "../utils/getNextKeyVk";
 import { useKeyEditorActions } from "./useKeyEditorAction";
 
 interface UseQuickRemapOptions {
@@ -11,6 +13,7 @@ interface UseQuickRemapOptions {
   selectedLayerId: string;
   selectedTrigger: TriggerType;
   targetKeys: number[];
+  keyboardLayout: KeyboardLayout;
 
   onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
 }
@@ -26,6 +29,7 @@ interface UseQuickRemapReturn {
  * - editingKey: 現在選択中のFromキー（入力待ち状態）
  * - startEditing: キークリック時にFromキーを設定
  * - キー押下検知でリマップを即座に適用
+ * - 保存後は自動的に右隣のキーに移動
  */
 export function useQuickRemap({
   enabled,
@@ -34,6 +38,7 @@ export function useQuickRemap({
   hasExistingBinding,
   selectedLayerId,
   targetKeys,
+  keyboardLayout,
 }: UseQuickRemapOptions): UseQuickRemapReturn {
   const [editingKey, setEditingKey] = useState<number | null>(null);
 
@@ -93,7 +98,9 @@ export function useQuickRemap({
         if (canSave) {
           handleSave();
         }
-        setEditingKey(null);
+        // 次のキーに移動（行末なら null で編集終了）
+        const nextVk = getNextKeyVk(keyboardLayout, editingKey);
+        setEditingKey(nextVk);
       }
 
       // キーを除去
@@ -114,7 +121,8 @@ export function useQuickRemap({
     removeHoldKeys,
     holds,
     canSave,
-    handleSave
+    handleSave,
+    keyboardLayout,
   ]);
 
   // モードが無効になったら編集中状態をクリア

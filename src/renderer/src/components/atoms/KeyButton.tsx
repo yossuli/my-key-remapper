@@ -14,7 +14,7 @@ interface KeyButtonProps {
   keyDef: KeyDefinition;
   bindings?: KeyBinding[];
   layout: LayoutType;
-  isBaseLayer: boolean;
+  layerId: string;
   selectedTrigger: TriggerType;
   isQuickEditing?: boolean; // クイック設定モードで入力待ち状態のキー
   onClick: (vk: number) => void;
@@ -51,7 +51,7 @@ export function KeyButton({
   keyDef,
   bindings,
   layout,
-  isBaseLayer,
+  layerId,
   selectedTrigger,
   isQuickEditing = false,
   onClick,
@@ -69,8 +69,11 @@ export function KeyButton({
   const displayLabel = getDisplayLabel(triggerAction, keyDef.label, layout);
 
   // カスタムレイヤーでバインディングがないキーは薄く表示
-  const isInactive = !(isBaseLayer || hasBindingForTrigger);
-  const isActive = hasBindingForTrigger && isBaseLayer;
+  const isInactive = !(
+    (["base", "shift"] as string[]).includes(layerId) || hasBindingForTrigger
+  );
+  const isActive =
+    (["base", "shift"] as string[]).includes(layerId) && hasBindingForTrigger;
 
   return (
     <WithRemoveBadge disabled={!isActive} onRemove={onRemove}>

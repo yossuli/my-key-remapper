@@ -11,6 +11,7 @@ import { objectiveSwitch } from "../utils/objectiveSwitch";
 
 interface UseKeyEditorActionsProps {
   state: BindingState;
+  layerId: string;
   targetVk: number | null;
   selectedTrigger: TriggerType;
   onSave: (trigger: TriggerType, action: Action) => void;
@@ -35,6 +36,7 @@ interface UseKeyEditorActionsReturn {
  */
 export function useKeyEditorActions({
   state: { actionType, targetKeys, selectedLayerId },
+  layerId,
   targetVk,
   selectedTrigger,
   onSave,
@@ -58,9 +60,10 @@ export function useKeyEditorActions({
         actionType === "remap" &&
         (computedTargetKeys.length === 0 ||
           (computedTargetKeys.length === 1 &&
+            layerId === "base" &&
             computedTargetKeys[0] === targetVk))
       ),
-    [actionType, computedTargetKeys, targetVk]
+    [actionType, computedTargetKeys, targetVk, layerId]
   );
 
   const remove = useCallback(

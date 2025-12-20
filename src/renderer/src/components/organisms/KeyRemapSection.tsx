@@ -28,7 +28,6 @@ interface KeyRemapSectionProps {
   layout: LayoutType;
   keyboardLayout: KeyboardLayout;
   bindings: Record<number, KeyBinding[]>;
-  isBaseLayer: boolean;
   selectedTrigger: TriggerType;
   disableRemap: () => void;
   enableRemap: () => void;
@@ -48,7 +47,6 @@ export function KeyRemapSection({
   layout,
   keyboardLayout,
   bindings,
-  isBaseLayer,
   selectedTrigger,
   disableRemap,
   enableRemap,
@@ -133,8 +131,8 @@ export function KeyRemapSection({
       <div className="overflow-x-auto">
         <KeyboardGrid
           bindings={bindings}
-          isBaseLayer={isBaseLayer}
           keyboardLayout={keyboardLayout}
+          layerId={layerId}
           layout={layout}
           onKeyClick={onKeyClick}
           onRemoveMapping={onRemoveMapping}

@@ -1,3 +1,7 @@
+import {
+  KEYBOARD_LAYOUT_BASE,
+  KEYBOARD_LAYOUT_SHIFT,
+} from "../../../../shared/constants";
 import type { Layer, TriggerType } from "../../../../shared/types/remapConfig";
 import type { KeyboardLayout, LayoutType } from "../../types";
 import { KeyButton } from "../atoms/KeyButton";
@@ -7,7 +11,7 @@ interface KeyboardGridProps {
   bindings: Layer["bindings"];
   keyboardLayout: KeyboardLayout;
   layout: LayoutType;
-  isBaseLayer: boolean;
+  layerId: string;
   selectedTrigger: TriggerType;
   quickEditingKey?: number | null; // クイック設定モードで入力待ち中のキー
   onKeyClick: (vk: number) => void;
@@ -16,14 +20,18 @@ interface KeyboardGridProps {
 
 export function KeyboardGrid({
   bindings,
-  keyboardLayout,
+  // keyboardLayout,
   layout,
-  isBaseLayer,
+  layerId,
   selectedTrigger,
   quickEditingKey,
   onKeyClick,
   onRemoveMapping,
 }: KeyboardGridProps) {
+  const keyboardLayout: KeyboardLayout =
+    layerId === "shift"
+      ? KEYBOARD_LAYOUT_SHIFT[layout]
+      : KEYBOARD_LAYOUT_BASE[layout];
   return (
     <Mapped
       as="div"
@@ -37,9 +45,9 @@ export function KeyboardGrid({
             return (
               <KeyButton
                 bindings={bindings[baseVk]}
-                isBaseLayer={isBaseLayer}
                 isQuickEditing={quickEditingKey === baseVk}
                 keyDef={keyDef}
+                layerId={layerId}
                 layout={layout}
                 onClick={onKeyClick}
                 onRemove={() => onRemoveMapping(baseVk)}

@@ -59,7 +59,6 @@ export function KeyRemapperPage() {
             bindings={currentBindings}
             disableRemap={disableRemap}
             enableRemap={enableRemap}
-            isBaseLayer={layerId === "base"}
             keyboardLayout={keyboardLayout}
             layerId={layerId}
             layers={layers}

@@ -53,8 +53,8 @@ export function KeyEditorForm({
     loadBindingForTrigger,
     setActionType,
   } = binding;
-
-  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+  console.log(layerId, selectedLayerId);
+  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
   const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: VK.ENTER }); // biome-ignore format: 引数に関心はない
 

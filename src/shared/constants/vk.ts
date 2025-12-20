@@ -133,7 +133,7 @@ type CodeToVK = {
   [K in VKEntries as K[1]]: K[0];
 };
 
-export const CODE_TO_VK: CodeToVK = {
+export const CODE_TO_VK: Record<number, string> = {
   8: "BACKSPACE",
   9: "TAB",
   13: "ENTER",
@@ -246,4 +246,4 @@ export const CODE_TO_VK: CodeToVK = {
   222: "OEM_7",
   223: "OEM_8",
   226: "OEM_102",
-};
+} satisfies CodeToVK;

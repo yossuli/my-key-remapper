@@ -1,12 +1,12 @@
 import {
   KEYBOARD_LAYOUT_BASE,
   KEYBOARD_LAYOUT_SHIFT,
-  VK,
 } from "../../../shared/constants";
+import { CODE_TO_VK } from "../../../shared/constants/vk";
 import type { KeyboardLayout, LayoutType } from "../types";
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 諦め
-export const getKeyLabel = (vk: number[], layoutType: LayoutType) => {
+export const getKeyLabel = (vk: number[], layoutType: LayoutType): string => {
   if (vk.length === 1) {
     const keyboardLayout: KeyboardLayout = KEYBOARD_LAYOUT_BASE[layoutType];
     for (const { row } of keyboardLayout) {
@@ -15,10 +15,7 @@ export const getKeyLabel = (vk: number[], layoutType: LayoutType) => {
         return found.label;
       }
     }
-    return (
-      Object.entries(VK).find(([__dirname, value]) => value === vk[0])?.[0] ??
-      `VK ${vk}`
-    );
+    return CODE_TO_VK[vk[0]] ?? `VK ${vk}`;
     // biome-ignore lint/style/noUselessElse: 1対1対応なのでelseで良い
   } else {
     const keyboardLayout: KeyboardLayout = KEYBOARD_LAYOUT_SHIFT[layoutType];
@@ -35,12 +32,6 @@ export const getKeyLabel = (vk: number[], layoutType: LayoutType) => {
         return found.label;
       }
     }
-    return vk
-      .map(
-        (k) =>
-          Object.entries(VK).find(([__dirname, value]) => value === k)?.[0] ??
-          `VK ${k}`
-      )
-      .join(" + ");
+    return vk.map((k) => getKeyLabel([k], layoutType)).join(" + ");
   }
 };

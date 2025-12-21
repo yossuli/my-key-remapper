@@ -13,22 +13,28 @@
 ```
 src/
 ├── main/           # Electron メインプロセス
-│   ├── config/     # 設定関連
-│   ├── handler/    # キーハンドリング
-│   ├── hook/       # キーボードフック
-│   ├── remap/      # リマップルール
-│   ├── sender/     # キー送信
-│   └── state/      # 状態管理
-├── preload/        # Electron プリロード
-└── renderer/       # React フロントエンド (Atomic Design)
-    └── src/
-        ├── components/
-        │   ├── atoms/
-        │   ├── molecules/
-        │   ├── organisms/
-        │   ├── templates/
-        │   └── pages/
-        └── hooks/
+│   ├── hook/       # キーボードフック・イベント処理
+│   ├── ipc/        # IPC通信ハンドラ
+│   ├── native/     # koffi FFIバインディング・キー送信
+│   ├── state/      # 状態管理（RemapRules, KeyState, LayerState）
+│   ├── storage/    # 設定永続化
+│   └── utils/      # ユーティリティ
+├── preload/        # Electron プリロード（IPC bridge）
+├── renderer/       # React フロントエンド (Atomic Design)
+│   └── src/
+│       ├── components/
+│       │   ├── atoms/      # 7コンポーネント
+│       │   ├── molecules/  # 7コンポーネント
+│       │   ├── organisms/  # 5コンポーネント
+│       │   ├── template/   # 3コンポーネント
+│       │   ├── pages/      # 1コンポーネント
+│       │   └── control/    # 7コンポーネント（宣言的条件分岐用）
+│       ├── hooks/          # 11カスタムフック
+│       ├── utils/          # 9ユーティリティ関数
+│       └── types/          # フロントエンド専用型
+└── shared/         # 共有コード
+    ├── constants/  # VKコード、キーボードレイアウト定義
+    └── types/      # 共有型定義（TriggerType, Action, Layer等）
 ```
 
 ### コーディング規約

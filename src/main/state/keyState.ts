@@ -81,8 +81,10 @@ export class KeyStateManager {
 
   /**
    * キーダウンイベントを処理
+   * @param code キーコード
+   * @param keyTiming キー別タイミング設定（省略時はグローバル設定を使用）
    */
-  onKeyDown(code: number): void {
+  onKeyDown(code: number, keyTiming?: { holdThresholdMs?: number }): void {
     const state = this.getState(code);
     const now = Date.now();
 
@@ -106,13 +108,16 @@ export class KeyStateManager {
       clearTimeout(state.holdTimerId);
     }
 
+    // キー別設定があればそれを使用、なければグローバル設定
+    const holdMs = keyTiming?.holdThresholdMs ?? this.holdThresholdMs;
+
     state.holdTimerId = setTimeout(() => {
       if (state.isDown && !state.holdFired) {
         state.holdFired = true;
         this.states.set(code, state);
         console.log(`[HOOK] Hold detected for key ${code}`);
       }
-    }, this.holdThresholdMs);
+    }, holdMs);
 
     return;
   }
@@ -122,9 +127,14 @@ export class KeyStateManager {
    * 注意: トリガーは即時ではなく、コールバック経由で遅延発火される場合がある
    * @param code キーコード
    * @param hasDoubleTapBinding ダブルタップバインディングがあるか（ない場合は遅延なしで tap を発火）
+   * @param keyTiming キー別タイミング設定（省略時はグローバル設定を使用）
    * @returns 即時発火するトリガー、または null（遅延発火待ち）
    */
-  onKeyUp(code: number, hasDoubleTapBinding: boolean): TriggerType | null {
+  onKeyUp(
+    code: number,
+    hasDoubleTapBinding: boolean,
+    keyTiming?: { tapIntervalMs?: number }
+  ): TriggerType | null {
     const state = this.getState(code);
     const now = Date.now();
 
@@ -147,11 +157,14 @@ export class KeyStateManager {
       return "tap";
     }
 
+    // キー別設定があればそれを使用、なければグローバル設定
+    const tapMs = keyTiming?.tapIntervalMs ?? this.tapIntervalMs;
+
     // 短押しの場合
     const timeSinceLastTap = now - state.lastTapTime;
 
     // ダブルタップ判定：前回のタップから tapIntervalMs 以内
-    if (timeSinceLastTap < this.tapIntervalMs && state.lastTapTime > 0) {
+    if (timeSinceLastTap < tapMs && state.lastTapTime > 0) {
       // タップ遅延タイマーをクリア（前回のタップを取り消し）
       if (state.tapTimerId) {
         clearTimeout(state.tapTimerId);
@@ -167,7 +180,7 @@ export class KeyStateManager {
       state.tapTimerId = null;
       state.lastTapTime = 0; // タイムアウト後リセット
       this.fireTrigger(code, "tap");
-    }, this.tapIntervalMs);
+    }, tapMs);
 
     // 即時発火なし（コールバックで遅延発火）
     return null;

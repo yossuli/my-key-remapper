@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { VK } from "../../../../shared/constants/vk";
 import type {
   Action,
+  KeyTimingConfig,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
@@ -18,6 +19,7 @@ import { Show } from "../control/Show";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
+import { TimingConfig } from "../molecules/TimingConfig";
 import { TriggerTabs } from "../molecules/TriggerTabs";
 
 interface KeyEditorFormProps {
@@ -26,7 +28,13 @@ interface KeyEditorFormProps {
   layout: LayoutType;
   layers: Pick<Layer, "id">[];
   trigger: TriggerType;
-  onSave: (trigger: TriggerType, action: Action) => void;
+  /** 既存のタイミング設定（編集時に読み込む） */
+  existingTiming?: KeyTimingConfig;
+  onSave: (
+    trigger: TriggerType,
+    action: Action,
+    timing?: KeyTimingConfig
+  ) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
 }
@@ -36,11 +44,20 @@ export function KeyEditorForm({
   layerId,
   layout,
   layers,
+  existingTiming,
   onSave,
   onRemove,
   onClose,
 }: KeyEditorFormProps) {
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
+  // タイミング設定の状態
+  const [holdThresholdMs, setHoldThresholdMs] = useState<number | undefined>(
+    existingTiming?.holdThresholdMs
+  );
+  const [tapIntervalMs, setTapIntervalMs] = useState<number | undefined>(
+    existingTiming?.tapIntervalMs
+  );
+
   const binding = useBindingConfig({
     targetVk,
     layerId,
@@ -54,7 +71,20 @@ export function KeyEditorForm({
     setActionType,
   } = binding;
   console.log(layerId, selectedLayerId);
-  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+
+  // タイミング設定を含めて保存
+  const handleSaveWithTiming = useCallback(
+    (trigger: TriggerType, action: Action) => {
+      const timing: KeyTimingConfig | undefined =
+        holdThresholdMs !== undefined || tapIntervalMs !== undefined
+          ? { holdThresholdMs, tapIntervalMs }
+          : undefined;
+      onSave(trigger, action, timing);
+    },
+    [holdThresholdMs, tapIntervalMs, onSave]
+  );
+
+  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave: handleSaveWithTiming, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
   const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: VK.ENTER }); // biome-ignore format: 引数に関心はない
 
@@ -157,6 +187,13 @@ export function KeyEditorForm({
           selectedLayerId={selectedLayerId}
         />
       </Show>
+      {/* タイミング設定 */}
+      <TimingConfig
+        holdThresholdMs={holdThresholdMs}
+        onHoldThresholdChange={setHoldThresholdMs}
+        onTapIntervalChange={setTapIntervalMs}
+        tapIntervalMs={tapIntervalMs}
+      />
       <div className="flex justify-end gap-2 pt-2">
         <Show condition={hasExistingBinding}>
           <Button onClick={handleRemove} variant="destructive">

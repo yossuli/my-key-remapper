@@ -1,6 +1,7 @@
 import type {
   Action,
   KeyBinding,
+  KeyTimingConfig,
   Layer,
   RemapConfig,
   TriggerType,
@@ -148,6 +149,38 @@ export class RemapRules {
     const stack = layerState.getStack();
     const layers = this.getLayers();
     return layers.find((l) => l.id === stack.at(-1));
+  }
+
+  /**
+   * 指定レイヤー・キーのタイミング設定を取得
+   */
+  getKeyTiming(layerId: string, keyCode: number): KeyTimingConfig | undefined {
+    const layer = this.getLayers().find((l) => l.id === layerId);
+    return layer?.keyTimings?.[keyCode];
+  }
+
+  /**
+   * 指定レイヤー・キーのタイミング設定を設定/削除
+   */
+  setKeyTiming(
+    layerId: string,
+    keyCode: number,
+    timing: KeyTimingConfig | null
+  ): void {
+    const config = configStorage.getConfig();
+    const layer = config.layers.find((l) => l.id === layerId);
+    if (!layer) {
+      return;
+    }
+    if (!layer.keyTimings) {
+      layer.keyTimings = {};
+    }
+    if (timing === null) {
+      delete layer.keyTimings[keyCode];
+    } else {
+      layer.keyTimings[keyCode] = timing;
+    }
+    configStorage.save(config);
   }
 }
 

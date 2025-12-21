@@ -117,6 +117,16 @@ export interface KeyBinding {
 // =====================================
 
 /**
+ * キー別タイミング設定
+ */
+export interface KeyTimingConfig {
+  /** 長押し判定のしきい値（ミリ秒）- 未設定時はグローバル設定を使用 */
+  holdThresholdMs?: number;
+  /** ダブルタップ判定の間隔（ミリ秒）- 未設定時はグローバル設定を使用 */
+  tapIntervalMs?: number;
+}
+
+/**
  * レイヤー定義
  */
 export interface Layer {
@@ -129,6 +139,8 @@ export interface Layer {
   defaultModifiers?: {
     shift?: boolean | "left" | "right";
   };
+  /** キーコード → タイミング設定 */
+  keyTimings?: Record<number, KeyTimingConfig>;
 }
 
 // =====================================

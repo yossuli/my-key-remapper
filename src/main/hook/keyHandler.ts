@@ -111,8 +111,16 @@ export function handleKeyUp(vkCode: number): number {
 
   releaseMomentaryLayer(vkCode);
 
+  // 現在のレイヤーからキー別タイミング設定を取得
+  const currentLayer = remapRules.getCurrentLayer();
+  const keyTiming = currentLayer?.keyTimings?.[vkCode];
+
   const hasDoubleTapBinding = !!remapRules.getAction(vkCode, "doubleTap");
-  const trigger = keyStateManager.onKeyUp(vkCode, hasDoubleTapBinding);
+  const trigger = keyStateManager.onKeyUp(
+    vkCode,
+    hasDoubleTapBinding,
+    keyTiming
+  );
 
   // トリガーが null の場合は遅延発火待ち（コールバックで後から発火）
   if (trigger !== null) {
@@ -141,6 +149,10 @@ export function handleKeyDown(vkCode: number): number {
     return tapResult;
   }
 
-  keyStateManager.onKeyDown(vkCode);
+  // 現在のレイヤーからキー別タイミング設定を取得
+  const currentLayer = remapRules.getCurrentLayer();
+  const keyTiming = currentLayer?.keyTimings?.[vkCode];
+
+  keyStateManager.onKeyDown(vkCode, keyTiming);
   return 1;
 }

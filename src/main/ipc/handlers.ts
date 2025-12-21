@@ -10,10 +10,16 @@ export function setupIPCHandlers() {
   // マッピング取得
   ipcMain.handle("get-mappings", () => remapRules.getLayers());
 
-  // マッピング追加
-  ipcMain.on("add-mapping", (_event, { layerId, from, binding }) => {
-    remapRules.addBinding(layerId, from, binding);
-  });
+  // キー設定保存（バインディング + タイミング）
+  ipcMain.on(
+    "save-key-config",
+    (_event, { layerId, from, binding, timing }) => {
+      remapRules.addBinding(layerId, from, binding);
+      if (timing) {
+        remapRules.setKeyTiming(layerId, from, timing);
+      }
+    }
+  );
 
   // バインディング削除
   ipcMain.on("remove-binding", (_event, { layerId, from, trigger }) => {

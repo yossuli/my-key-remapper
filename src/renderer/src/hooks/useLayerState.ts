@@ -16,7 +16,12 @@ interface UseLayerStateReturn {
   currentBindings: Layer["bindings"];
   addLayer: (newLayerId: string) => void;
   removeLayer: (targetLayerId: string) => void;
-  saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
+  saveMapping: (
+    from: number,
+    trigger: TriggerType,
+    action: Action,
+    timing?: { holdThresholdMs?: number; tapIntervalMs?: number }
+  ) => void;
   removeMapping: (from: number, trigger: TriggerType) => void;
 }
 
@@ -61,8 +66,18 @@ export function useLayerState(): UseLayerStateReturn {
 
   // マッピング保存
   const saveMapping = useCallback(
-    (from: number, trigger: TriggerType, action: Action) => {
-      send("add-mapping", { layerId, from, binding: { trigger, action } });
+    (
+      from: number,
+      trigger: TriggerType,
+      action: Action,
+      timing?: { holdThresholdMs?: number; tapIntervalMs?: number }
+    ) => {
+      send("save-key-config", {
+        layerId,
+        from,
+        binding: { trigger, action },
+        timing,
+      });
       // 楽観的更新
       setLayers(upsert(layerId, from, trigger, action));
     },

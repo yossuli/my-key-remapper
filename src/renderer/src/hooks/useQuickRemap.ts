@@ -51,6 +51,7 @@ export function useQuickRemap({
         targetKeys,
         hasExistingBinding,
       },
+      layerId: selectedLayerId,
       targetVk: editingKey,
       selectedTrigger,
       onSave: (trigger: TriggerType, action: Action) => {

@@ -91,7 +91,9 @@ export function KeyRemapperPage() {
             layout={layout}
             onClose={handleCloseEditor}
             onRemove={(trigger) => removeMapping(e, trigger)}
-            onSave={(trigger, action) => saveMapping(e, trigger, action)}
+            onSave={(trigger, action, timing) =>
+              saveMapping(e, trigger, action, timing)
+            }
             targetVk={e}
             trigger={selectedTrigger}
           />

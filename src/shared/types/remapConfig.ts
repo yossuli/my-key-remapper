@@ -41,12 +41,13 @@ export interface MacroStep {
 }
 
 /**
- * リマップアクション（複数キー対応）
+ * キーリマップアクション
  */
 export interface RemapAction {
   type: "remap";
-  keys: number[];
+  targetKeys: number[];
   modifiers?: ModifierOutput;
+  /** タイミング設定（未設定時はグローバル設定を使用） */
 }
 
 /**
@@ -58,7 +59,7 @@ export interface MacroAction {
 }
 
 /**
- * レイヤートグルアクション（タップで切り替え）
+ * レイヤー切り替えアクション（トグル）
  */
 export interface LayerToggleAction {
   type: "layerToggle";
@@ -66,7 +67,7 @@ export interface LayerToggleAction {
 }
 
 /**
- * レイヤーモーメンタリーアクション（押している間だけ有効）
+ * レイヤー一時切り替えアクション（モーメンタリ）
  */
 export interface LayerMomentaryAction {
   type: "layerMomentary";
@@ -78,6 +79,8 @@ export interface LayerMomentaryAction {
  */
 export interface NoneAction {
   type: "none";
+  /** タイミング設定（未設定時はグローバル設定を使用） */
+  timing?: KeyTimingConfig;
 }
 
 /**
@@ -85,6 +88,8 @@ export interface NoneAction {
  */
 export interface PassthroughAction {
   type: "passthrough";
+  /** タイミング設定（未設定時はグローバル設定を使用） */
+  timing?: KeyTimingConfig;
 }
 
 /**
@@ -92,11 +97,11 @@ export interface PassthroughAction {
  */
 export type Action =
   | RemapAction
-  // | MacroAction
+  | MacroAction
   | LayerToggleAction
   | LayerMomentaryAction
-  | NoneAction;
-// | PassthroughAction;
+  | NoneAction
+  | PassthroughAction;
 
 export type ActionType = Action["type"];
 
@@ -110,6 +115,8 @@ export type ActionType = Action["type"];
 export interface KeyBinding {
   trigger: TriggerType;
   action: Action;
+  /** タイミング設定(ms)。triggerに応じて意味が変わる: hold=長押し判定時間, doubleTap=タップ間隔 */
+  timingMs?: number;
 }
 
 // =====================================
@@ -139,8 +146,6 @@ export interface Layer {
   defaultModifiers?: {
     shift?: boolean | "left" | "right";
   };
-  /** キーコード → タイミング設定 */
-  keyTimings?: Record<number, KeyTimingConfig>;
 }
 
 // =====================================

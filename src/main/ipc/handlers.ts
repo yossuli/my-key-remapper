@@ -18,18 +18,10 @@ export function setupIPCHandlers(): void {
   });
 
   // キー設定保存（バインディング + タイミング）
-  ipcMain.on(
-    "save-key-config",
-    (_event, { layerId, from, binding, timing }) => {
-      remapRules.addBinding(layerId, from, binding);
-      // timingがnullの場合は設定を削除、undefinedの場合は何もしない、値がある場合は設定
-      if (timing === null) {
-        remapRules.setKeyTiming(layerId, from, null);
-      } else if (timing !== undefined) {
-        remapRules.setKeyTiming(layerId, from, timing);
-      }
-    }
-  );
+  ipcMain.on("save-key-config", (_event, { layerId, from, binding }) => {
+    // bindingにはtimingも含まれているため、そのまま保存
+    remapRules.addBinding(layerId, from, binding);
+  });
 
   // バインディング削除
   ipcMain.on("remove-binding", (_event, { layerId, from, trigger }) => {

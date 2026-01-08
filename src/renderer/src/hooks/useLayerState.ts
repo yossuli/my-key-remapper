@@ -94,13 +94,20 @@ export function useLayerState(): UseLayerStateReturn {
       action: Action,
       timing?: { holdThresholdMs?: number; tapIntervalMs?: number } | null
     ) => {
+      // triggerに応じたtimingMsを決定
+      let timingMs: number | undefined;
+      if (timing) {
+        if (trigger === "hold") {
+          timingMs = timing.holdThresholdMs;
+        } else if (trigger === "doubleTap") {
+          timingMs = timing.tapIntervalMs;
+        }
+      }
+
       send("save-key-config", {
         layerId,
         from,
-        binding: {
-          trigger,
-          action: { ...action, timing: timing ?? undefined }
-        },
+        binding: { trigger, action, timingMs },
       });
       // 楽観的更新
       setLayers(upsert(layerId, from, trigger, action));

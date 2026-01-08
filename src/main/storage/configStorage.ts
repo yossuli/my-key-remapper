@@ -24,7 +24,7 @@ export class ConfigStorage {
    * 設定をロード（存在しない場合はデフォルトを使用）
    */
   async load(): Promise<RemapConfig> {
-    console.log(`Loading config from ${this.configPath}`)
+    console.log(`Loading config from ${this.configPath}`);
     try {
       const data = await readFile(this.configPath, "utf-8");
       this.config = JSON.parse(data) as RemapConfig;

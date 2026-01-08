@@ -111,10 +111,21 @@ export function handleKeyUp(vkCode: number): number {
 
   releaseMomentaryLayer(vkCode);
 
-  // 現在のレイヤーからキー別タイミング設定を取得
-  const currentLayer = remapRules.getCurrentLayer();
-  const keyTiming = currentLayer?.keyTimings?.[vkCode];
+  // 現在のレイヤーからバインディングを取得し、タイミング設定を抽出
+  const bindings = remapRules.getBindings(vkCode);
+  let holdThresholdMs: number | undefined;
+  let tapIntervalMs: number | undefined;
 
+  // 各bindingからtriggerに応じたtimingMsを取得
+  for (const binding of bindings) {
+    if (binding.trigger === "hold" && binding.timingMs !== undefined) {
+      holdThresholdMs = binding.timingMs;
+    } else if (binding.trigger === "doubleTap" && binding.timingMs !== undefined) {
+      tapIntervalMs = binding.timingMs;
+    }
+  }
+
+  const keyTiming = { holdThresholdMs, tapIntervalMs };
   const hasDoubleTapBinding = !!remapRules.getAction(vkCode, "doubleTap");
   const trigger = keyStateManager.onKeyUp(
     vkCode,
@@ -149,10 +160,21 @@ export function handleKeyDown(vkCode: number): number {
     return tapResult;
   }
 
-  // 現在のレイヤーからキー別タイミング設定を取得
-  const currentLayer = remapRules.getCurrentLayer();
-  const keyTiming = currentLayer?.keyTimings?.[vkCode];
+  // 現在のレイヤーからバインディングを取得し、タイミング設定を抽出
+  const bindingsForTiming = remapRules.getBindings(vkCode);
+  let holdThresholdMs: number | undefined;
+  let tapIntervalMs: number | undefined;
 
+  // 各bindingからtriggerに応じたtimingMsを取得
+  for (const binding of bindingsForTiming) {
+    if (binding.trigger === "hold" && binding.timingMs !== undefined) {
+      holdThresholdMs = binding.timingMs;
+    } else if (binding.trigger === "doubleTap" && binding.timingMs !== undefined) {
+      tapIntervalMs = binding.timingMs;
+    }
+  }
+
+  const keyTiming = { holdThresholdMs, tapIntervalMs };
   keyStateManager.onKeyDown(vkCode, keyTiming);
   return 1;
 }

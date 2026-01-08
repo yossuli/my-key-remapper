@@ -61,22 +61,14 @@ export function KeyEditorForm({
   onRemove,
   onClose,
 }: KeyEditorFormProps) {
-  const currentLayer = layers.find((l) => l.id === layerId);
-  const existingTiming = currentLayer?.keyTimings?.[targetVk];
-
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-  const [holdThresholdMs, setHoldThresholdMs] = useState<number | undefined>(
-    existingTiming?.holdThresholdMs
-  );
-  const [tapIntervalMs, setTapIntervalMs] = useState<number | undefined>(
-    existingTiming?.tapIntervalMs
-  );
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showVkInput, setShowVkInput] = useState(false);
   const [vkInputValue, setVkInputValue] = useState("");
 
   const {
     state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
+    existingTiming,
     setSelectedLayerId,
     loadBindingForTrigger,
     clearTargetKeys,
@@ -86,6 +78,13 @@ export function KeyEditorForm({
     layerId,
     defaultLayerId: layers[0]?.id || "",
   });
+
+  const [holdThresholdMs, setHoldThresholdMs] = useState<number | undefined>(
+    existingTiming?.holdThresholdMs
+  );
+  const [tapIntervalMs, setTapIntervalMs] = useState<number | undefined>(
+    existingTiming?.tapIntervalMs
+  );
 
   const handleSaveWithTiming = useCallback(
     (trigger: TriggerType, action: Action) => {

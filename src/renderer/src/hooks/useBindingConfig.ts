@@ -21,6 +21,10 @@ interface UseBindingConfigProps {
 
 interface UseBindingConfigReturn {
   state: BindingState;
+  existingTiming: {
+    holdThresholdMs: number | undefined;
+    tapIntervalMs: number | undefined;
+  };
   setActionType: (actionType: ActionType) => void;
   setTargetKeys: (targetKeys: number[]) => void;
   addTargetKey: (keyCode: number) => void;
@@ -42,26 +46,33 @@ export function useBindingConfig({
     createInitialBindingState(defaultLayerId)
   );
 
-  // バインディングを取得する関数
-  const fetchBinding = useCallback(
-    async (trigger: TriggerType): Promise<KeyBinding | undefined> => {
-      const allLayers = await getMappings();
-      if (!allLayers) {
-        return;
-      }
-      const layer = allLayers.layers.find((l) => l.id === layerId);
-      return layer?.bindings[targetVk]?.find((b) => b.trigger === trigger);
-    },
-    [getMappings, layerId, targetVk]
-  );
+  const [existingTiming, setExistingTiming] = useState<{
+    holdThresholdMs: number | undefined;
+    tapIntervalMs: number | undefined;
+  }>({ holdThresholdMs: undefined, tapIntervalMs: undefined });
 
-  // トリガー変更時にバインディングを読み込み
+  // バインディングとタイミング設定を一度に取得
+  const fetchBindings = useCallback(async () => {
+    const allLayers = await getMappings();
+    if (!allLayers) {
+      return;
+    }
+    const layer = allLayers.layers.find((l) => l.id === layerId);
+    const bindings = layer?.bindings[targetVk];
+
+    return bindings;
+  }, [getMappings, layerId, targetVk]);
+
+  // トリガー変更時にバインディングとタイミングを読み込み
   const loadBindingForTrigger = useCallback(
     async (trigger: TriggerType) => {
       // 状態をリセット
       setState(createInitialBindingState(defaultLayerId));
 
-      const binding = await fetchBinding(trigger);
+      const bindings = await fetchBindings();
+
+      const binding = bindings?.find((b) => b.trigger === trigger);
+
       if (binding) {
         const partialState = actionToBindingState(binding.action);
         setState((prev) => ({
@@ -70,8 +81,14 @@ export function useBindingConfig({
           hasExistingBinding: true,
         }));
       }
+      // タイミング設定を更新
+      setExistingTiming({
+        holdThresholdMs: bindings?.find((b) => b.trigger === "hold")?.timingMs,
+        tapIntervalMs: bindings?.find((b) => b.trigger === "doubleTap")
+          ?.timingMs,
+      });
     },
-    [fetchBinding, defaultLayerId]
+    [fetchBindings, defaultLayerId]
   );
 
   // 初期読み込み
@@ -107,6 +124,7 @@ export function useBindingConfig({
 
   return {
     state,
+    existingTiming,
     setActionType,
     setTargetKeys,
     addTargetKey,

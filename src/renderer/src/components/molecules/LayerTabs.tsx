@@ -125,7 +125,13 @@ export function LayerTabs({
       <ConfirmModal
         confirmLabel="削除"
         isOpen={layerToRemove !== null}
-        message={`レイヤー「${layerToRemove ?? ""}」を削除しますか？この操作は元に戻せません。`}
+        message={
+          <>
+            レイヤー「<strong>{layerToRemove}</strong>」を削除しますか？
+            <br />
+            この操作は元に戻せません。
+          </>
+        }
         onCancel={handleCancelRemove}
         onConfirm={handleConfirmRemove}
         title="レイヤーの削除"

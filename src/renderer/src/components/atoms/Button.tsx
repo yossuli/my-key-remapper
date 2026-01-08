@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "destructive" | "ghost";
+  variant?: "primary" | "secondary" | "destructive" | "ghost" | "outline";
   size?: "sm" | "md" | "lg";
 }
 
@@ -23,6 +23,8 @@ export function Button({
     destructive:
       "bg-destructive text-destructive-foreground hover:bg-destructive/90",
     ghost: "hover:bg-muted text-foreground",
+    outline:
+      "border border-border bg-background text-foreground hover:bg-muted",
   };
 
   const sizeStyles = {

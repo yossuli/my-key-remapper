@@ -1,6 +1,7 @@
 // キー別タイミング設定コンポーネント
 
 import { useCallback } from "react";
+import { Input } from "../atoms/Input";
 
 interface TimingConfigProps {
   /** 長押し判定のしきい値（ミリ秒） */
@@ -76,44 +77,28 @@ export function TimingConfig({
         タイミング設定
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label
-            className="text-muted-foreground text-xs"
-            htmlFor="holdThreshold"
-          >
-            ホールド判定 (ms)
-          </label>
-          <input
-            className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm focus:border-primary focus:outline-none"
-            id="holdThreshold"
-            min="1"
-            onBlur={handleBlur}
-            onChange={handleHoldChange}
-            onFocus={handleFocus}
-            placeholder={`デフォルト: ${defaultHoldThresholdMs}`}
-            type="number"
-            value={holdThresholdMs ?? ""}
-          />
-        </div>
-        <div className="space-y-1">
-          <label
-            className="text-muted-foreground text-xs"
-            htmlFor="tapInterval"
-          >
-            タップ間隔 (ms)
-          </label>
-          <input
-            className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm focus:border-primary focus:outline-none"
-            id="tapInterval"
-            min="1"
-            onBlur={handleBlur}
-            onChange={handleTapChange}
-            onFocus={handleFocus}
-            placeholder={`デフォルト: ${defaultTapIntervalMs}`}
-            type="number"
-            value={tapIntervalMs ?? ""}
-          />
-        </div>
+        <Input
+          id="holdThreshold"
+          input-min="1"
+          input-onBlur={handleBlur}
+          input-onChange={handleHoldChange}
+          input-onFocus={handleFocus}
+          input-placeholder={`デフォルト: ${defaultHoldThresholdMs}`}
+          input-type="number"
+          input-value={holdThresholdMs ?? ""}
+          label="ホールド判定 (ms)"
+        />
+        <Input
+          id="tapInterval"
+          input-min="1"
+          input-onBlur={handleBlur}
+          input-onChange={handleTapChange}
+          input-onFocus={handleFocus}
+          input-placeholder={`デフォルト: ${defaultTapIntervalMs}`}
+          input-type="number"
+          input-value={tapIntervalMs ?? ""}
+          label="タップ間隔 (ms)"
+        />
       </div>
       <p className="text-muted-foreground text-xs">
         空欄の場合はデフォルト値が使用されます

@@ -4,7 +4,7 @@ import { Conditional, Else, Then } from "./Ternary";
 
 interface HandleEmptyProps<T> {
   array: T[];
-  empty: JSX.Element;
+  empty?: JSX.Element;
   children: (value: T, index: number, array: T[]) => JSX.Element;
 }
 

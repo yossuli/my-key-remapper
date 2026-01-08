@@ -9,14 +9,12 @@ type FlexProps<T extends React.ElementType = "div"> = {
 export const Column = <T extends React.ElementType = "div">({
   as,
   children,
+  className,
   ...props
 }: FlexProps<T>) => {
   const Tag = as || "div";
   return (
-    <Tag
-      className={cn("flex flex-col items-center", props.className)}
-      {...props}
-    >
+    <Tag className={cn("flex flex-col items-center", className)} {...props}>
       {children}
     </Tag>
   );

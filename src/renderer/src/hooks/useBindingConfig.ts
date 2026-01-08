@@ -49,8 +49,7 @@ export function useBindingConfig({
       if (!allLayers) {
         return;
       }
-
-      const layer = allLayers.find((l) => l.id === layerId);
+      const layer = allLayers.layers.find((l) => l.id === layerId);
       return layer?.bindings[targetVk]?.find((b) => b.trigger === trigger);
     },
     [getMappings, layerId, targetVk]

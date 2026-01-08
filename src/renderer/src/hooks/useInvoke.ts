@@ -24,8 +24,10 @@ export function useInvoke<TResult, TArgs extends unknown[] = []>(
 /**
  * get-mappings専用のinvokeフック
  */
-export function useGetMappings(): () => Promise<Layer[] | undefined> {
-  return useInvoke<Layer[]>("get-mappings");
+export function useGetMappings(): () => Promise<
+  { layers: Layer[]; layerOrder: string[] } | undefined
+> {
+  return useInvoke<{ layers: Layer[]; layerOrder: string[] }>("get-mappings");
 }
 
 /**

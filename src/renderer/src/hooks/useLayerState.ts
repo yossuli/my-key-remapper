@@ -33,9 +33,12 @@ interface UseLayerStateReturn {
  */
 export function useLayerState(): UseLayerStateReturn {
   const { send, invoke } = useIpc();
-  const [layers, setLayers] = useState<Layer[]>([]);
-  const [layerId, setLayerId] = useState<string>("base");
-  const [layerOrder, setLayerOrder] = useState<string[]>([]); // 追加
+  const [layers, setLayers] = useState<UseLayerStateReturn["layers"]>([]);
+  const [layerId, setLayerId] =
+    useState<UseLayerStateReturn["layerId"]>("base");
+  const [layerOrder, setLayerOrder] = useState<
+    UseLayerStateReturn["layerOrder"]
+  >([]); // 追加
 
   // 初期化：マッピングを取得
   const loadLayers = useCallback(async () => {
@@ -53,8 +56,8 @@ export function useLayerState(): UseLayerStateReturn {
   }, [loadLayers]);
 
   // レイヤー追加
-  const addLayer = useCallback(
-    (newLayerId: string) => {
+  const addLayer = useCallback<UseLayerStateReturn["addLayer"]>(
+    (newLayerId) => {
       send("add-layer", { layerId: newLayerId });
       // 楽観的更新
       setLayers((prev) => [...prev, { id: newLayerId, bindings: {} }]);
@@ -64,8 +67,8 @@ export function useLayerState(): UseLayerStateReturn {
   );
 
   // レイヤー削除
-  const removeLayer = useCallback(
-    (targetLayerId: string) => {
+  const removeLayer = useCallback<UseLayerStateReturn["removeLayer"]>(
+    (targetLayerId) => {
       send("remove-layer", { layerId: targetLayerId });
       // 楽観的更新
       setLayers((prev) => prev.filter((l) => l.id !== targetLayerId));
@@ -77,8 +80,8 @@ export function useLayerState(): UseLayerStateReturn {
   );
 
   // レイヤー並べ替え
-  const reorderLayers = useCallback(
-    (newOrder: string[]) => {
+  const reorderLayers = useCallback<UseLayerStateReturn["reorderLayers"]>(
+    (newOrder) => {
       send("reorder-layers", { newOrder });
       // 楽観的更新
       setLayerOrder(newOrder);
@@ -87,15 +90,11 @@ export function useLayerState(): UseLayerStateReturn {
   );
 
   // マッピング保存
-  const saveMapping = useCallback(
-    async (
-      from: number,
-      trigger: TriggerType,
-      action: Action,
-      timing?: number | null
-    ) => {
+  const saveMapping = useCallback<UseLayerStateReturn["saveMapping"]>(
+    async (from, trigger, action, timing) => {
       // triggerに応じたtimingMsを決定
-      const timingMs = trigger === "hold" || trigger === "doubleTap" ? timing : undefined;
+      const timingMs =
+        trigger === "hold" || trigger === "doubleTap" ? timing : undefined;
 
       send("save-key-config", {
         layerId,
@@ -113,8 +112,8 @@ export function useLayerState(): UseLayerStateReturn {
   );
 
   // マッピング削除
-  const removeMapping = useCallback(
-    (from: number, trigger: TriggerType) => {
+  const removeMapping = useCallback<UseLayerStateReturn["removeMapping"]>(
+    (from, trigger) => {
       send("remove-binding", { layerId, from, trigger });
       // 楽観的更新
       setLayers(remove(layerId, from, trigger));

@@ -7,15 +7,20 @@ import {
 /**
  * グローバル設定を管理するカスタムフック
  */
-export function useGlobalSettings(): {
+export interface UseGlobalSettingsReturn {
   globalSettings: GlobalSettings | null;
   updateGlobalSettings: (settings: Partial<GlobalSettings>) => void;
   isLoading: boolean;
-} {
-  const [globalSettings, setGlobalSettings] = useState<GlobalSettings | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(true);
+}
+
+/**
+ * グローバル設定を管理するカスタムフック
+ */
+export function useGlobalSettings(): UseGlobalSettingsReturn {
+  const [globalSettings, setGlobalSettings] =
+    useState<UseGlobalSettingsReturn["globalSettings"]>(null);
+  const [isLoading, setIsLoading] =
+    useState<UseGlobalSettingsReturn["isLoading"]>(true);
 
   // 初期ロード
   useEffect(() => {
@@ -39,16 +44,13 @@ export function useGlobalSettings(): {
   }, []);
 
   // 設定を更新
-  const updateGlobalSettings = useCallback(
-    (settings: Partial<GlobalSettings>) => {
-      window.electron?.ipcRenderer.send("update-global-settings", { settings });
-      // ローカルの状態も更新
-      setGlobalSettings((prev) =>
-        prev ? { ...prev, ...settings } : prev
-      );
-    },
-    []
-  );
+  const updateGlobalSettings = useCallback<
+    UseGlobalSettingsReturn["updateGlobalSettings"]
+  >((settings) => {
+    window.electron?.ipcRenderer.send("update-global-settings", { settings });
+    // ローカルの状態も更新
+    setGlobalSettings((prev) => (prev ? { ...prev, ...settings } : prev));
+  }, []);
 
   return {
     globalSettings,

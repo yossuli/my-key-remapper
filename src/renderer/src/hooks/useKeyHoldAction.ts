@@ -55,7 +55,7 @@ export function useKeyHoldAction({
   const keyActiveRef = useRef(false);
   const actionReadyRef = useRef(false);
 
-  const clearTimer = useCallback(() => {
+  const clearTimer = useCallback<UseKeyHoldActionReturn["clearTimer"]>(() => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -65,14 +65,22 @@ export function useKeyHoldAction({
   }, []);
 
   // アクション準備完了かどうかを確認
-  const isActionReady = useCallback(() => actionReadyRef.current, []);
+  const isActionReady = useCallback<UseKeyHoldActionReturn["isActionReady"]>(
+    () => actionReadyRef.current,
+    []
+  );
 
   // キー長押し開始を知らせるフラグ
-  const isKeyActive = useCallback(() => keyActiveRef.current, []);
+  const isKeyActive = useCallback<UseKeyHoldActionReturn["isKeyActive"]>(
+    () => keyActiveRef.current,
+    []
+  );
 
   // keydown ハンドラー
-  const handleHoldKeyDown = useCallback(
-    (e: number, callbacks?: KeyDownCallbacks) => {
+  const handleHoldKeyDown = useCallback<
+    UseKeyHoldActionReturn["handleHoldKeyDown"]
+  >(
+    (e, callbacks) => {
       // 対象キー以外ならコールバック呼び出しして終了
       if (e !== targetKey) {
         callbacks?.onOtherKeyDown?.(e);
@@ -99,8 +107,10 @@ export function useKeyHoldAction({
   );
 
   // keyup ハンドラー
-  const handleHoldKeyUp = useCallback(
-    (e: number, callbacks: KeyUpCallbacks): void => {
+  const handleHoldKeyUp = useCallback<
+    UseKeyHoldActionReturn["handleHoldKeyUp"]
+  >(
+    (e, callbacks) => {
       if (e !== targetKey) {
         callbacks.onOtherKeyUp?.(e);
         return;

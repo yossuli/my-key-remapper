@@ -43,7 +43,8 @@ export function useKeyEditorActions({
   onRemove,
   onClose,
 }: UseKeyEditorActionsProps): UseKeyEditorActionsReturn {
-  const [newTargetKeys, setNewTargetKeys] = useState<number[]>(targetKeys);
+  const [newTargetKeys, setNewTargetKeys] =
+    useState<UseKeyEditorActionsReturn["newTargetKeys"]>(targetKeys);
   const [holds, setHolds] = useState<number[]>([]);
 
   const computedTargetKeys = useMemo(() => {
@@ -71,8 +72,8 @@ export function useKeyEditorActions({
     []
   );
 
-  const addHoldKey = useCallback(
-    (vkCode: number) => {
+  const addHoldKey = useCallback<UseKeyEditorActionsReturn["addHoldKey"]>(
+    (vkCode) => {
       setHolds((prev) => [...remove(prev, vkCode), vkCode]);
       if (holds.length === 0) {
         setNewTargetKeys([vkCode]);
@@ -83,15 +84,15 @@ export function useKeyEditorActions({
     [holds.length, remove]
   );
 
-  const removeHoldKey = useCallback(
-    (vkCode: number) => {
+  const removeHoldKey = useCallback<UseKeyEditorActionsReturn["removeHoldKey"]>(
+    (vkCode) => {
       setHolds((prev) => remove(prev, vkCode));
     },
     [remove]
   );
 
-  const removeKey = useCallback(
-    (keyCode: number) => {
+  const removeKey = useCallback<UseKeyEditorActionsReturn["removeKey"]>(
+    (keyCode) => {
       setNewTargetKeys((prev) => remove(prev, keyCode));
       setHolds((prev) => remove(prev, keyCode));
     },
@@ -99,12 +100,16 @@ export function useKeyEditorActions({
   );
 
   // 状態をリセット
-  const resetState = useCallback(() => {
+  const resetState = useCallback<
+    UseKeyEditorActionsReturn["resetState"]
+  >(() => {
     setNewTargetKeys([]);
     setHolds([]);
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback<
+    UseKeyEditorActionsReturn["handleSave"]
+  >(() => {
     if (!canSave) {
       return;
     }
@@ -136,7 +141,9 @@ export function useKeyEditorActions({
     canSave,
   ]);
 
-  const handleRemove = useCallback(() => {
+  const handleRemove = useCallback<
+    UseKeyEditorActionsReturn["handleRemove"]
+  >(() => {
     onRemove?.(selectedTrigger);
     onClose?.();
   }, [onClose, onRemove, selectedTrigger]);

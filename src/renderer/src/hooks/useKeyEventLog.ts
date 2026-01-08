@@ -20,7 +20,7 @@ interface UseKeyEventLogReturn {
  * キーイベントログを管理するカスタムフック
  */
 export function useKeyEventLog(): UseKeyEventLogReturn {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState<UseKeyEventLogReturn["logs"]>([]);
 
   const handleKeyEvent = useCallback((...args: unknown[]) => {
     const data = args[1] as { vkCode: number };
@@ -36,7 +36,7 @@ export function useKeyEventLog(): UseKeyEventLogReturn {
 
   useIpcEvent("key-event", handleKeyEvent);
 
-  const clearLogs = useCallback(() => {
+  const clearLogs = useCallback<UseKeyEventLogReturn["clearLogs"]>(() => {
     setLogs([]);
   }, []);
 

@@ -19,10 +19,10 @@ interface UseLayerStackReturn {
  */
 export function useLayerStack(): UseLayerStackReturn {
   const { send, invoke } = useIpc();
-  const [stack, setStack] = useState<string[]>(["base"]);
+  const [stack, setStack] = useState<UseLayerStackReturn["stack"]>(["base"]);
 
   // 初期取得
-  const refresh = useCallback(() => {
+  const refresh = useCallback<UseLayerStackReturn["refresh"]>(() => {
     invoke<string[]>("get-layer-stack").then((result) => {
       if (result) {
         setStack(result);
@@ -44,8 +44,8 @@ export function useLayerStack(): UseLayerStackReturn {
   });
 
   // 指定レイヤーに強制リセット
-  const resetToLayer = useCallback(
-    (layerId: string) => {
+  const resetToLayer = useCallback<UseLayerStackReturn["resetToLayer"]>(
+    (layerId) => {
       send("reset-layer", { layerId });
       // 楽観的更新
       setStack([layerId]);

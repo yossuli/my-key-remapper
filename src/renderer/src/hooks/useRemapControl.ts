@@ -17,30 +17,38 @@ interface UseRemapControlReturn {
  */
 export function useRemapControl(): UseRemapControlReturn {
   const { send } = useIpc();
-  const [isActive, setIsActiveState] = useState(true);
+  const [isActive, setIsActiveState] =
+    useState<UseRemapControlReturn["isActive"]>(true);
 
-  const setRemapEnabled = useCallback(
-    (enabled: boolean) => {
+  const setRemapEnabled = useCallback<UseRemapControlReturn["setRemapEnabled"]>(
+    (enabled) => {
       send("set-remap-enabled", { enabled });
     },
     [send]
   );
 
-  const disableRemap = useCallback(() => {
+  const disableRemap = useCallback<
+    UseRemapControlReturn["disableRemap"]
+  >(() => {
     setRemapEnabled(false);
   }, [setRemapEnabled]);
 
-  const enableRemap = useCallback(() => {
+  const enableRemap = useCallback<UseRemapControlReturn["enableRemap"]>(() => {
     setRemapEnabled(true);
   }, [setRemapEnabled]);
 
-  const toggleActive = useCallback(() => {
+  const toggleActive = useCallback<
+    UseRemapControlReturn["toggleActive"]
+  >(() => {
     setIsActiveState((prev) => !prev);
   }, []);
 
-  const setIsActive = useCallback((active: boolean) => {
-    setIsActiveState(active);
-  }, []);
+  const setIsActive = useCallback<UseRemapControlReturn["setIsActive"]>(
+    (active) => {
+      setIsActiveState(active);
+    },
+    []
+  );
 
   return {
     isActive,

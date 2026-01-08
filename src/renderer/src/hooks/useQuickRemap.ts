@@ -41,7 +41,8 @@ export function useQuickRemap({
   targetKeys,
   keyboardLayout,
 }: UseQuickRemapOptions): UseQuickRemapReturn {
-  const [editingKey, setEditingKey] = useState<number | null>(null);
+  const [editingKey, setEditingKey] =
+    useState<UseQuickRemapReturn["editingKey"]>(null);
 
   const { canSave, holds, addHoldKey, removeHoldKey, handleSave } =
     useKeyEditorActions({
@@ -63,8 +64,8 @@ export function useQuickRemap({
     });
 
   // キークリックでFromキーを設定
-  const startEditing = useCallback(
-    (vk: number) => {
+  const startEditing = useCallback<UseQuickRemapReturn["startEditing"]>(
+    (vk) => {
       if (!enabled) {
         return;
       }
@@ -74,7 +75,9 @@ export function useQuickRemap({
   );
 
   // 編集をキャンセル
-  const cancelEditing = useCallback(() => {
+  const cancelEditing = useCallback<
+    UseQuickRemapReturn["cancelEditing"]
+  >(() => {
     setEditingKey(null);
   }, []);
 

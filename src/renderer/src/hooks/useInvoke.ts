@@ -27,3 +27,19 @@ export function useInvoke<TResult, TArgs extends unknown[] = []>(
 export function useGetMappings(): () => Promise<Layer[] | undefined> {
   return useInvoke<Layer[]>("get-mappings");
 }
+
+/**
+ * release-all-keys専用のinvokeフック
+ * 押下中のキーを一括でリリースする
+ */
+export function useReleaseAllKeys(): () => Promise<number | undefined> {
+  return useInvoke<number>("release-all-keys");
+}
+
+/**
+ * get-pressed-keys専用のinvokeフック
+ * 押下中のキーコードを取得する
+ */
+export function useGetPressedKeys(): () => Promise<number[] | undefined> {
+  return useInvoke<number[]>("get-pressed-keys");
+}

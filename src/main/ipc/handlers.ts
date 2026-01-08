@@ -1,12 +1,14 @@
 import { ipcMain } from "electron";
 import { setRemapEnabled } from "../hook/keyHandler";
+import { getPressedKeys } from "../native/pressedKeysTracker";
+import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
 
 /**
  * IPCハンドラの登録
  */
 
-export function setupIPCHandlers() {
+export function setupIPCHandlers(): void {
   // マッピング取得
   ipcMain.handle("get-mappings", () => remapRules.getLayers());
 
@@ -48,4 +50,10 @@ export function setupIPCHandlers() {
   ipcMain.on("reset-layer", (_event, { layerId }) => {
     remapRules.resetToLayer(layerId);
   });
+
+  // 押下中のキーを取得
+  ipcMain.handle("get-pressed-keys", () => getPressedKeys());
+
+  // すべての押下中キーをリリース
+  ipcMain.handle("release-all-keys", () => releaseAllPressedKeys());
 }

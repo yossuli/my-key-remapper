@@ -1,13 +1,21 @@
 import koffi from "koffi";
 import { SendInput } from "./bindings";
+import { getPressedKeys, markKeyDown, markKeyUp } from "./pressedKeysTracker";
 import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
 
 /**
  * キー送信機能
  */
 
-export const sendKey = (vk: number, up: boolean, m?: any) => {
+export const sendKey = (vk: number, up: boolean, m?: unknown): void => {
   console.log("sendkey", vk, up ? "up" : "down", m);
+
+  // 押下キーを追跡
+  if (up) {
+    markKeyUp(vk);
+  } else {
+    markKeyDown(vk);
+  }
 
   try {
     const input = {
@@ -32,3 +40,17 @@ export const sendKey = (vk: number, up: boolean, m?: any) => {
     console.error("SendInput Error:", e);
   }
 };
+
+/**
+ * すべての押下中キーに対してキーアップを送信
+ * @returns リリースしたキーの数
+ */
+export function releaseAllPressedKeys(): number {
+  // 先に配列にコピー（ループ中に sendKey 内で markKeyUp が呼ばれセットが変更されるため）
+  const keys = getPressedKeys();
+  console.log("releaseAllPressedKeys", keys);
+  for (const vk of keys) {
+    sendKey(vk, true, "release-all");
+  }
+  return keys.length;
+}

@@ -10,6 +10,7 @@ import { useLayerState } from "../../hooks/useLayerState";
 import { useRemapControl } from "../../hooks/useRemapControl";
 import type { LayoutType } from "../../types";
 import { Show } from "../control/Show";
+import { PressedKeysPanel } from "../molecules/PressedKeysPanel";
 import { AppHeader } from "../organisms/AppHeader";
 import { KeyEditorForm } from "../organisms/KeyEditorForm";
 import { KeyRemapSection } from "../organisms/KeyRemapSection";
@@ -97,6 +98,7 @@ export function KeyRemapperPage() {
               onResetToLayer={resetToLayer}
               stack={stack}
             />
+            <PressedKeysPanel layout={layout} />
             <Show condition={!simpleMode}>
               <LogList logs={logs} />
             </Show>

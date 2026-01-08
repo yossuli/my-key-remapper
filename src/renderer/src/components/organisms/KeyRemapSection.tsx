@@ -116,18 +116,17 @@ export function KeyRemapSection({
             selectedTrigger={selectedTrigger}
             size="compact"
           />
-          <Button
-            className={cn(
-              "gap-1",
-              isQuickEditMode ? "bg-yellow-500 hover:bg-yellow-600" : ""
-            )}
-            onClick={onToggleQuickEditMode}
-            size="sm"
-            variant={isQuickEditMode ? "default" : "secondary"}
-          >
-            <Icon icon={Zap} size="sm" />
-            {isQuickEditMode ? "Quick ON" : "Quick"}
-          </Button>
+            <Button
+              className={cn(
+                "gap-1",
+                isQuickEditMode ? "bg-yellow-500 hover:bg-yellow-600" : ""
+              )}
+              onClick={onToggleQuickEditMode}
+              variant={isQuickEditMode ? "default" : "secondary"}
+            >
+              <Icon icon={Zap} />
+              {isQuickEditMode ? "Quick ON" : "Quick"}
+            </Button>
         </Row>
       </Row>
 
@@ -145,7 +144,7 @@ export function KeyRemapSection({
       </div>
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 font-semibold text-lg">
-          <Icon className="opacity-70" icon={Settings} />
+          <Icon className="opacity-70" icon={Settings} size="md" />
           Keyboard Layout: {layout}
         </h2>
         <LayoutToggle currentLayout={layout} onToggle={onLayoutToggle} />

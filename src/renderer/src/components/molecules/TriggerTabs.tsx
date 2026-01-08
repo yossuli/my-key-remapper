@@ -1,4 +1,5 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { JSX, ReactNode } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TriggerType } from "../../../../shared/types/remapConfig";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
@@ -28,12 +29,14 @@ interface TriggerSelectorProps {
   onTriggerChange: (trigger: TriggerType) => void;
   /** サイズ: compactはLayerTabsと横に並べる用、defaultは通常表示 */
   size?: "compact" | "default";
+  children?: ReactNode;
 }
 
 export function TriggerTabs({
   selectedTrigger,
   onTriggerChange,
   size = "default",
+  children,
 }: TriggerSelectorProps) {
   const isCompact = size === "compact";
 
@@ -82,7 +85,10 @@ export function TriggerTabs({
             )}
           </Mapped>
         </TabsList>
+        {children}
       </Tabs>
     </div>
   );
 }
+
+export { TabsContent };

@@ -119,7 +119,7 @@ export function LayerTabs({
                 size="sm"
                 variant="ghost"
               >
-                <Icon icon={Plus} size="sm" />
+                <Icon icon={Plus} />
               </Button>
             </Else>
           </Ternary>

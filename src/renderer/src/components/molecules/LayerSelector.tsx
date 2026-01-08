@@ -23,7 +23,7 @@ export function LayerSelector({
         id="selectLayer"
         label={
           <>
-            <Icon icon={Layers} size="sm" />
+            <Icon icon={Layers} />
             対象レイヤー
           </>
         }

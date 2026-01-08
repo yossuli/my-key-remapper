@@ -39,7 +39,7 @@ export function LayerStatusPanel({
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-lg">レイヤーステータス</h3>
-        <Button onClick={onRefresh} size="sm" variant="ghost">
+        <Button onClick={onRefresh} variant="ghost">
           <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
@@ -74,7 +74,6 @@ export function LayerStatusPanel({
             <Button
               key={layerId}
               onClick={handleResetClick(layerId)}
-              size="sm"
               variant={
                 stack.length === 1 && stack[0] === layerId
                   ? "ghost"

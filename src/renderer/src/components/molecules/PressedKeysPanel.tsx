@@ -57,7 +57,7 @@ export function PressedKeysPanel({
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm">押下中のキー</h3>
-        <Button onClick={refresh} size="sm" variant="ghost">
+        <Button onClick={refresh} variant="ghost">
           <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
@@ -82,7 +82,6 @@ export function PressedKeysPanel({
         <Button
           className="w-full"
           onClick={handleReleaseAll}
-          size="sm"
           variant="destructive"
         >
           すべてリリース

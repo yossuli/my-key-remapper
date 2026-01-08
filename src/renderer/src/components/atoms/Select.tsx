@@ -43,7 +43,7 @@ export function Select<T extends string>({
   );
 
   return (
-    <div className="space-y-2">
+    <>
       <Label
         className={cn(
           "font-medium text-muted-foreground text-xs",
@@ -68,6 +68,6 @@ export function Select<T extends string>({
           </Mapped>
         </SelectContent>
       </ShadcnSelect>
-    </div>
+    </>
   );
 }

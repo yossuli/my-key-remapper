@@ -37,16 +37,17 @@ export function AppHeader({
             onClick={onToggleSimpleMode}
             variant="ghost"
           >
-            <Icon icon={icon} size="sm" />
+            <Icon icon={icon} />
             {simpleMode ? "詳細表示" : "シンプル表示"}
           </Button>
         ) : null}
         <Button
           className="gap-2 rounded-full"
           onClick={onToggleActive}
+          size="default"
           variant={isActive ? "default" : "destructive"}
         >
-          <Icon icon={Power} size="sm" />
+          <Icon icon={Power} />
           {isActive ? "Active" : "Disabled"}
         </Button>
       </div>

@@ -16,7 +16,7 @@ export function LayoutToggle({ currentLayout, onToggle }: LayoutToggleProps) {
       onClick={onToggle}
       variant="ghost"
     >
-      <Icon icon={Keyboard} size="sm" />
+      <Icon icon={Keyboard} />
       {SWITCH_LAYOUT_RULE[currentLayout]}
     </Button>
   );

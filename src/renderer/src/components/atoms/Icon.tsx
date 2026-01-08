@@ -9,7 +9,7 @@ interface IconProps {
 
 export function Icon({
   icon: IconComponent,
-  size = "md",
+  size = "sm",
   className,
 }: IconProps) {
   const sizeStyles = {

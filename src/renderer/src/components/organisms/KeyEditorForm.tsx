@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { ArrowRight, Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { MAX_VK_CODE, MIN_VK_CODE, VK } from "../../../../shared/constants/vk";
@@ -23,8 +29,8 @@ import { Show } from "../control/Show";
 import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { LayerSelector } from "../molecules/LayerSelector";
-import { TimingConfig } from "../molecules/TimingConfig";
-import { TriggerTabs } from "../molecules/TriggerTabs";
+
+import { TabsContent, TriggerTabs } from "../molecules/TriggerTabs";
 import { Column, Row } from "../template/Flex";
 
 interface KeyEditorFormProps {
@@ -148,11 +154,11 @@ export function KeyEditorForm({
   };
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="px-6">
       <div className="flex items-center justify-center gap-4 font-bold text-2xl">
         <KeyDisplay layout={layout} vkCode={targetVk} />
         <Show condition={targetKeys.length > 0}>
-          <Icon icon={ArrowRight} />
+          <Icon icon={ArrowRight} size="md" />
           <Mapped value={targetKeys.map((vk) => ({ id: vk }))}>
             {({ id: vk }) => (
               <KeyDisplay layout={layout} variant="primary" vkCode={vk} />
@@ -163,115 +169,168 @@ export function KeyEditorForm({
       <TriggerTabs
         onTriggerChange={handleTriggerChange}
         selectedTrigger={selectedTrigger}
-      />
-      <ActionTypeSelector
-        actionType={actionType}
-        onActionTypeChange={setActionType}
-        triggerType={selectedTrigger}
-      />
-      <Show condition={actionType === "remap"}>
-        <div className="space-y-4 py-4 text-center">
-          <div className="flex flex-wrap items-center justify-center gap-4 font-bold text-xl">
-            <KeyDisplay layout={layout} vkCode={targetVk} />
-            <Icon icon={ArrowRight} />
-            <div className="flex flex-wrap items-center gap-2">
-              <HandleEmpty
-                array={newTargetKeys.map((vk) => ({ id: vk }))}
-                empty={
-                  <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground text-sm">
-                    {showVkInput ? "数値を入力して追加" : "キーを長押して選択"}
-                  </span>
-                }
-              >
-                {({ id: vk }) => (
-                  <WithRemoveBadge
-                    disabled={newTargetKeys.length === 1}
-                    onRemove={() => removeKey(vk)}
-                  >
-                    <KeyDisplay layout={layout} variant="primary" vkCode={vk} />
-                  </WithRemoveBadge>
-                )}
-              </HandleEmpty>
-            </div>
-          </div>
-
-          <Column className="gap-2">
-            <Row>
-              <Button
-                onClick={() => {
-                  resetState();
-                  clearTargetKeys();
-                }}
-                size="sm"
-                variant="ghost"
-              >
-                クリア
-              </Button>
-              <Button
-                className="text-muted-foreground text-xs"
-                onClick={() => setShowVkInput(!showVkInput)}
-                size="sm"
-                variant="ghost"
-              >
-                {showVkInput ? "入力を閉じる" : "VKコードで直接指定"}
-              </Button>
-            </Row>
-            <Show condition={showVkInput}>
-              <div className="flex items-center gap-1">
-                <Input
-                  id="vk-direct-input"
-                  input-className="w-16 font-mono text-center text-sm"
-                  input-onBlur={() => setIsInputFocused(false)}
-                  input-onChange={(e) => setVkInputValue(e.target.value)}
-                  input-onFocus={() => setIsInputFocused(true)}
-                  input-onKeyDown={(e) =>
-                    e.key === "Enter" && handleVkInputConfirm()
+      >
+        <ActionTypeSelector
+          actionType={actionType}
+          onActionTypeChange={setActionType}
+          triggerType={selectedTrigger}
+        />
+        <Show condition={actionType === "remap"}>
+          <div className="py-4 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-4 font-bold text-xl">
+              <KeyDisplay layout={layout} vkCode={targetVk} />
+              <Icon icon={ArrowRight} size="md" />
+              <div className="flex flex-wrap items-center gap-2">
+                <HandleEmpty
+                  array={newTargetKeys.map((vk) => ({ id: vk }))}
+                  empty={
+                    <span className="rounded-md border border-muted-foreground border-dashed px-4 py-2 text-muted-foreground text-sm">
+                      {showVkInput
+                        ? "数値を入力して追加"
+                        : "キーを長押して選択"}
+                    </span>
                   }
-                  input-placeholder="VK"
-                  input-type="number"
-                  input-value={vkInputValue}
-                />
+                >
+                  {({ id: vk }) => (
+                    <WithRemoveBadge
+                      disabled={newTargetKeys.length === 1}
+                      onRemove={() => removeKey(vk)}
+                    >
+                      <KeyDisplay
+                        layout={layout}
+                        variant="primary"
+                        vkCode={vk}
+                      />
+                    </WithRemoveBadge>
+                  )}
+                </HandleEmpty>
+              </div>
+              <Show condition={newTargetKeys.length > 0}>
                 <Button
-                  onClick={handleVkInputConfirm}
-                  size="sm"
+                  onClick={() => {
+                    resetState();
+                    clearTargetKeys();
+                  }}
                   variant="ghost"
                 >
-                  <Icon icon={Plus} size="sm" />
+                  クリア
                 </Button>
-              </div>
-            </Show>
-          </Column>
-        </div>
-      </Show>
-      <Show
-        condition={
-          actionType === "layerToggle" || actionType === "layerMomentary"
-        }
-      >
-        <LayerSelector
-          description={getLayerDescription(actionType)}
-          layers={layers}
-          onLayerChange={setSelectedLayerId}
-          selectedLayerId={selectedLayerId}
-        />
-      </Show>
-      <TimingConfig
-        holdThresholdMs={holdThresholdMs}
-        onFocusChange={setIsInputFocused}
-        onHoldThresholdChange={setHoldThresholdMs}
-        onTapIntervalChange={setTapIntervalMs}
-        tapIntervalMs={tapIntervalMs}
-      />
-      <div className="flex justify-end gap-2 pt-2">
-        <Show condition={hasExistingBinding}>
-          <Button onClick={handleRemove} variant="destructive">
-            削除
-          </Button>
+              </Show>
+            </div>
+
+            <Accordion
+              type="single"
+              collapsible
+              onValueChange={(val) => setShowVkInput(val === "vk-input")}
+            >
+              <AccordionItem value="vk-input" className="border-none">
+                <AccordionTrigger className="justify-center py-2 text-xs text-muted-foreground hover:no-underline">
+                  VKコードで直接指定
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex items-center justify-center gap-1 py-1">
+                    <Input
+                      id="vk-direct-input"
+                      input-className="w-16 font-mono text-center text-sm"
+                      input-onBlur={() => setIsInputFocused(false)}
+                      input-onChange={(e) => setVkInputValue(e.target.value)}
+                      input-onFocus={() => setIsInputFocused(true)}
+                      input-onKeyDown={(e) =>
+                        e.key === "Enter" && handleVkInputConfirm()
+                      }
+                      input-placeholder="VK"
+                      input-type="number"
+                      input-value={vkInputValue}
+                    />
+                    <Button onClick={handleVkInputConfirm} variant="ghost">
+                      <Icon icon={Plus} />
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </Show>
-        <Button disabled={!canSave} onClick={handleSave} variant="default">
-          保存
-        </Button>
-      </div>
+
+        <Show
+          condition={
+            actionType === "layerToggle" || actionType === "layerMomentary"
+          }
+        >
+          <LayerSelector
+            description={getLayerDescription(actionType)}
+            layers={layers}
+            onLayerChange={setSelectedLayerId}
+            selectedLayerId={selectedLayerId}
+          />
+        </Show>
+
+        <TabsContent value="hold">
+          <Input
+            id="holdThreshold"
+            input-min="1"
+            input-size={0}
+            input-onBlur={() => setIsInputFocused(false)}
+            input-onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") {
+                setHoldThresholdMs(undefined);
+              } else {
+                const num = Number.parseInt(val, 10);
+                if (!Number.isNaN(num) && num > 0) setHoldThresholdMs(num);
+              }
+            }}
+            input-onFocus={() => setIsInputFocused(true)}
+            input-placeholder="200"
+            input-type="number"
+            input-value={holdThresholdMs ?? ""}
+            label="判定時間 (ms)"
+          />
+          <span className="text-muted-foreground text-xs">
+            (デフォルト: 200ms)
+          </span>
+        </TabsContent>
+        <TabsContent value="doubleTap">
+          <Input
+            id="tapInterval"
+            input-min="1"
+            input-onBlur={() => setIsInputFocused(false)}
+            input-onChange={(e) => {
+              const val = e.target.value;
+              if (val === "") {
+                setTapIntervalMs(undefined);
+              } else {
+                const num = Number.parseInt(val, 10);
+                if (!Number.isNaN(num) && num > 0) setTapIntervalMs(num);
+              }
+            }}
+            input-onFocus={() => setIsInputFocused(true)}
+            input-placeholder="300"
+            input-type="number"
+            input-value={tapIntervalMs ?? ""}
+            label="タップ間隔 (ms)"
+          />
+          <span className="text-muted-foreground text-xs">
+            (デフォルト: 300ms)
+          </span>
+        </TabsContent>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Show condition={hasExistingBinding}>
+            <Button onClick={handleRemove} size="default" variant="destructive">
+              削除
+            </Button>
+          </Show>
+          <Button
+            disabled={!canSave}
+            onClick={handleSave}
+            size="default"
+            variant="default"
+          >
+            保存
+          </Button>
+        </div>
+      </TriggerTabs>
     </div>
   );
 }

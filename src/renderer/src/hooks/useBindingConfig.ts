@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   ActionType,
-  KeyBinding,
   TriggerType,
 } from "../../../shared/types/remapConfig";
 import {
@@ -42,7 +41,7 @@ export function useBindingConfig({
   defaultLayerId,
 }: UseBindingConfigProps): UseBindingConfigReturn {
   const getMappings = useGetMappings();
-  const [state, setState] = useState<BindingState>(() =>
+  const [state, setState] = useState<UseBindingConfigReturn["state"]>(() =>
     createInitialBindingState(defaultLayerId)
   );
 
@@ -64,8 +63,11 @@ export function useBindingConfig({
   }, [getMappings, layerId, targetVk]);
 
   // トリガー変更時にバインディングとタイミングを読み込み
-  const loadBindingForTrigger = useCallback(
-    async (trigger: TriggerType) => {
+  // トリガー変更時にバインディングとタイミングを読み込み
+  const loadBindingForTrigger = useCallback<
+    UseBindingConfigReturn["loadBindingForTrigger"]
+  >(
+    async (trigger) => {
       // 状態をリセット
       setState(createInitialBindingState(defaultLayerId));
 
@@ -97,28 +99,42 @@ export function useBindingConfig({
   }, [loadBindingForTrigger]);
 
   // 状態セッター
-  const setActionType = useCallback((actionType: ActionType) => {
-    setState((prev) => ({ ...prev, actionType }));
-  }, []);
+  // 状態セッター
+  const setActionType = useCallback<UseBindingConfigReturn["setActionType"]>(
+    (actionType) => {
+      setState((prev) => ({ ...prev, actionType }));
+    },
+    []
+  );
 
-  const setTargetKeys = useCallback((targetKeys: number[]) => {
-    setState((prev) => ({ ...prev, targetKeys }));
-  }, []);
+  const setTargetKeys = useCallback<UseBindingConfigReturn["setTargetKeys"]>(
+    (targetKeys) => {
+      setState((prev) => ({ ...prev, targetKeys }));
+    },
+    []
+  );
 
-  const addTargetKey = useCallback((keyCode: number) => {
-    setState((prev) => ({
-      ...prev,
-      targetKeys: prev.targetKeys.includes(keyCode)
-        ? prev.targetKeys
-        : [...prev.targetKeys, keyCode],
-    }));
-  }, []);
+  const addTargetKey = useCallback<UseBindingConfigReturn["addTargetKey"]>(
+    (keyCode) => {
+      setState((prev) => ({
+        ...prev,
+        targetKeys: prev.targetKeys.includes(keyCode)
+          ? prev.targetKeys
+          : [...prev.targetKeys, keyCode],
+      }));
+    },
+    []
+  );
 
-  const clearTargetKeys = useCallback(() => {
+  const clearTargetKeys = useCallback<
+    UseBindingConfigReturn["clearTargetKeys"]
+  >(() => {
     setState((prev) => ({ ...prev, targetKeys: [] }));
   }, []);
 
-  const setSelectedLayerId = useCallback((selectedLayerId: string) => {
+  const setSelectedLayerId = useCallback<
+    UseBindingConfigReturn["setSelectedLayerId"]
+  >((selectedLayerId) => {
     setState((prev) => ({ ...prev, selectedLayerId }));
   }, []);
 

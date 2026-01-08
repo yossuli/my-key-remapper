@@ -36,9 +36,9 @@ export function GlobalSettingsForm({
     tapIntervalMs !== globalSettings.defaultTapIntervalMs;
 
   return (
-    <VStack gap={4} className="px-6">
+    <VStack gap={4}>
       <VStack gap={1}>
-        <Text size="lg" weight="bold">グローバルタイミング設定</Text>
+        <Text size="md" weight="semibold">タイミング設定</Text>
         <Text size="sm" variant="muted">
           すべてのキーのデフォルトの判定時間を設定します。個別のキーで設定されている場合はそちらが優先されます。
         </Text>

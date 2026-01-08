@@ -13,7 +13,7 @@ import type { LayoutType } from "../../types";
 import { Show } from "../control/Show";
 import { PressedKeysPanel } from "../molecules/PressedKeysPanel";
 import { AppHeader } from "../organisms/AppHeader";
-import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
+import { GlobalSettingsModal } from "../molecules/GlobalSettingsModal";
 import { KeyEditorForm } from "../organisms/KeyEditorForm";
 import { KeyRemapSection } from "../organisms/KeyRemapSection";
 import { LayerStatusPanel } from "../organisms/LayerStatusPanel";
@@ -49,6 +49,7 @@ export function KeyRemapperPage() {
   const [layout, setLayout] = useState<LayoutType>("JIS");
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
   const [simpleMode, setSimpleMode] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   // キーボードレイアウト
   const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT.base[layout], [layout]);
@@ -71,6 +72,7 @@ export function KeyRemapperPage() {
         <Header>
           <AppHeader
             isActive={isActive}
+            onOpenSettings={() => setSettingsModalOpen(true)}
             onToggleActive={toggleActive}
             onToggleSimpleMode={() => setSimpleMode((prev) => !prev)}
             simpleMode={simpleMode}
@@ -109,14 +111,6 @@ export function KeyRemapperPage() {
             />
             <PressedKeysPanel layout={layout} />
             <Show condition={!simpleMode}>
-              <With value={globalSettings}>
-                {(globalSettings) => (
-                  <GlobalSettingsForm
-                    globalSettings={globalSettings}
-                    onSave={updateGlobalSettings}
-                  />
-                )}
-              </With>
               <LogList logs={logs} />
             </Show>
           </VStack>
@@ -141,6 +135,17 @@ export function KeyRemapperPage() {
           />
         )}
       </ModalLayout>
+
+      <With value={globalSettings}>
+        {(globalSettings) => (
+          <GlobalSettingsModal
+            globalSettings={globalSettings}
+            isOpen={settingsModalOpen}
+            onClose={() => setSettingsModalOpen(false)}
+            onSave={updateGlobalSettings}
+          />
+        )}
+      </With>
     </>
   );
 }

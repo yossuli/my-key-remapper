@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
+import { VStack } from "../template/Flex";
 
 interface SelectOption {
   value: string;
@@ -45,7 +46,7 @@ export function Select<T extends string>({
   );
 
   return (
-    <>
+    <VStack gap={2}>
       <Label
         className={cn(
           "font-medium text-muted-foreground text-xs",
@@ -70,6 +71,6 @@ export function Select<T extends string>({
           </Mapped>
         </SelectContent>
       </ShadcnSelect>
-    </>
+    </VStack>
   );
 }

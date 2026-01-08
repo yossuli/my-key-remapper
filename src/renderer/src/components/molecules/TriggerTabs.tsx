@@ -1,10 +1,11 @@
-import { JSX, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TriggerType } from "../../../../shared/types/remapConfig";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
 import { Then } from "../control/Ternary";
+import { VStack } from "../template/Flex";
 
 interface TriggerOption {
   value: TriggerType;
@@ -31,6 +32,7 @@ interface TriggerSelectorProps {
   size?: "compact" | "default";
   children?: ReactNode;
   className?: string;
+  gap?: 1 | 2 | 8 | 3 | 4 | 6 | undefined;
 }
 
 export function TriggerTabs({
@@ -39,6 +41,7 @@ export function TriggerTabs({
   size = "default",
   children,
   className,
+  gap,
 }: TriggerSelectorProps) {
   const isCompact = size === "compact";
 
@@ -67,28 +70,30 @@ export function TriggerTabs({
         onValueChange={(val) => onTriggerChange(val as TriggerType)}
         value={selectedTrigger}
       >
-        <TabsList
-          className={cn(
-            "h-auto bg-muted/30 p-1",
-            !isCompact && "w-full justify-start"
-          )}
-        >
-          <Mapped as={Then} value={TRIGGER_OPTIONS}>
-            {({ value, label, shortLabel }) => (
-              <TabsTrigger
-                className={cn(
-                  "data-[state=active]:bg-background",
-                  !isCompact && "flex-1"
-                )}
-                key={value}
-                value={value}
-              >
-                {isCompact ? shortLabel : label}
-              </TabsTrigger>
+        <VStack gap={gap}>
+          <TabsList
+            className={cn(
+              "h-auto bg-muted/30 p-1",
+              !isCompact && "w-full justify-start"
             )}
-          </Mapped>
-        </TabsList>
-        {children}
+          >
+            <Mapped as={Then} value={TRIGGER_OPTIONS}>
+              {({ value, label, shortLabel }) => (
+                <TabsTrigger
+                  className={cn(
+                    "data-[state=active]:bg-background",
+                    !isCompact && "flex-1"
+                  )}
+                  key={value}
+                  value={value}
+                >
+                  {isCompact ? shortLabel : label}
+                </TabsTrigger>
+              )}
+            </Mapped>
+          </TabsList>
+          {children}
+        </VStack>
       </Tabs>
     </div>
   );

@@ -73,6 +73,12 @@ export class RemapRules {
     const config = configStorage.getConfig();
     if (!config.layers.some((l) => l.id === layer.id)) {
       config.layers.push(layer);
+      // layerOrderにも追加
+      if (config.layerOrder) {
+        config.layerOrder.push(layer.id);
+      } else {
+        config.layerOrder = config.layers.map((l) => l.id);
+      }
       configStorage.save(config);
     }
   }
@@ -83,8 +89,32 @@ export class RemapRules {
     }
     const config = configStorage.getConfig();
     config.layers = config.layers.filter((l) => l.id !== layerId);
+    // layerOrderからも削除
+    if (config.layerOrder) {
+      config.layerOrder = config.layerOrder.filter((id) => id !== layerId);
+    }
     layerState.popLayer(layerId);
     configStorage.save(config);
+  }
+
+  /**
+   * レイヤー順序を更新
+   */
+  reorderLayers(newOrder: string[]) {
+    const config = configStorage.getConfig();
+    config.layerOrder = newOrder;
+    configStorage.save(config);
+  }
+
+  /**
+   * レイヤー情報と順序を取得
+   */
+  getLayerData(): { layers: Layer[]; layerOrder: string[] } {
+    const config = configStorage.getConfig();
+    return {
+      layers: config.layers,
+      layerOrder: config.layerOrder ?? config.layers.map((l) => l.id),
+    };
   }
 
   addBinding(layerId: string, keyCode: number, binding: KeyBinding) {

@@ -10,7 +10,12 @@ import { remapRules } from "../state/rules";
 
 export function setupIPCHandlers(): void {
   // マッピング取得
-  ipcMain.handle("get-mappings", () => remapRules.getLayers());
+  ipcMain.handle("get-mappings", () => remapRules.getLayerData());
+
+  // レイヤー順序変更
+  ipcMain.on("reorder-layers", (_event, { newOrder }) => {
+    remapRules.reorderLayers(newOrder);
+  });
 
   // キー設定保存（バインディング + タイミング）
   ipcMain.on(

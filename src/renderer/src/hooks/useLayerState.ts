@@ -1,6 +1,6 @@
 // レイヤー状態とマッピング管理のカスタムフック
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   Action,
   Layer,
@@ -11,11 +11,13 @@ import { useIpc } from "./useIpc";
 
 interface UseLayerStateReturn {
   layers: Layer[];
+  layerOrder: string[]; // 追加
   layerId: string;
   setLayerId: React.Dispatch<React.SetStateAction<string>>;
   currentBindings: Layer["bindings"];
   addLayer: (newLayerId: string) => void;
   removeLayer: (targetLayerId: string) => void;
+  reorderLayers: (newOrder: string[]) => void; // 追加
   saveMapping: (
     from: number,
     trigger: TriggerType,
@@ -32,14 +34,18 @@ export function useLayerState(): UseLayerStateReturn {
   const { send, invoke } = useIpc();
   const [layers, setLayers] = useState<Layer[]>([]);
   const [layerId, setLayerId] = useState<string>("base");
+  const [layerOrder, setLayerOrder] = useState<string[]>([]); // 追加
 
   // 初期化：マッピングを取得
   useEffect(() => {
-    invoke<Layer[]>("get-mappings").then((initial) => {
-      if (initial) {
-        setLayers(initial);
+    invoke<{ layers: Layer[]; layerOrder: string[] }>("get-mappings").then(
+      (initial) => {
+        if (initial) {
+          setLayers(initial.layers);
+          setLayerOrder(initial.layerOrder);
+        }
       }
-    });
+    );
   }, [invoke]);
 
   // レイヤー追加
@@ -48,6 +54,7 @@ export function useLayerState(): UseLayerStateReturn {
       send("add-layer", { layerId: newLayerId });
       // 楽観的更新
       setLayers((prev) => [...prev, { id: newLayerId, bindings: {} }]);
+      setLayerOrder((prev) => [...prev, newLayerId]);
     },
     [send]
   );
@@ -58,8 +65,19 @@ export function useLayerState(): UseLayerStateReturn {
       send("remove-layer", { layerId: targetLayerId });
       // 楽観的更新
       setLayers((prev) => prev.filter((l) => l.id !== targetLayerId));
+      setLayerOrder((prev) => prev.filter((id) => id !== targetLayerId));
       // 削除したレイヤーが選択中だった場合はbaseに戻す
       setLayerId((prev) => (prev === targetLayerId ? "base" : prev));
+    },
+    [send]
+  );
+
+  // レイヤー並べ替え
+  const reorderLayers = useCallback(
+    (newOrder: string[]) => {
+      send("reorder-layers", { newOrder });
+      // 楽観的更新
+      setLayerOrder(newOrder);
     },
     [send]
   );
@@ -94,16 +112,35 @@ export function useLayerState(): UseLayerStateReturn {
     [send, layerId]
   );
 
+  // レイヤーをlayerOrderに基づいてソート
+  const sortedLayers = useMemo(() => {
+    if (layerOrder.length === 0) {
+      return layers;
+    }
+
+    // layerOrderのインデックスをマップ化
+    const orderMap = new Map(layerOrder.map((id, index) => [id, index]));
+
+    return [...layers].sort((a, b) => {
+      const ia = orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER;
+      const ib = orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER;
+      return ia - ib;
+    });
+  }, [layers, layerOrder]);
+
   // 現在のレイヤーのバインディング
-  const currentBindings = layers.find((l) => l.id === layerId)?.bindings ?? {};
+  const currentBindings =
+    sortedLayers.find((l) => l.id === layerId)?.bindings ?? {};
 
   return {
-    layers,
+    layers: sortedLayers,
+    layerOrder,
     layerId,
     setLayerId,
     currentBindings,
     addLayer,
     removeLayer,
+    reorderLayers,
     saveMapping,
     removeMapping,
   };

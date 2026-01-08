@@ -37,6 +37,11 @@ export class ConfigStorage {
       this.config.layers.unshift(...DEFAULT_REMAP_CONFIG.layers);
     }
 
+    // layerOrderがない場合は生成（後方互換性）
+    if (!this.config.layerOrder) {
+      this.config.layerOrder = this.config.layers.map((l) => l.id);
+    }
+
     return this.config;
   }
 

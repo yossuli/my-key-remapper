@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
+import { Text } from "../atoms/Text";
+import { VStack, HStack } from "../template/Flex";
 
 interface GlobalSettingsFormProps {
   globalSettings: GlobalSettings;
@@ -34,16 +36,19 @@ export function GlobalSettingsForm({
     tapIntervalMs !== globalSettings.defaultTapIntervalMs;
 
   return (
-    <div className="flex flex-col gap-4 px-6 py-4">
-      <h3 className="font-bold text-lg">グローバルタイミング設定</h3>
-      <p className="text-muted-foreground text-sm">
-        すべてのキーのデフォルトの判定時間を設定します。個別のキーで設定されている場合はそちらが優先されます。
-      </p>
+    <VStack gap={4} className="px-6">
+      <VStack gap={1}>
+        <Text size="lg" weight="bold">グローバルタイミング設定</Text>
+        <Text size="sm" variant="muted">
+          すべてのキーのデフォルトの判定時間を設定します。個別のキーで設定されている場合はそちらが優先されます。
+        </Text>
+      </VStack>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
+      <VStack gap={3}>
+        <VStack gap={1}>
           <Input
             id="global-hold-threshold"
+            label="長押し判定時間 (ms)"
             input-min="1"
             input-onChange={(e) => {
               const val = e.target.value;
@@ -54,16 +59,16 @@ export function GlobalSettingsForm({
             }}
             input-type="number"
             input-value={holdThresholdMs}
-            label="長押し判定時間 (ms)"
           />
-          <span className="text-muted-foreground text-xs">
+          <Text size="xs" variant="muted">
             キーを長押しと判定するまでの時間
-          </span>
-        </div>
+          </Text>
+        </VStack>
 
-        <div className="flex flex-col gap-1">
+        <VStack gap={1}>
           <Input
             id="global-tap-interval"
+            label="ダブルタップ判定間隔 (ms)"
             input-min="1"
             input-onChange={(e) => {
               const val = e.target.value;
@@ -74,15 +79,14 @@ export function GlobalSettingsForm({
             }}
             input-type="number"
             input-value={tapIntervalMs}
-            label="ダブルタップ判定間隔 (ms)"
           />
-          <span className="text-muted-foreground text-xs">
+          <Text size="xs" variant="muted">
             2回のタップをダブルタップと判定する間隔
-          </span>
-        </div>
-      </div>
+          </Text>
+        </VStack>
+      </VStack>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <HStack gap={2} className="justify-end">
         <Button
           disabled={!hasChanges}
           onClick={handleSave}
@@ -91,7 +95,7 @@ export function GlobalSettingsForm({
         >
           保存
         </Button>
-      </div>
-    </div>
+      </HStack>
+    </VStack>
   );
 }

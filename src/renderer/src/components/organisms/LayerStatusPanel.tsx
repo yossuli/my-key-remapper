@@ -3,6 +3,9 @@
 import { RefreshCw } from "lucide-react";
 import { useCallback } from "react";
 import { Button } from "../atoms/Button";
+import { Card } from "../atoms/Card";
+import { Text } from "../atoms/Text";
+import { VStack, HStack, Wrap } from "../template/Flex";
 
 interface LayerStatusPanelProps {
   /** 現在のレイヤースタック */
@@ -35,56 +38,58 @@ export function LayerStatusPanel({
   );
 
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg">レイヤーステータス</h3>
-        <Button onClick={onRefresh} variant="ghost">
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </div>
+    <Card className="p-4">
+      <VStack gap={4}>
+        {/* ヘッダー */}
+        <HStack className="justify-between">
+          <Text size="lg" weight="semibold">レイヤーステータス</Text>
+          <Button onClick={onRefresh} variant="ghost" size="icon">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </HStack>
 
-      {/* 現在のスタック表示 */}
-      <div className="space-y-2">
-        <div className="text-muted-foreground text-sm">現在のスタック</div>
-        <div className="flex flex-wrap gap-2">
-          {stack.map((layerId, index) => (
-            <div
-              className={`rounded-md px-3 py-1 text-sm ${
-                index === stack.length - 1
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-              key={layerId}
-            >
-              {layerId}
-              {index === stack.length - 1 && (
-                <span className="ml-1 text-xs opacity-80">(アクティブ)</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+        {/* 現在のスタック表示 */}
+        <VStack gap={2}>
+          <Text size="sm" variant="muted">現在のスタック</Text>
+          <Wrap gap={2}>
+            {stack.map((layerId, index) => (
+              <div
+                className={`rounded-md px-3 py-1 text-sm ${
+                  index === stack.length - 1
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+                key={layerId}
+              >
+                {layerId}
+                {index === stack.length - 1 && (
+                  <span className="ml-1 text-xs opacity-80">(アクティブ)</span>
+                )}
+              </div>
+            ))}
+          </Wrap>
+        </VStack>
 
-      {/* 強制リセットボタン */}
-      <div className="space-y-2">
-        <div className="text-muted-foreground text-sm">強制リセット</div>
-        <div className="flex flex-wrap gap-2">
-          {availableLayers.map((layerId) => (
-            <Button
-              key={layerId}
-              onClick={handleResetClick(layerId)}
-              variant={
-                stack.length === 1 && stack[0] === layerId
-                  ? "ghost"
-                  : "secondary"
-              }
-            >
-              {layerId}
-            </Button>
-          ))}
-        </div>
-      </div>
-    </div>
+        {/* 強制リセットボタン */}
+        <VStack gap={2}>
+          <Text size="sm" variant="muted">強制リセット</Text>
+          <Wrap gap={2}>
+            {availableLayers.map((layerId) => (
+              <Button
+                key={layerId}
+                onClick={handleResetClick(layerId)}
+                variant={
+                  stack.length === 1 && stack[0] === layerId
+                    ? "ghost"
+                    : "secondary"
+                }
+              >
+                {layerId}
+              </Button>
+            ))}
+          </Wrap>
+        </VStack>
+      </VStack>
+    </Card>
   );
 }

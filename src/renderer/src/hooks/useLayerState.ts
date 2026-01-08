@@ -97,18 +97,17 @@ export function useLayerState(): UseLayerStateReturn {
       send("save-key-config", {
         layerId,
         from,
-        binding: { trigger, action },
-        timing,
+        binding: {
+          trigger,
+          action: { ...action, timing: timing ?? undefined }
+        },
       });
       // 楽観的更新
       setLayers(upsert(layerId, from, trigger, action));
-      // タイミング設定も保存された場合は、設定を再読み込みしてUIを更新
-      if (timing !== undefined) {
-        // 少し遅延させてバックエンドの保存を待つ
-        setTimeout(() => {
-          loadLayers();
-        }, 100);
-      }
+      // 設定が変更された場合は再読み込みしてUIを更新
+      setTimeout(() => {
+        loadLayers();
+      }, 100);
     },
     [send, layerId, loadLayers]
   );

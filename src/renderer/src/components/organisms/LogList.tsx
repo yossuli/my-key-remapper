@@ -1,7 +1,9 @@
 import { AlertCircle } from "lucide-react";
 import { Icon } from "../atoms/Icon";
 import { HandleEmpty } from "../control/HandleEmpty";
+import { Mapped } from "../control/Mapped";
 import { LogEntry } from "../molecules/LogEntry";
+import { VStack } from "../template/Flex";
 
 interface LogItem {
   id: string;
@@ -20,7 +22,7 @@ export function LogList({ logs }: LogListProps) {
         <Icon className="text-accent-foreground" icon={AlertCircle} />
         <h2 className="font-semibold text-sm">Live Event Log</h2>
       </div>
-      <div className="max-h-[400px] flex-1 space-y-2 overflow-y-auto p-4 font-mono text-sm">
+      <VStack gap={2} className="max-h-[400px] flex-1 overflow-y-auto p-4 font-mono text-sm">
         <HandleEmpty
           array={logs}
           empty={
@@ -33,7 +35,7 @@ export function LogList({ logs }: LogListProps) {
             <LogEntry key={log.id} time={log.time} vkCode={log.vkCode} />
           )}
         </HandleEmpty>
-      </div>
+      </VStack>
     </section>
   );
 }

@@ -30,6 +30,7 @@ interface TriggerSelectorProps {
   /** サイズ: compactはLayerTabsと横に並べる用、defaultは通常表示 */
   size?: "compact" | "default";
   children?: ReactNode;
+  className?: string;
 }
 
 export function TriggerTabs({
@@ -37,6 +38,7 @@ export function TriggerTabs({
   onTriggerChange,
   size = "default",
   children,
+  className,
 }: TriggerSelectorProps) {
   const isCompact = size === "compact";
 
@@ -44,7 +46,8 @@ export function TriggerTabs({
     <div
       className={cn(
         "flex items-center gap-2",
-        isCompact ? undefined : "flex-col items-start"
+        isCompact ? undefined : "flex-col items-start",
+        className
       )}
     >
       <Show condition={!isCompact}>

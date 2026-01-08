@@ -3,12 +3,14 @@ import type { Layer } from "../../../../shared/types/remapConfig";
 import { Icon } from "../atoms/Icon";
 import { Select } from "../atoms/Select";
 import { Show } from "../control/Show";
+import { VStack } from "../template/Flex";
 
 interface LayerSelectorProps {
   layers: Pick<Layer, "id">[];
   selectedLayerId: string;
   onLayerChange: (layerId: string) => void;
   description?: string;
+  className?: string;
 }
 
 export function LayerSelector({
@@ -16,9 +18,10 @@ export function LayerSelector({
   selectedLayerId,
   onLayerChange,
   description,
+  className,
 }: LayerSelectorProps) {
   return (
-    <>
+    <VStack gap={2} className={className}>
       <Select
         id="selectLayer"
         label={
@@ -39,6 +42,6 @@ export function LayerSelector({
       <Show condition={Boolean(description)}>
         <p className="text-muted-foreground text-xs">{description}</p>
       </Show>
-    </>
+    </VStack>
   );
 }

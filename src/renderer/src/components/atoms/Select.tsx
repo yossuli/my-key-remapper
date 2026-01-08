@@ -24,6 +24,7 @@ interface SelectProps<T extends string>
   id: string;
   options: SelectOption[];
   onValueChange: (value: T) => void;
+  className?: string;
 }
 
 export function Select<T extends string>({
@@ -33,6 +34,7 @@ export function Select<T extends string>({
   onValueChange,
   "select-value": value,
   "label-className": labelClassName,
+  className,
   id,
   ...props
 }: SelectProps<T>) {

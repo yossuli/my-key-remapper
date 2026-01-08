@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Show } from "../control/Show";
+import { VStack } from "../template/Flex";
 
 interface InputProps
   extends AddPrefix<InputHTMLAttributes<HTMLInputElement>, "input-">,
@@ -11,6 +12,7 @@ interface InputProps
   label?: string;
   error?: string;
   id: string;
+  className?: string;
 }
 
 export function Input({
@@ -18,6 +20,7 @@ export function Input({
   error,
   "input-className": inputClassName,
   "label-className": labelClassName,
+  className,
   id,
   ...props
 }: InputProps) {
@@ -32,7 +35,7 @@ export function Input({
       .map(([key, value]) => [key.replace("input-", ""), value])
   );
   return (
-    <div className="space-y-2">
+    <VStack gap={2} className={className}>
       <Show condition={Boolean(label)}>
         <Label
           className={cn(
@@ -56,6 +59,6 @@ export function Input({
       <Show condition={Boolean(error)}>
         <p className="text-destructive text-xs">{error}</p>
       </Show>
-    </div>
+    </VStack>
   );
 }

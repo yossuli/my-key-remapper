@@ -21,6 +21,7 @@ import { LogList } from "../organisms/LogList";
 import { Header, Main, MainLayout, Side } from "../template/MainLayout";
 import { ModalLayout } from "../template/ModalLayout";
 import { VStack } from "../template/Flex";
+import { With } from "../control/With";
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
@@ -99,7 +100,7 @@ export function KeyRemapperPage() {
           </Show>
         </Main>
         <Side>
-          <div className="space-y-4">
+          <VStack gap={4}>
             <LayerStatusPanel
               availableLayers={availableLayers}
               onRefresh={refresh}
@@ -108,48 +109,37 @@ export function KeyRemapperPage() {
             />
             <PressedKeysPanel layout={layout} />
             <Show condition={!simpleMode}>
-              <Show condition={!isLoading && globalSettings !== null}>
-                <GlobalSettingsForm
-                  globalSettings={globalSettings}
-                  onSave={updateGlobalSettings}
-                />
-              </Show>
+              <With value={globalSettings}>
+                {(globalSettings) => (
+                  <GlobalSettingsForm
+                    globalSettings={globalSettings}
+                    onSave={updateGlobalSettings}
+                  />
+                )}
+              </With>
               <LogList logs={logs} />
             </Show>
-          </div>
+          </VStack>
         </Side>
       </MainLayout>
 
-      <ModalLayout
-        editingKey={editingKey}
-        onClose={handleCloseEditor}
-      >
-        {(e) => {
-          // 現在のレイヤーからタイミング設定を取得
-          const currentLayer = layers.find((l) => l.id === layerId);
-          const existingTiming = currentLayer?.keyTimings?.[e];
-          return (
-            <KeyEditorForm
-              defaultHoldThresholdMs={
-                globalSettings?.defaultHoldThresholdMs
-              }
-              defaultTapIntervalMs={
-                globalSettings?.defaultTapIntervalMs
-              }
-              existingTiming={existingTiming}
-              layerId={layerId}
-              layers={layers.map((l) => ({ id: l.id }))}
-              layout={layout}
-              onClose={handleCloseEditor}
-              onRemove={(trigger) => removeMapping(e, trigger)}
-              onSave={(trigger, action, timing) =>
-                saveMapping(e, trigger, action, timing)
-              }
-              targetVk={e}
-              trigger={selectedTrigger}
-            />
-          );
-        }}
+      <ModalLayout editingKey={editingKey} onClose={handleCloseEditor}>
+        {(e) => (
+          <KeyEditorForm
+            defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs}
+            defaultTapIntervalMs={globalSettings?.defaultTapIntervalMs}
+            layerId={layerId}
+            layers={layers}
+            layout={layout}
+            onClose={handleCloseEditor}
+            onRemove={(trigger) => removeMapping(e, trigger)}
+            onSave={(trigger, action, timing) =>
+              saveMapping(e, trigger, action, timing)
+            }
+            targetVk={e}
+            trigger={selectedTrigger}
+          />
+        )}
       </ModalLayout>
     </>
   );

@@ -20,12 +20,14 @@ interface ActionTypeSelectorProps {
   actionType: ActionType;
   triggerType: TriggerType;
   onActionTypeChange: (actionType: ActionType) => void;
+  className?: string;
 }
 
 export function ActionTypeSelector({
   actionType,
   triggerType,
   onActionTypeChange,
+  className,
 }: ActionTypeSelectorProps) {
   // holdトリガーの時のみlayerMomentaryを表示（hold以外では非表示）
   const filteredOptions = useMemo(() => {
@@ -37,6 +39,7 @@ export function ActionTypeSelector({
 
   return (
     <Select
+      className={className}
       id="actionType"
       label="アクション"
       onValueChange={(e: ActionType) => onActionTypeChange(e)}

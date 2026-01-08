@@ -18,8 +18,8 @@ import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { LayerTabs } from "../molecules/LayerTabs";
 import { LayoutToggle } from "../molecules/LayoutToggle";
+import { HStack, VStack } from "../template/Flex";
 import { TriggerTabs } from "../molecules/TriggerTabs";
-import { Row } from "../template/Flex";
 import { KeyboardGrid } from "./KeyboardGrid";
 
 interface KeyRemapSectionProps {
@@ -100,8 +100,8 @@ export function KeyRemapSection({
   }, [disableRemap, enableRemap]);
 
   return (
-    <section className="space-y-4">
-      <Row className="justify-between gap-4">
+    <VStack as="section" gap={4}>
+      <HStack className="justify-between gap-4">
         <LayerTabs
           activeLayerId={layerId}
           layers={layers}
@@ -110,25 +110,25 @@ export function KeyRemapSection({
           onRemoveLayer={onRemoveLayer}
           onReorder={onReorderLayers}
         />
-        <Row className="gap-2">
+        <HStack className="gap-2">
           <TriggerTabs
             onTriggerChange={onTriggerChange}
             selectedTrigger={selectedTrigger}
             size="compact"
           />
-            <Button
-              className={cn(
-                "gap-1",
-                isQuickEditMode ? "bg-yellow-500 hover:bg-yellow-600" : ""
-              )}
-              onClick={onToggleQuickEditMode}
-              variant={isQuickEditMode ? "default" : "secondary"}
-            >
-              <Icon icon={Zap} />
-              {isQuickEditMode ? "Quick ON" : "Quick"}
-            </Button>
-        </Row>
-      </Row>
+          <Button
+            className={cn(
+              "gap-1",
+              isQuickEditMode ? "bg-yellow-500 hover:bg-yellow-600" : ""
+            )}
+            onClick={onToggleQuickEditMode}
+            variant={isQuickEditMode ? "default" : "secondary"}
+          >
+            <Icon icon={Zap} />
+            {isQuickEditMode ? "Quick ON" : "Quick"}
+          </Button>
+        </HStack>
+      </HStack>
 
       <div className="overflow-x-auto">
         <KeyboardGrid
@@ -149,6 +149,6 @@ export function KeyRemapSection({
         </h2>
         <LayoutToggle currentLayout={layout} onToggle={onLayoutToggle} />
       </div>
-    </section>
+    </VStack>
   );
 }

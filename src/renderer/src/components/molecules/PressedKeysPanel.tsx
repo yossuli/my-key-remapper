@@ -6,7 +6,10 @@ import { useGetPressedKeys, useReleaseAllKeys } from "../../hooks/useInvoke";
 import type { LayoutType } from "../../types";
 import { getKeyLabel } from "../../utils/getKeyLabel";
 import { Button } from "../atoms/Button";
+import { HandleEmpty } from "../control/HandleEmpty";
+import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
+import { VStack } from "../template/Flex";
 
 interface PressedKeysPanelProps {
   /** キーボードレイアウト */
@@ -54,7 +57,7 @@ export function PressedKeysPanel({
   }, [releaseAllKeys]);
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+    <VStack gap={3} className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm">押下中のキー</h3>
         <Button onClick={refresh} variant="ghost">
@@ -87,6 +90,6 @@ export function PressedKeysPanel({
           すべてリリース
         </Button>
       </Show>
-    </div>
+    </VStack>
   );
 }

@@ -1,6 +1,8 @@
 import { Eye, EyeOff, Keyboard, Power } from "lucide-react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { Text } from "../atoms/Text";
+import { HStack, VStack, Box } from "../template/Flex";
 
 interface AppHeaderProps {
   isActive: boolean;
@@ -19,18 +21,22 @@ export function AppHeader({
 }: AppHeaderProps) {
   const icon = simpleMode ? Eye : EyeOff;
   return (
-    <header className="mb-8 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-primary/10 p-2">
+    <HStack as="header" className="mb-8 justify-between">
+      <HStack gap={3}>
+        <Box className="rounded-lg bg-primary/10 p-2">
           <Icon className="text-primary" icon={Keyboard} size="lg" />
-        </div>
-        <div>
-          <h1 className="font-bold text-xl tracking-tight">Key Remapper</h1>
-          <p className="text-muted-foreground text-xs">Windows Native Hook</p>
-        </div>
-      </div>
+        </Box>
+        <VStack>
+          <Text as="h1" weight="bold" size="xl" className="tracking-tight">
+            Key Remapper
+          </Text>
+          <Text variant="muted" size="xs">
+            Windows Native Hook
+          </Text>
+        </VStack>
+      </HStack>
 
-      <div className="flex items-center gap-2">
+      <HStack gap={2}>
         {onToggleSimpleMode ? (
           <Button
             className="gap-2 rounded-full"
@@ -50,7 +56,7 @@ export function AppHeader({
           <Icon icon={Power} />
           {isActive ? "Active" : "Disabled"}
         </Button>
-      </div>
-    </header>
+      </HStack>
+    </HStack>
   );
 }

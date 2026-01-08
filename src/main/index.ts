@@ -29,7 +29,6 @@ app.whenReady().then(async () => {
       mainWindow.webContents.send(channel, data);
     }
   });
-
   createWindow();
 
   app.on("activate", () => {

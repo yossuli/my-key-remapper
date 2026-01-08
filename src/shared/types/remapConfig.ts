@@ -163,6 +163,8 @@ export interface GlobalSettings {
 export interface RemapConfig {
   version: number;
   layers: Layer[];
+  /** レイヤーの表示順序（レイヤーIDの配列） */
+  layerOrder: string[];
   globalSettings: GlobalSettings;
 }
 
@@ -201,6 +203,7 @@ export const DEFAULT_REMAP_CONFIG: RemapConfig = {
       defaultModifiers: { shift: true },
     },
   ] satisfies RemapConfig["layers"],
+  layerOrder: ["base", "shift"],
   globalSettings: {
     defaultHoldThresholdMs: 200,
     defaultTapIntervalMs: 300,

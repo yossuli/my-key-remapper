@@ -1,8 +1,9 @@
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TriggerType } from "../../../../shared/types/remapConfig";
 import { cn } from "../../utils/cn";
-import { Button } from "../atoms/Button";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
+import { Then } from "../control/Ternary";
 
 interface TriggerOption {
   value: TriggerType;
@@ -40,7 +41,7 @@ export function TriggerTabs({
     <div
       className={cn(
         "flex items-center gap-2",
-        isCompact ? undefined : "flex-col"
+        isCompact ? undefined : "flex-col items-start"
       )}
     >
       <Show condition={!isCompact}>
@@ -54,23 +55,34 @@ export function TriggerTabs({
       <Show condition={isCompact}>
         <span className="text-muted-foreground text-sm">Trigger:</span>
       </Show>
-      <Mapped
-        as="div"
-        className="flex gap-1 rounded-lg border bg-muted/30 p-1"
-        value={TRIGGER_OPTIONS}
+
+      <Tabs
+        className="w-full"
+        onValueChange={(val) => onTriggerChange(val as TriggerType)}
+        value={selectedTrigger}
       >
-        {({ value, label, shortLabel, id }) => (
-          <Button
-            className={cn(isCompact ? undefined : "flex-1")}
-            id={id}
-            onClick={() => onTriggerChange(value)}
-            size="sm"
-            variant={selectedTrigger === id ? "primary" : "ghost"}
-          >
-            {isCompact ? shortLabel : label}
-          </Button>
-        )}
-      </Mapped>
+        <TabsList
+          className={cn(
+            "h-auto bg-muted/30 p-1",
+            !isCompact && "w-full justify-start"
+          )}
+        >
+          <Mapped as={Then} value={TRIGGER_OPTIONS}>
+            {({ value, label, shortLabel }) => (
+              <TabsTrigger
+                className={cn(
+                  "data-[state=active]:bg-background",
+                  !isCompact && "flex-1"
+                )}
+                key={value}
+                value={value}
+              >
+                {isCompact ? shortLabel : label}
+              </TabsTrigger>
+            )}
+          </Mapped>
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

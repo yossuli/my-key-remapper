@@ -24,11 +24,13 @@ export function KeyRemapperPage() {
   const { logs } = useKeyEventLog();
   const {
     layers,
+    layerOrder,
     layerId,
     setLayerId,
     currentBindings,
     addLayer,
     removeLayer,
+    reorderLayers,
     saveMapping,
     removeMapping,
   } = useLayerState();
@@ -83,6 +85,7 @@ export function KeyRemapperPage() {
               onLayoutToggle={toggleLayout}
               onRemoveLayer={removeLayer}
               onRemoveMapping={(from) => removeMapping(from, selectedTrigger)}
+              onReorderLayers={reorderLayers}
               onSaveMapping={saveMapping}
               onTriggerChange={setSelectedTrigger}
               selectedTrigger={selectedTrigger}

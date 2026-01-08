@@ -33,7 +33,7 @@ export function LayerSelector({
           value: layer.id,
           label: layer.id,
         }))}
-        select-onChange={(e) => onLayerChange(e.target.value)}
+        onValueChange={(e) => onLayerChange(e)}
         select-value={selectedLayerId}
       />
       <Show condition={Boolean(description)}>

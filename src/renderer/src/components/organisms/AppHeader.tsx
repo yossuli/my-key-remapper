@@ -44,7 +44,7 @@ export function AppHeader({
         <Button
           className="gap-2 rounded-full"
           onClick={onToggleActive}
-          variant={isActive ? "primary" : "destructive"}
+          variant={isActive ? "default" : "destructive"}
         >
           <Icon icon={Power} size="sm" />
           {isActive ? "Active" : "Disabled"}

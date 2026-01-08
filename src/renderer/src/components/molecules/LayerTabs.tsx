@@ -1,10 +1,12 @@
+import { Reorder } from "framer-motion";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Layer } from "../../../../shared/types/remapConfig";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { Input } from "../atoms/Input";
 import { WithRemoveBadge } from "../atoms/RemoveBadge";
-import { Mapped } from "../control/Mapped";
 import { Else, Ternary, Then } from "../control/Ternary";
 import { ConfirmModal } from "./ConfirmModal";
 
@@ -14,6 +16,7 @@ interface LayerTabsProps {
   onLayerChange: (layerId: string) => void;
   onAddLayer: (layerId: string) => void;
   onRemoveLayer: (layerId: string) => void;
+  onReorder: (newOrder: string[]) => void;
 }
 
 export function LayerTabs({
@@ -22,11 +25,13 @@ export function LayerTabs({
   onLayerChange,
   onAddLayer,
   onRemoveLayer,
+  onReorder,
 }: LayerTabsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newLayerName, setNewLayerName] = useState("");
-  // 削除確認モーダル用の状態
   const [layerToRemove, setLayerToRemove] = useState<string | null>(null);
+
+  const orderedLayerIds = useMemo(() => layers.map((l) => l.id), [layers]);
 
   const handleAdd = () => {
     if (newLayerName.trim()) {
@@ -45,12 +50,10 @@ export function LayerTabs({
     }
   };
 
-  // 削除確認モーダルを開く
   const handleRemoveClick = (layerId: string) => {
     setLayerToRemove(layerId);
   };
 
-  // 削除を確定
   const handleConfirmRemove = () => {
     if (layerToRemove) {
       onRemoveLayer(layerToRemove);
@@ -58,70 +61,70 @@ export function LayerTabs({
     }
   };
 
-  // 削除をキャンセル
   const handleCancelRemove = () => {
     setLayerToRemove(null);
   };
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <span className="text-muted-foreground text-sm">Layer:</span>
-        <Mapped
-          as={"div"}
-          className="flex gap-1 rounded-lg border bg-muted/30 p-1"
-          value={layers}
-        >
-          {({ id }) => (
-            <Ternary condition={id !== "base"} key={id}>
-              <Then>
-                <WithRemoveBadge onRemove={() => handleRemoveClick(id)}>
-                  <Button
-                    onClick={() => onLayerChange(id)}
-                    size="sm"
-                    variant={activeLayerId === id ? "primary" : "ghost"}
-                  >
-                    {id.charAt(0).toUpperCase() + id.slice(1)}
-                  </Button>
-                </WithRemoveBadge>
-              </Then>
-              <Else>
-                <Button
-                  onClick={() => onLayerChange(id)}
-                  size="sm"
-                  variant={activeLayerId === id ? "primary" : "ghost"}
-                >
-                  {id.charAt(0).toUpperCase() + id.slice(1)}
-                </Button>
-              </Else>
-            </Ternary>
-          )}
-        </Mapped>
+      <Tabs onValueChange={onLayerChange} value={activeLayerId}>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-sm">Layer:</span>
 
-        <Ternary condition={isAdding}>
-          <Then>
-            <input
-              autoFocus
-              className="w-24 rounded border bg-background px-2 py-1 text-sm"
-              onBlur={() => {
-                if (!newLayerName.trim()) {
-                  setIsAdding(false);
+          <TabsList className="h-auto bg-muted/30 p-1">
+            <Reorder.Group
+              as="div"
+              axis="x"
+              className="flex items-center gap-1"
+              onReorder={onReorder}
+              values={orderedLayerIds}
+            >
+              {orderedLayerIds.map((id) => (
+                <Reorder.Item as="div" key={id} value={id}>
+                  <WithRemoveBadge onRemove={() => handleRemoveClick(id)}>
+                    <TabsTrigger
+                      className="data-[state=active]:bg-background"
+                      value={id}
+                    >
+                      {id.charAt(0).toUpperCase() + id.slice(1)}
+                    </TabsTrigger>
+                  </WithRemoveBadge>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </TabsList>
+
+          <Ternary condition={isAdding}>
+            <Then>
+              <Input
+                id="new-layer-input"
+                input-autoFocus
+                input-className="h-8 w-24 text-sm"
+                input-onBlur={() => {
+                  if (!newLayerName.trim()) {
+                    setIsAdding(false);
+                  }
+                }}
+                input-onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewLayerName(e.target.value)
                 }
-              }}
-              onChange={(e) => setNewLayerName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="レイヤー名"
-              type="text"
-              value={newLayerName}
-            />
-          </Then>
-          <Else>
-            <Button onClick={() => setIsAdding(true)} size="sm" variant="ghost">
-              <Icon icon={Plus} size="sm" />
-            </Button>
-          </Else>
-        </Ternary>
-      </div>
+                input-onKeyDown={handleKeyDown}
+                input-placeholder="レイヤー名"
+                input-value={newLayerName}
+              />
+            </Then>
+            <Else>
+              <Button
+                onClick={() => setIsAdding(true)}
+                size="sm"
+                variant="ghost"
+              >
+                <Icon icon={Plus} size="sm" />
+              </Button>
+            </Else>
+          </Ternary>
+        </div>
+      </Tabs>
       <ConfirmModal
         confirmLabel="削除"
         isOpen={layerToRemove !== null}

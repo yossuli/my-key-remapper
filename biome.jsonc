@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/react"],
+  "files": {
+    "ignore": ["src/renderer/src/components/ui"]
+  },
   "linter": {
     "rules": {
       "nursery": {

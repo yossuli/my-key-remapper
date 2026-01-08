@@ -34,6 +34,7 @@ interface KeyRemapSectionProps {
   onLayerChange: (layerId: string) => void;
   onAddLayer: (layerId: string) => void;
   onRemoveLayer: (layerId: string) => void;
+  onReorderLayers: (newOrder: string[]) => void;
   onRemoveMapping: (from: number) => void;
   onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
   onLayoutToggle: () => void;
@@ -54,6 +55,7 @@ export function KeyRemapSection({
   onAddLayer,
   onSaveMapping,
   onRemoveLayer,
+  onReorderLayers,
   onRemoveMapping,
   onLayoutToggle,
   onTriggerChange,
@@ -106,6 +108,7 @@ export function KeyRemapSection({
           onAddLayer={onAddLayer}
           onLayerChange={onLayerChange}
           onRemoveLayer={onRemoveLayer}
+          onReorder={onReorderLayers}
         />
         <Row className="gap-2">
           <TriggerTabs
@@ -120,7 +123,7 @@ export function KeyRemapSection({
             )}
             onClick={onToggleQuickEditMode}
             size="sm"
-            variant={isQuickEditMode ? "primary" : "secondary"}
+            variant={isQuickEditMode ? "default" : "secondary"}
           >
             <Icon icon={Zap} size="sm" />
             {isQuickEditMode ? "Quick ON" : "Quick"}

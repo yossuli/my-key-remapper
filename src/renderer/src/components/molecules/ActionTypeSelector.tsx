@@ -39,8 +39,8 @@ export function ActionTypeSelector({
     <Select
       id="actionType"
       label="アクション"
+      onValueChange={(e: ActionType) => onActionTypeChange(e)}
       options={filteredOptions}
-      select-onChange={(e) => onActionTypeChange(e.target.value as ActionType)}
       select-value={actionType}
     />
   );

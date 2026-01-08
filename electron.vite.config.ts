@@ -24,5 +24,10 @@ export default defineConfig({
         },
       },
     },
+    resolve: {
+      alias: {
+        "@": resolve("src/renderer/src"),
+      },
+    },
   },
 });

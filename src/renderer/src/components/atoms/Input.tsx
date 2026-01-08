@@ -1,4 +1,6 @@
 import type { InputHTMLAttributes, LabelHTMLAttributes } from "react";
+import { Input as ShadcnInput } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Show } from "../control/Show";
@@ -32,7 +34,7 @@ export function Input({
   return (
     <div className="space-y-2">
       <Show condition={Boolean(label)}>
-        <label
+        <Label
           className={cn(
             "font-medium text-muted-foreground text-xs",
             labelClassName
@@ -41,14 +43,14 @@ export function Input({
           {...labelProps}
         >
           {label}
-        </label>
+        </Label>
       </Show>
-      <input
+      <ShadcnInput
         className={cn(
-          "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary",
-          Boolean(error) && "border-destructive",
+          Boolean(error) && "border-destructive focus-visible:ring-destructive",
           inputClassName
         )}
+        id={id}
         {...inputProps}
       />
       <Show condition={Boolean(error)}>

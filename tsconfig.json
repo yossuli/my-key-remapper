@@ -13,7 +13,10 @@
     "skipLibCheck": true,
     "outDir": "out",
     "strictNullChecks": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/renderer/src/*"]
+    }
   },
   "include": ["src/**/*"]
 }

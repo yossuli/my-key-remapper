@@ -268,7 +268,7 @@ export function KeyEditorForm({
             削除
           </Button>
         </Show>
-        <Button disabled={!canSave} onClick={handleSave} variant="primary">
+        <Button disabled={!canSave} onClick={handleSave} variant="default">
           保存
         </Button>
       </div>

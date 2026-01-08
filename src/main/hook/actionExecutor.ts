@@ -19,6 +19,9 @@ export function releaseMomentaryLayer(vkCode: number) {
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
   }
+  if (layerId === "shift") {
+    sendKey(VK.SHIFT, true, "layer-remove");
+  }
 }
 
 /**
@@ -29,6 +32,9 @@ export function addMomentaryLayer(vkCode: number, layerId: string) {
   if (isLayerSetCurrent === undefined) {
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
+  }
+  if (layerId === "shift") {
+    sendKey(VK.SHIFT, false, "layer-add");
   }
 }
 
@@ -47,17 +53,18 @@ function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
   const layerId = layer?.id;
 
   if (layerId === "shift") {
+    sendKey(VK.SHIFT, true, "shift key");
     if (isUp) {
       // keyUp: キーを離してから Shift を離す
-      sendKey(vkCode, true, 2);
-      sendKey(VK.SHIFT, true, 3);
+      sendKey(vkCode, true);
+      sendKey(VK.SHIFT, true);
     } else {
       // keyDown: Shift を押してからキーを押す
-      sendKey(VK.SHIFT, false, 4);
-      sendKey(vkCode, false, 5);
+      sendKey(VK.SHIFT, false);
+      sendKey(vkCode, false);
     }
   } else {
-    sendKey(vkCode, isUp, 6);
+    sendKey(vkCode, isUp);
   }
 }
 
@@ -83,7 +90,7 @@ export function handleTapOnlyBindings(
   // tap アクションがある場合（修飾キーなしで送信）
   if (action?.type === "remap") {
     for (const key of action.keys) {
-      sendKey(key, isUp, 1);
+      sendKey(key, isUp);
     }
     return 1;
   }

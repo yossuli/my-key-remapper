@@ -22,6 +22,7 @@ import { Header, Main, MainLayout, Side } from "../template/MainLayout";
 import { ModalLayout } from "../template/ModalLayout";
 import { VStack } from "../template/Flex";
 import { With } from "../control/With";
+import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
@@ -117,7 +118,7 @@ export function KeyRemapperPage() {
         </Side>
       </MainLayout>
 
-      <ModalLayout editingKey={editingKey} onClose={handleCloseEditor}>
+      <ModalLayout value={editingKey} onClose={handleCloseEditor}>
         {(e) => (
           <KeyEditorForm
             defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs}
@@ -136,16 +137,17 @@ export function KeyRemapperPage() {
         )}
       </ModalLayout>
 
-      <With value={globalSettings}>
+      <ModalLayout
+        value={settingsModalOpen ? globalSettings : null}
+        onClose={() => setSettingsModalOpen(false)}
+      >
         {(globalSettings) => (
-          <GlobalSettingsModal
+          <GlobalSettingsForm
             globalSettings={globalSettings}
-            isOpen={settingsModalOpen}
-            onClose={() => setSettingsModalOpen(false)}
             onSave={updateGlobalSettings}
           />
         )}
-      </With>
+      </ModalLayout>
     </>
   );
 }

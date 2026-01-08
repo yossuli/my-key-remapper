@@ -1,25 +1,24 @@
 import type { ReactNode } from "react";
 import { Dialog } from "../atoms/Dialog";
 
-interface ModalLayoutProps {
-  editingKey: number | null;
+interface ModalLayoutProps<T> {
+  value: T | null;
   title?: string;
-  children: (editingKey: number) => ReactNode;
+  children: (value: T) => ReactNode;
   onClose: () => void;
 }
 
-export function ModalLayout({
-  editingKey,
+export function ModalLayout<T>({
+  value,
   title,
   children,
   onClose,
-}: ModalLayoutProps) {
-  const isOpen = editingKey !== null;
+}: ModalLayoutProps<T>) {
+  const isOpen = !!value;
 
   return (
-
     <Dialog open={isOpen} onClose={onClose} title={title}>
-      {editingKey !== null && children(editingKey)}
+      {value !== null && children(value)}
     </Dialog>
   );
 }

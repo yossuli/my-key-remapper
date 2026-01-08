@@ -13,6 +13,7 @@ interface InputProps
   error?: string;
   id: string;
   className?: string;
+  setFocused?: (focused: boolean) => void;
 }
 
 export function Input({
@@ -22,6 +23,7 @@ export function Input({
   "label-className": labelClassName,
   className,
   id,
+  setFocused,
   ...props
 }: InputProps) {
   const labelProps = Object.fromEntries(
@@ -54,6 +56,8 @@ export function Input({
           inputClassName
         )}
         id={id}
+        onBlur={() => setFocused?.(false)}
+        onFocus={() => setFocused?.(true)}
         {...inputProps}
       />
       <Show condition={Boolean(error)}>

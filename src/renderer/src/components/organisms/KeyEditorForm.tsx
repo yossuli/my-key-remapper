@@ -246,10 +246,9 @@ export function KeyEditorForm({
                     <div className="flex items-center justify-center gap-1">
                       <Input
                         id="vk-direct-input"
+                        setFocused={setIsInputFocused}
                         input-className="w-16 font-mono text-center text-sm"
-                        input-onBlur={() => setIsInputFocused(false)}
                         input-onChange={(e) => setVkInputValue(e.target.value)}
-                        input-onFocus={() => setIsInputFocused(true)}
                         input-onKeyDown={(e) =>
                           e.key === "Enter" && handleVkInputConfirm()
                         }
@@ -284,9 +283,9 @@ export function KeyEditorForm({
             <VStack gap={1}>
               <Input
                 id="holdThreshold"
+                setFocused={setIsInputFocused}
                 input-min="1"
                 input-size={0}
-                input-onBlur={() => setIsInputFocused(false)}
                 input-onChange={(e) => {
                   const val = e.target.value;
                   if (val === "") {
@@ -296,7 +295,6 @@ export function KeyEditorForm({
                     if (!Number.isNaN(num) && num > 0) setHoldThresholdMs(num);
                   }
                 }}
-                input-onFocus={() => setIsInputFocused(true)}
                 input-placeholder={String(defaultHoldThresholdMs ?? "-")}
                 input-type="number"
                 input-value={holdThresholdMs ?? ""}
@@ -316,8 +314,8 @@ export function KeyEditorForm({
             <VStack gap={1}>
               <Input
                 id="tapInterval"
+                setFocused={setIsInputFocused}
                 input-min="1"
-                input-onBlur={() => setIsInputFocused(false)}
                 input-onChange={(e) => {
                   const val = e.target.value;
                   if (val === "") {
@@ -327,8 +325,6 @@ export function KeyEditorForm({
                     if (!Number.isNaN(num) && num > 0) setTapIntervalMs(num);
                   }
                 }}
-                input-onFocus={() => setIsInputFocused(true)}
-                input-placeholder={String(defaultTapIntervalMs ?? "-")}
                 input-type="number"
                 input-value={tapIntervalMs ?? ""}
                 label="タップ間隔 (ms)"

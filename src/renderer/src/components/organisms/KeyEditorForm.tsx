@@ -1,11 +1,4 @@
-import { ArrowRight, Plus } from "lucide-react";
 import { useCallback, useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { MAX_VK_CODE, MIN_VK_CODE, VK } from "../../../../shared/constants/vk";
 import type {
   Action,
@@ -17,21 +10,28 @@ import { useKeyEditorActions } from "../../hooks/useKeyEditorAction";
 import { useKeyEventInput } from "../../hooks/useKeyEventInput";
 import { useKeyHoldAction } from "../../hooks/useKeyHoldAction";
 import type { LayoutType } from "../../types";
-import { getLayerDescription } from "../../utils/getLayerDescription";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
-import { Input } from "../atoms/Input";
-import { WithRemoveBadge } from "../atoms/RemoveBadge";
-import { HandleEmpty } from "../control/HandleEmpty";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
-import { ActionTypeSelector } from "../molecules/ActionTypeSelector";
+import { ActionSelector, ActionSelectorContent } from "../molecules/ActionSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
-import { LayerSelector } from "../molecules/LayerSelector";
 import { TimingInput } from "../molecules/TimingInput";
 
 import { TabsContent, TriggerTabs } from "../molecules/TriggerTabs";
 import { HStack, VStack } from "../template/Flex";
+import { ArrowRight, Plus } from "lucide-react";
+import { getLayerDescription } from "@/utils/getLayerDescription";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { WithRemoveBadge } from "../atoms/RemoveBadge";
+import { HandleEmpty } from "../control/HandleEmpty";
+import { LayerSelector } from "../molecules/LayerSelector";
+import { Input } from "../atoms/Input";
 
 interface KeyEditorFormProps {
   targetVk: number;
@@ -175,13 +175,13 @@ export function KeyEditorForm({
         onTriggerChange={handleTriggerChange}
         selectedTrigger={selectedTrigger}
       >
-        <VStack gap={2}>
-          <ActionTypeSelector
-            actionType={actionType}
-            onActionTypeChange={setActionType}
-            triggerType={selectedTrigger}
-          />
-          <Show condition={actionType === "remap"}>
+        <ActionSelector
+          actionType={actionType}
+          onActionTypeChange={setActionType}
+          triggerType={selectedTrigger}
+          gap={2}
+        >
+          <ActionSelectorContent value="remap">
             <HStack
               className="flex-wrap justify-center font-bold text-xl"
               gap={4}
@@ -248,21 +248,17 @@ export function KeyEditorForm({
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          </Show>
-        </VStack>
+          </ActionSelectorContent>
 
-        <Show
-          condition={
-            actionType === "layerToggle" || actionType === "layerMomentary"
-          }
-        >
-          <LayerSelector
-            description={getLayerDescription(actionType)}
-            layers={layers}
-            onLayerChange={setSelectedLayerId}
-            selectedLayerId={selectedLayerId}
-          />
-        </Show>
+          <ActionSelectorContent value={["layerToggle", "layerMomentary"]}>
+            <LayerSelector
+              description={getLayerDescription(actionType)}
+              layers={layers}
+              onLayerChange={setSelectedLayerId}
+              selectedLayerId={selectedLayerId}
+            />
+          </ActionSelectorContent>
+        </ActionSelector>
 
         <TabsContent value="hold">
           <TimingInput

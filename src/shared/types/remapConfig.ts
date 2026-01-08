@@ -7,9 +7,9 @@
  * - tap: 単押し（短押し）
  * - hold: 長押し
  * - doubleTap: ダブルクリック
- * - tapHold: タップ後に長押し
+ * - tapHold: タップ後に長押し（未実装）
  */
-export type TriggerType = "tap" | "hold" | "doubleTap" | "tapHold";
+export type TriggerType = "tap" | "hold" | "doubleTap"; // | "tapHold";
 
 // =====================================
 // 修飾キー
@@ -45,9 +45,7 @@ export interface MacroStep {
  */
 export interface RemapAction {
   type: "remap";
-  targetKeys: number[];
-  modifiers?: ModifierOutput;
-  /** タイミング設定（未設定時はグローバル設定を使用） */
+  keys: number[];
 }
 
 /**
@@ -79,8 +77,6 @@ export interface LayerMomentaryAction {
  */
 export interface NoneAction {
   type: "none";
-  /** タイミング設定（未設定時はグローバル設定を使用） */
-  timing?: KeyTimingConfig;
 }
 
 /**
@@ -88,8 +84,6 @@ export interface NoneAction {
  */
 export interface PassthroughAction {
   type: "passthrough";
-  /** タイミング設定（未設定時はグローバル設定を使用） */
-  timing?: KeyTimingConfig;
 }
 
 /**
@@ -97,11 +91,11 @@ export interface PassthroughAction {
  */
 export type Action =
   | RemapAction
-  | MacroAction
+  // | MacroAction
   | LayerToggleAction
   | LayerMomentaryAction
   | NoneAction
-  | PassthroughAction;
+  // | PassthroughAction;
 
 export type ActionType = Action["type"];
 
@@ -122,17 +116,6 @@ export interface KeyBinding {
 // =====================================
 // レイヤー
 // =====================================
-
-/**
- * キー別タイミング設定
- */
-export interface KeyTimingConfig {
-  /** 長押し判定のしきい値（ミリ秒）- 未設定時はグローバル設定を使用 */
-  holdThresholdMs?: number;
-  /** ダブルタップ判定の間隔（ミリ秒）- 未設定時はグローバル設定を使用 */
-  tapIntervalMs?: number;
-}
-
 /**
  * レイヤー定義
  */
@@ -140,8 +123,8 @@ export interface Layer {
   id: string;
   /** キーコード → バインディング配列 */
   bindings: Record<number, KeyBinding[]>;
-  /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する */
-  passThroughKeys?: number[];
+  /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する（未実装） */
+  // passThroughKeys?: number[];
   /** レイヤーアクティブ時にデフォルトで送信する修飾キー（tap アクションが設定されているキーは除外） */
   defaultModifiers?: {
     shift?: boolean | "left" | "right";

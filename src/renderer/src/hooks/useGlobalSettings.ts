@@ -21,7 +21,7 @@ export function useGlobalSettings(): {
   useEffect(() => {
     const loadSettings = async (): Promise<void> => {
       try {
-        const data = await window.electron.ipcRenderer.invoke("get-mappings");
+        const data = await window.electron?.ipcRenderer.invoke("get-mappings");
         // globalSettingsが存在しない場合はデフォルト値を使用（後方互換性）
         setGlobalSettings(
           data.globalSettings ?? DEFAULT_REMAP_CONFIG.globalSettings
@@ -41,7 +41,7 @@ export function useGlobalSettings(): {
   // 設定を更新
   const updateGlobalSettings = useCallback(
     (settings: Partial<GlobalSettings>) => {
-      window.electron.ipcRenderer.send("update-global-settings", { settings });
+      window.electron?.ipcRenderer.send("update-global-settings", { settings });
       // ローカルの状態も更新
       setGlobalSettings((prev) =>
         prev ? { ...prev, ...settings } : prev

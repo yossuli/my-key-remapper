@@ -9,7 +9,6 @@ import { useCallback, useState } from "react";
 import { MAX_VK_CODE, MIN_VK_CODE, VK } from "../../../../shared/constants/vk";
 import type {
   Action,
-  KeyTimingConfig,
   Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
@@ -44,7 +43,7 @@ interface KeyEditorFormProps {
   onSave: (
     trigger: TriggerType,
     action: Action,
-    timing?: KeyTimingConfig | null
+    timing?: number | null
   ) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
@@ -89,15 +88,7 @@ export function KeyEditorForm({
   const handleSaveWithTiming = useCallback(
     (trigger: TriggerType, action: Action) => {
       // 両方がundefinedの場合はnullを送信して設定を削除
-      const timing:
-        | { holdThresholdMs?: number; tapIntervalMs?: number }
-        | null
-        | undefined =
-        holdThresholdMs === undefined && tapIntervalMs === undefined
-          ? null
-          : holdThresholdMs !== undefined || tapIntervalMs !== undefined
-          ? { holdThresholdMs, tapIntervalMs }
-          : undefined;
+      const timing = trigger === "hold" ? holdThresholdMs : trigger === "doubleTap" ? tapIntervalMs : undefined;
       onSave(trigger, action, timing);
     },
     [holdThresholdMs, tapIntervalMs, onSave]

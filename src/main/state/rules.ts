@@ -2,7 +2,6 @@ import type {
   Action,
   GlobalSettings,
   KeyBinding,
-  KeyTimingConfig,
   Layer,
   RemapConfig,
   TriggerType,

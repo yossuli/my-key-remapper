@@ -22,7 +22,7 @@ interface UseLayerStateReturn {
     from: number,
     trigger: TriggerType,
     action: Action,
-    timing?: { holdThresholdMs?: number; tapIntervalMs?: number } | null
+    timing?: number | null
   ) => void;
   removeMapping: (from: number, trigger: TriggerType) => void;
   reloadLayers: () => Promise<void>; // 追加
@@ -92,17 +92,10 @@ export function useLayerState(): UseLayerStateReturn {
       from: number,
       trigger: TriggerType,
       action: Action,
-      timing?: { holdThresholdMs?: number; tapIntervalMs?: number } | null
+      timing?: number | null
     ) => {
       // triggerに応じたtimingMsを決定
-      let timingMs: number | undefined;
-      if (timing) {
-        if (trigger === "hold") {
-          timingMs = timing.holdThresholdMs;
-        } else if (trigger === "doubleTap") {
-          timingMs = timing.tapIntervalMs;
-        }
-      }
+      const timingMs = trigger === "hold" || trigger === "doubleTap" ? timing : undefined;
 
       send("save-key-config", {
         layerId,

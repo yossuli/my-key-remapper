@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { setRemapEnabled } from "../hook/keyHandler";
+import { applyGlobalSettings, setRemapEnabled } from "../hook/keyHandler";
 import { getPressedKeys } from "../native/pressedKeysTracker";
 import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
@@ -22,7 +22,10 @@ export function setupIPCHandlers(): void {
     "save-key-config",
     (_event, { layerId, from, binding, timing }) => {
       remapRules.addBinding(layerId, from, binding);
-      if (timing) {
+      // timingがnullの場合は設定を削除、undefinedの場合は何もしない、値がある場合は設定
+      if (timing === null) {
+        remapRules.setKeyTiming(layerId, from, null);
+      } else if (timing !== undefined) {
         remapRules.setKeyTiming(layerId, from, timing);
       }
     }
@@ -61,4 +64,11 @@ export function setupIPCHandlers(): void {
 
   // すべての押下中キーをリリース
   ipcMain.handle("release-all-keys", () => releaseAllPressedKeys());
+
+  // グローバル設定を更新
+  ipcMain.on("update-global-settings", (_event, { settings }) => {
+    remapRules.updateGlobalSettings(settings);
+    // 設定を即座に反映
+    applyGlobalSettings();
+  });
 }

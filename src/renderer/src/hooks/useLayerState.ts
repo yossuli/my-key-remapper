@@ -22,9 +22,10 @@ interface UseLayerStateReturn {
     from: number,
     trigger: TriggerType,
     action: Action,
-    timing?: { holdThresholdMs?: number; tapIntervalMs?: number }
+    timing?: { holdThresholdMs?: number; tapIntervalMs?: number } | null
   ) => void;
   removeMapping: (from: number, trigger: TriggerType) => void;
+  reloadLayers: () => Promise<void>; // 追加
 }
 
 /**
@@ -37,16 +38,19 @@ export function useLayerState(): UseLayerStateReturn {
   const [layerOrder, setLayerOrder] = useState<string[]>([]); // 追加
 
   // 初期化：マッピングを取得
-  useEffect(() => {
-    invoke<{ layers: Layer[]; layerOrder: string[] }>("get-mappings").then(
-      (initial) => {
-        if (initial) {
-          setLayers(initial.layers);
-          setLayerOrder(initial.layerOrder);
-        }
-      }
+  const loadLayers = useCallback(async () => {
+    const initial = await invoke<{ layers: Layer[]; layerOrder: string[] }>(
+      "get-mappings"
     );
+    if (initial) {
+      setLayers(initial.layers);
+      setLayerOrder(initial.layerOrder);
+    }
   }, [invoke]);
+
+  useEffect(() => {
+    loadLayers();
+  }, [loadLayers]);
 
   // レイヤー追加
   const addLayer = useCallback(
@@ -84,11 +88,11 @@ export function useLayerState(): UseLayerStateReturn {
 
   // マッピング保存
   const saveMapping = useCallback(
-    (
+    async (
       from: number,
       trigger: TriggerType,
       action: Action,
-      timing?: { holdThresholdMs?: number; tapIntervalMs?: number }
+      timing?: { holdThresholdMs?: number; tapIntervalMs?: number } | null
     ) => {
       send("save-key-config", {
         layerId,
@@ -98,8 +102,15 @@ export function useLayerState(): UseLayerStateReturn {
       });
       // 楽観的更新
       setLayers(upsert(layerId, from, trigger, action));
+      // タイミング設定も保存された場合は、設定を再読み込みしてUIを更新
+      if (timing !== undefined) {
+        // 少し遅延させてバックエンドの保存を待つ
+        setTimeout(() => {
+          loadLayers();
+        }, 100);
+      }
     },
-    [send, layerId]
+    [send, layerId, loadLayers]
   );
 
   // マッピング削除
@@ -143,5 +154,6 @@ export function useLayerState(): UseLayerStateReturn {
     reorderLayers,
     saveMapping,
     removeMapping,
+    reloadLayers: loadLayers,
   };
 }

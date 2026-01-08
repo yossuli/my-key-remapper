@@ -1,5 +1,6 @@
 import type {
   Action,
+  GlobalSettings,
   KeyBinding,
   KeyTimingConfig,
   Layer,
@@ -109,11 +110,16 @@ export class RemapRules {
   /**
    * レイヤー情報と順序を取得
    */
-  getLayerData(): { layers: Layer[]; layerOrder: string[] } {
+  getLayerData(): {
+    layers: Layer[];
+    layerOrder: string[];
+    globalSettings: GlobalSettings;
+  } {
     const config = configStorage.getConfig();
     return {
       layers: config.layers,
       layerOrder: config.layerOrder ?? config.layers.map((l) => l.id),
+      globalSettings: config.globalSettings,
     };
   }
 
@@ -217,6 +223,17 @@ export class RemapRules {
     } else {
       layer.keyTimings[keyCode] = timing;
     }
+    configStorage.save(config);
+  }
+  /**
+   * グローバル設定を更新
+   */
+  updateGlobalSettings(settings: Partial<GlobalSettings>): void {
+    const config = configStorage.getConfig();
+    config.globalSettings = {
+      ...config.globalSettings,
+      ...settings,
+    };
     configStorage.save(config);
   }
 }

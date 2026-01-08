@@ -4,6 +4,7 @@ import {
   SWITCH_LAYOUT_RULE,
 } from "../../../../shared/constants";
 import type { TriggerType } from "../../../../shared/types/remapConfig";
+import { useGlobalSettings } from "../../hooks/useGlobalSettings";
 import { useKeyEventLog } from "../../hooks/useKeyEventLog";
 import { useLayerStack } from "../../hooks/useLayerStack";
 import { useLayerState } from "../../hooks/useLayerState";
@@ -12,12 +13,14 @@ import type { LayoutType } from "../../types";
 import { Show } from "../control/Show";
 import { PressedKeysPanel } from "../molecules/PressedKeysPanel";
 import { AppHeader } from "../organisms/AppHeader";
+import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
 import { KeyEditorForm } from "../organisms/KeyEditorForm";
 import { KeyRemapSection } from "../organisms/KeyRemapSection";
 import { LayerStatusPanel } from "../organisms/LayerStatusPanel";
 import { LogList } from "../organisms/LogList";
 import { Header, Main, MainLayout, Side } from "../template/MainLayout";
 import { ModalLayout } from "../template/ModalLayout";
+import { VStack } from "../template/Flex";
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
@@ -37,6 +40,8 @@ export function KeyRemapperPage() {
   const { isActive, toggleActive, enableRemap, disableRemap } =
     useRemapControl();
   const { stack, refresh, resetToLayer } = useLayerStack();
+  const { globalSettings, updateGlobalSettings, isLoading } =
+    useGlobalSettings();
 
   // UI状態
   const [editingKey, setEditingKey] = useState<number | null>(null);
@@ -103,6 +108,12 @@ export function KeyRemapperPage() {
             />
             <PressedKeysPanel layout={layout} />
             <Show condition={!simpleMode}>
+              <Show condition={!isLoading && globalSettings !== null}>
+                <GlobalSettingsForm
+                  globalSettings={globalSettings}
+                  onSave={updateGlobalSettings}
+                />
+              </Show>
               <LogList logs={logs} />
             </Show>
           </div>
@@ -112,7 +123,6 @@ export function KeyRemapperPage() {
       <ModalLayout
         editingKey={editingKey}
         onClose={handleCloseEditor}
-        title="Edit Key Mapping"
       >
         {(e) => {
           // 現在のレイヤーからタイミング設定を取得
@@ -120,6 +130,12 @@ export function KeyRemapperPage() {
           const existingTiming = currentLayer?.keyTimings?.[e];
           return (
             <KeyEditorForm
+              defaultHoldThresholdMs={
+                globalSettings?.defaultHoldThresholdMs
+              }
+              defaultTapIntervalMs={
+                globalSettings?.defaultTapIntervalMs
+              }
               existingTiming={existingTiming}
               layerId={layerId}
               layers={layers.map((l) => ({ id: l.id }))}

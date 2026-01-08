@@ -41,10 +41,13 @@ interface KeyEditorFormProps {
   trigger: TriggerType;
   /** 既存のタイミング設定（編集時に読み込む） */
   existingTiming?: KeyTimingConfig;
+  /** グローバル設定（デフォルト値表示用） */
+  defaultHoldThresholdMs: number | undefined;
+  defaultTapIntervalMs: number | undefined;
   onSave: (
     trigger: TriggerType,
     action: Action,
-    timing?: KeyTimingConfig
+    timing?: KeyTimingConfig | null
   ) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
@@ -56,6 +59,8 @@ export function KeyEditorForm({
   layout,
   layers,
   existingTiming,
+  defaultHoldThresholdMs,
+  defaultTapIntervalMs,
   onSave,
   onRemove,
   onClose,
@@ -85,8 +90,7 @@ export function KeyEditorForm({
 
   const handleSaveWithTiming = useCallback(
     (trigger: TriggerType, action: Action) => {
-      const timing: KeyTimingConfig | undefined =
-        holdThresholdMs !== undefined || tapIntervalMs !== undefined
+        | { holdThresholdMs?: number; tapIntervalMs?: number }
           ? { holdThresholdMs, tapIntervalMs }
           : undefined;
       onSave(trigger, action, timing);
@@ -287,7 +291,11 @@ export function KeyEditorForm({
             label="判定時間 (ms)"
           />
           <span className="text-muted-foreground text-xs">
-            (デフォルト: 200ms)
+                (デフォルト:{" "}
+                {defaultHoldThresholdMs
+                  ? `${defaultHoldThresholdMs}ms`
+                  : "設定されていません"}
+                )
           </span>
         </TabsContent>
         <TabsContent value="doubleTap">
@@ -311,7 +319,11 @@ export function KeyEditorForm({
             label="タップ間隔 (ms)"
           />
           <span className="text-muted-foreground text-xs">
-            (デフォルト: 300ms)
+                (デフォルト:{" "}
+                {defaultTapIntervalMs
+                  ? `${defaultTapIntervalMs}ms`
+                  : "設定されていません"}
+                )
           </span>
         </TabsContent>
 

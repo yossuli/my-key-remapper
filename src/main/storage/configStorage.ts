@@ -24,12 +24,14 @@ export class ConfigStorage {
    * 設定をロード（存在しない場合はデフォルトを使用）
    */
   async load(): Promise<RemapConfig> {
+    console.log(`Loading config from ${this.configPath}`)
     try {
       const data = await readFile(this.configPath, "utf-8");
       this.config = JSON.parse(data) as RemapConfig;
     } catch (_error) {
-      console.log("No existing config found, starting with defaults.");
+      console.log("No existing config found. create config.");
       this.config = { ...DEFAULT_REMAP_CONFIG };
+      await this.save(this.config);
     }
 
     // 確実にbaseレイヤーが存在するようにする
@@ -40,6 +42,12 @@ export class ConfigStorage {
     // layerOrderがない場合は生成（後方互換性）
     if (!this.config.layerOrder) {
       this.config.layerOrder = this.config.layers.map((l) => l.id);
+    }
+
+    // globalSettingsがない場合はデフォルト値を設定（後方互換性）
+    if (!this.config.globalSettings) {
+      this.config.globalSettings = DEFAULT_REMAP_CONFIG.globalSettings;
+      console.log("Added default global settings for backward compatibility.");
     }
 
     return this.config;

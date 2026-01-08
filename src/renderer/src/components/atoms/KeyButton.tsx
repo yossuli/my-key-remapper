@@ -76,7 +76,7 @@ export function KeyButton({
     (["base", "shift"] as string[]).includes(layerId) && hasBindingForTrigger;
 
   return (
-    <WithRemoveBadge disabled={!isActive} onRemove={onRemove}>
+    <WithRemoveBadge disabled={!(isActive || !isInactive)} onRemove={onRemove}>
       <motion.button
         // biome-ignore lint/style/noMagicNumbers: アニメーションの値なぞマジックでよい
         animate={isQuickEditing ? { scale: [1, 1.05, 1] } : {}}

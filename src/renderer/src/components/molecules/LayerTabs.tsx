@@ -5,7 +5,7 @@ import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { WithRemoveBadge } from "../atoms/RemoveBadge";
 import { Mapped } from "../control/Mapped";
-import { Conditional, Else, Then } from "../control/Ternary";
+import { Else, Ternary, Then } from "../control/Ternary";
 import { ConfirmModal } from "./ConfirmModal";
 
 interface LayerTabsProps {
@@ -73,7 +73,7 @@ export function LayerTabs({
           value={layers}
         >
           {({ id }) => (
-            <Conditional condition={id !== "base"} key={id}>
+            <Ternary condition={id !== "base"} key={id}>
               <Then>
                 <WithRemoveBadge onRemove={() => handleRemoveClick(id)}>
                   <Button
@@ -94,11 +94,11 @@ export function LayerTabs({
                   {id.charAt(0).toUpperCase() + id.slice(1)}
                 </Button>
               </Else>
-            </Conditional>
+            </Ternary>
           )}
         </Mapped>
 
-        <Conditional condition={isAdding}>
+        <Ternary condition={isAdding}>
           <Then>
             <input
               autoFocus
@@ -120,7 +120,7 @@ export function LayerTabs({
               <Icon icon={Plus} size="sm" />
             </Button>
           </Else>
-        </Conditional>
+        </Ternary>
       </div>
       <ConfirmModal
         confirmLabel="削除"

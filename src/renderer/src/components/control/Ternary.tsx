@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import React from "react";
 import { type BaseProps, findWithComponentType } from ".";
 
-interface ConditionalProps {
+interface TernaryProps {
   condition: boolean;
   children: [JSX.Element, JSX.Element];
 }
@@ -25,5 +25,5 @@ export const Else = <T extends JSX.ElementType = typeof React.Fragment>({
   return <Tag {...props}>{children}</Tag>;
 };
 
-export const Conditional = ({ condition, children }: ConditionalProps) =>
+export const Ternary = ({ condition, children }: TernaryProps) =>
   findWithComponentType(children, condition ? Then : Else);

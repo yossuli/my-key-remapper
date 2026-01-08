@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { Mapped } from "./Mapped";
-import { Conditional, Else, Then } from "./Ternary";
+import { Else, Ternary, Then } from "./Ternary";
 
 interface HandleEmptyProps<T> {
   array: T[];
@@ -13,10 +13,10 @@ export const HandleEmpty = <T extends { id: string | number }>({
   empty,
   children,
 }: HandleEmptyProps<T>) => (
-  <Conditional condition={array.length === 0}>
+  <Ternary condition={array.length === 0}>
     <Then>{empty}</Then>
     <Else>
       <Mapped value={array}>{(elm, i) => children(elm, i, array)}</Mapped>
     </Else>
-  </Conditional>
+  </Ternary>
 );

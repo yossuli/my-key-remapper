@@ -21,7 +21,7 @@ export const KEYBOARD_LAYOUT_SHIFT = {
 
 export const KEYBOARD_LAYOUT = {
   base: KEYBOARD_LAYOUT_BASE,
-  shift: KEYBOARD_LAYOUT_US_SHIFT,
+  shift: KEYBOARD_LAYOUT_SHIFT,
 } as const satisfies Record<string, Record<LayoutType, KeyboardLayout>>;
 
 export const SWITCH_LAYOUT_RULE = {

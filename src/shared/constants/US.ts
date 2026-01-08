@@ -1,4 +1,4 @@
-import type { KeyboardLayout } from "../types";
+import type { KeyboardLayout } from "../../../src/renderer/src/types/index";
 import { VK } from "./vk";
 
 export const KEYBOARD_LAYOUT_US: KeyboardLayout = [

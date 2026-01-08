@@ -42,6 +42,13 @@ export class RemapRules {
     return layerState.getStack();
   }
 
+  /**
+   * 指定レイヤーにスタックを強制リセット
+   */
+  resetToLayer(layerId: string) {
+    layerState.resetToLayer(layerId);
+  }
+
   // =====================================
   // 設定データアクセス（configStorageに委譲）
   // =====================================

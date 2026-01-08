@@ -11,6 +11,8 @@ interface TimingConfigProps {
   onHoldThresholdChange: (value: number | undefined) => void;
   /** タップ間隔変更時のコールバック */
   onTapIntervalChange: (value: number | undefined) => void;
+  /** フォーカス状態変更時のコールバック */
+  onFocusChange?: (isFocused: boolean) => void;
   /** デフォルト値表示用 */
   defaultHoldThresholdMs?: number;
   /** デフォルト値表示用 */
@@ -26,6 +28,7 @@ export function TimingConfig({
   tapIntervalMs,
   onHoldThresholdChange,
   onTapIntervalChange,
+  onFocusChange,
   defaultHoldThresholdMs = 200,
   defaultTapIntervalMs = 300,
 }: TimingConfigProps) {
@@ -59,6 +62,14 @@ export function TimingConfig({
     [onTapIntervalChange]
   );
 
+  const handleFocus = useCallback(() => {
+    onFocusChange?.(true);
+  }, [onFocusChange]);
+
+  const handleBlur = useCallback(() => {
+    onFocusChange?.(false);
+  }, [onFocusChange]);
+
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3">
       <div className="font-medium text-muted-foreground text-sm">
@@ -76,7 +87,9 @@ export function TimingConfig({
             className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm focus:border-primary focus:outline-none"
             id="holdThreshold"
             min="1"
+            onBlur={handleBlur}
             onChange={handleHoldChange}
+            onFocus={handleFocus}
             placeholder={`デフォルト: ${defaultHoldThresholdMs}`}
             type="number"
             value={holdThresholdMs ?? ""}
@@ -93,7 +106,9 @@ export function TimingConfig({
             className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm focus:border-primary focus:outline-none"
             id="tapInterval"
             min="1"
+            onBlur={handleBlur}
             onChange={handleTapChange}
+            onFocus={handleFocus}
             placeholder={`デフォルト: ${defaultTapIntervalMs}`}
             type="number"
             value={tapIntervalMs ?? ""}

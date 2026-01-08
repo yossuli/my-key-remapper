@@ -40,4 +40,12 @@ export function setupIPCHandlers() {
   ipcMain.on("set-remap-enabled", (_event, { enabled }) => {
     setRemapEnabled(enabled);
   });
+
+  // レイヤースタック取得
+  ipcMain.handle("get-layer-stack", () => remapRules.getLayerStack());
+
+  // レイヤー強制リセット
+  ipcMain.on("reset-layer", (_event, { layerId }) => {
+    remapRules.resetToLayer(layerId);
+  });
 }

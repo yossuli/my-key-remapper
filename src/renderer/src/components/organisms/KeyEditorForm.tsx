@@ -57,6 +57,8 @@ export function KeyEditorForm({
   const [tapIntervalMs, setTapIntervalMs] = useState<number | undefined>(
     existingTiming?.tapIntervalMs
   );
+  // タイミング入力フィールドにフォーカスがあるか
+  const [isTimingFocused, setIsTimingFocused] = useState(false);
 
   const binding = useBindingConfig({
     targetVk,
@@ -124,7 +126,8 @@ export function KeyEditorForm({
   );
 
   useKeyEventInput({
-    enabled: true,
+    // タイミング入力にフォーカスがある間はキー入力を無効化
+    enabled: !isTimingFocused,
     onKeyDown,
     onKeyUp,
   });
@@ -190,6 +193,7 @@ export function KeyEditorForm({
       {/* タイミング設定 */}
       <TimingConfig
         holdThresholdMs={holdThresholdMs}
+        onFocusChange={setIsTimingFocused}
         onHoldThresholdChange={setHoldThresholdMs}
         onTapIntervalChange={setTapIntervalMs}
         tapIntervalMs={tapIntervalMs}

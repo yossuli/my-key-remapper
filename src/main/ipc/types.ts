@@ -7,12 +7,18 @@ interface KeyEventData {
 }
 
 /**
+ * レイヤースタック変更イベントデータ
+ */
+interface LayerStackChangedData {
+  stack: string[];
+}
+
+/**
  * IPCチャンネルとペイロードのマッピング
  */
 interface IPCChannelMap {
   "key-event": KeyEventData;
-  // 将来的に追加されるチャンネル
-  // "layer-changed": { layerId: string };
+  "layer-stack-changed": LayerStackChangedData;
 }
 
 /**

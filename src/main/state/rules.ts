@@ -164,15 +164,24 @@ export class RemapRules {
   }
 
   /**
-   * 指定キーのバインディングを取得（現在有効なレイヤーのみ、なければ何もしない）
+   * 指定キーのバインディングを取得（レイヤースタックをフォールバック）
    */
   getBindings(keyCode: number): KeyBinding[] {
     const stack = layerState.getStack();
     const layers = this.getLayers();
 
-    // スタックの最後（最優先レイヤー）から探す
-    const layer = layers.find((l) => l.id === stack.at(-1));
-    return layer?.bindings[keyCode] ?? [];
+    // スタックを後ろから前に確認（現在のレイヤー → ベースレイヤー）
+    for (let i = stack.length - 1; i >= 0; i--) {
+      const layerId = stack[i];
+      const layer = layers.find((l) => l.id === layerId);
+      const bindings = layer?.bindings[keyCode];
+
+      if (bindings && bindings.length > 0) {
+        return bindings;
+      }
+    }
+
+    return [];
   }
 
   /**

@@ -16,7 +16,10 @@ import { Icon } from "../atoms/Icon";
 import { Select } from "../atoms/Select";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
-import { ActionSelector, ActionSelectorContent } from "../molecules/ActionSelector";
+import {
+  ActionSelector,
+  ActionSelectorContent,
+} from "../molecules/ActionSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
 import { MousePositionInput } from "../molecules/MousePositionInput";
 import { TimingInput } from "../molecules/TimingInput";
@@ -35,7 +38,6 @@ import { WithRemoveBadge } from "../atoms/RemoveBadge";
 import { HandleEmpty } from "../control/HandleEmpty";
 import { LayerSelector } from "../molecules/LayerSelector";
 import { Input } from "../atoms/Input";
-
 
 interface KeyEditorFormProps {
   targetVk: number;
@@ -71,13 +73,24 @@ export function KeyEditorForm({
   const [vkInputValue, setVkInputValue] = useState("");
   const [mouseX, setMouseX] = useState<number>(0);
   const [mouseY, setMouseY] = useState<number>(0);
-  const [mouseButton, setMouseButton] = useState<"left" | "right" | "middle">("left");
+  const [mouseButton, setMouseButton] = useState<"left" | "right" | "middle">(
+    "left"
+  );
   const [clickCount, setClickCount] = useState<number>(1);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
   const {
-    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding, mouseX: loadedMouseX, mouseY: loadedMouseY, mouseButton: loadedMouseButton, clickCount: loadedClickCount },
+    state: {
+      actionType,
+      selectedLayerId,
+      targetKeys,
+      hasExistingBinding,
+      mouseX: loadedMouseX,
+      mouseY: loadedMouseY,
+      mouseButton: loadedMouseButton,
+      clickCount: loadedClickCount,
+    },
     existingTiming,
     setSelectedLayerId,
     loadBindingForTrigger,
@@ -102,8 +115,8 @@ export function KeyEditorForm({
         trigger === "hold"
           ? holdThresholdMs
           : trigger === "doubleTap"
-            ? tapIntervalMs
-            : undefined;
+          ? tapIntervalMs
+          : undefined;
       onSave(trigger, action, timing);
     },
     [holdThresholdMs, tapIntervalMs, onSave]
@@ -115,7 +128,13 @@ export function KeyEditorForm({
       if (action.type === "mouseMove") {
         handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY });
       } else if (action.type === "mouseClick") {
-        handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY, button: mouseButton, clickCount });
+        handleSaveWithTiming(trigger, {
+          ...action,
+          x: mouseX,
+          y: mouseY,
+          button: mouseButton,
+          clickCount,
+        });
       } else {
         handleSaveWithTiming(trigger, action);
       }
@@ -123,9 +142,28 @@ export function KeyEditorForm({
     [handleSaveWithTiming, mouseX, mouseY, mouseButton, clickCount]
   );
 
-  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, resetState, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave: handleSaveAction, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+  const {
+    newTargetKeys,
+    canSave,
+    addHoldKey,
+    removeHoldKey,
+    removeKey,
+    resetState,
+    handleSave,
+    handleRemove,
+  } = useKeyEditorActions({
+    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
+    layerId,
+    targetVk,
+    selectedTrigger,
+    onSave: handleSaveAction,
+    onRemove,
+    onClose,
+  });
 
-  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: VK.ENTER }); // biome-ignore format: 引数に関心はない
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
+    targetKey: VK.ENTER,
+  });
 
   const onKeyDown = useCallback(
     (e: number) => {
@@ -339,17 +377,11 @@ export function KeyEditorForm({
                 onMouseYChange={setMouseY}
                 setFocused={setIsInputFocused}
               />
-
-              <p className="text-xs text-muted-foreground">
-                {isCapturing
-                  ? "マウスを目的の位置に移動してください..."
-                  : `設定座標: (${mouseX}, ${mouseY})`}
-              </p>
             </VStack>
           </ActionSelectorContent>
 
           <ActionSelectorContent value="mouseClick">
-            <VStack gap={4} className="w-full">
+            <VStack gap={4} className="w-full justify-center">
               <p className="text-sm text-muted-foreground">
                 指定座標をクリックします
               </p>
@@ -364,38 +396,39 @@ export function KeyEditorForm({
                 onMouseXChange={setMouseX}
                 onMouseYChange={setMouseY}
                 setFocused={setIsInputFocused}
-              />
+              >
+                <VStack gap={2} className="justify-around h-full">
+                  <Button
+                    onClick={() => {
+                      setMouseButton((prev) =>
+                        prev === "left"
+                          ? "middle"
+                          : prev === "middle"
+                          ? "right"
+                          : "left"
+                      );
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {mouseButton === "left"
+                      ? "左クリック"
+                      : mouseButton === "middle"
+                      ? "中クリック"
+                      : "右クリック"}
+                  </Button>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Select
-                  id="mouse-button"
-                  label="ボタン"
-                  onValueChange={(value) => setMouseButton(value as any)}
-                  options={[
-                    { id: "left", value: "left", label: "左クリック" },
-                    { id: "middle", value: "middle", label: "中クリック" },
-                    { id: "right", value: "right", label: "右クリック" },
-                  ]}
-                  select-value={mouseButton}
-                />
-
-                <Select
-                  id="click-count"
-                  label="回数"
-                  onValueChange={(value) => setClickCount(Number(value))}
-                  options={[
-                    { id: 1, value: "1", label: "シングル" },
-                    { id: 2, value: "2", label: "ダブル" },
-                  ]}
-                  select-value={clickCount.toString()}
-                />
-              </div>
-
-              <p className="text-xs text-muted-foreground pt-2">
-                設定: ({mouseX}, {mouseY}) を
-                {mouseButton === "left" ? "左" : mouseButton === "middle" ? "中" : "右"}
-                クリック × {clickCount}
-              </p>
+                  <Button
+                    onClick={() => {
+                      setClickCount((prev) => (prev === 1 ? 2 : 1));
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {clickCount === 1 ? "シングル" : "ダブル"}
+                  </Button>
+                </VStack>
+              </MousePositionInput>
             </VStack>
           </ActionSelectorContent>
         </ActionSelector>

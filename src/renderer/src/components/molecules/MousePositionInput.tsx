@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
-import { HStack } from "../template/Flex";
+import { Center, VStack } from "../template/Flex";
+import { useScreenSize } from "../../hooks/useScreenSize";
 
 interface MousePositionInputProps {
   mouseX: number;
@@ -12,6 +14,7 @@ interface MousePositionInputProps {
   onGetPosition: () => void;
   setFocused: (focused: boolean) => void;
   idPrefix?: string;
+  children?: ReactNode;
 }
 
 /**
@@ -28,36 +31,70 @@ export function MousePositionInput({
   onGetPosition,
   setFocused,
   idPrefix = "mouse",
+  children,
 }: MousePositionInputProps) {
+  const screenSize = useScreenSize();
+
+  const relativeX = screenSize ? (mouseX / screenSize.width) * 100 : 50;
+  const relativeY = screenSize ? (mouseY / screenSize.height) * 100 : 50;
   return (
-    <HStack className="items-end justify-center" gap={2}>
-      <Input
-        id={`${idPrefix}-x`}
-        input-className="w-24 font-mono text-center"
-        input-onChange={(e) => onMouseXChange(Number(e.target.value))}
-        input-placeholder="X"
-        input-type="number"
-        input-value={mouseX.toString()}
-        label="X座標"
-        setFocused={setFocused}
-      />
-      <Input
-        id={`${idPrefix}-y`}
-        input-className="w-24 font-mono text-center"
-        input-onChange={(e) => onMouseYChange(Number(e.target.value))}
-        input-placeholder="Y"
-        input-type="number"
-        input-value={mouseY.toString()}
-        label="Y座標"
-        setFocused={setFocused}
-      />
-      <Button
-        disabled={isCapturing}
-        onClick={onGetPosition}
-        variant="outline"
-      >
-        {isCapturing ? `取得中... ${countdown}秒` : "位置を取得 (3秒後)"}
-      </Button>
-    </HStack>
+    <Center>
+      <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center w-fit">
+        <VStack gap={2} className="justify-around h-full">
+          <Input
+            horizontal
+            id={`${idPrefix}-x`}
+            input-className="w-16 font-mono text-center p-1"
+            input-onChange={(e) => onMouseXChange(Number(e.target.value))}
+            input-placeholder="0"
+            input-type="number"
+            input-value={mouseX.toString()}
+            label="X"
+            setFocused={setFocused}
+          />
+          <Input
+            horizontal
+            id={`${idPrefix}-y`}
+            input-className="w-16 font-mono text-center p-1"
+            input-onChange={(e) => onMouseYChange(Number(e.target.value))}
+            input-placeholder="0"
+            input-type="number"
+            input-value={mouseY.toString()}
+            label="Y"
+            setFocused={setFocused}
+          />
+        </VStack>
+
+        <Button
+          disabled={isCapturing}
+          onClick={onGetPosition}
+          variant="outline"
+          size="lg"
+          className="h-24 relative flex flex-col items-center justify-center gap-1"
+          style={
+            screenSize
+              ? { aspectRatio: `${screenSize.width} / ${screenSize.height}` }
+              : undefined
+          }
+        >
+          <div className="absolute inset-2 flex items-center justify-center pointer-events-none">
+            <div className="relative w-full h-full border border-primary/20 rounded">
+              <div
+                className="absolute w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200"
+                style={{
+                  left: `${relativeX}%`,
+                  top: `${relativeY}%`,
+                }}
+              />
+            </div>
+          </div>
+          <span className="relative z-10 font-medium">
+            {isCapturing ? `${countdown}秒後` : "位置を取得"}
+          </span>
+        </Button>
+
+        {children}
+      </div>
+    </Center>
   );
 }

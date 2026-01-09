@@ -61,3 +61,13 @@ export const SetCursorPos = user32.func("SetCursorPos", "bool", [
 export const GetCursorPos = user32.func("GetCursorPos", "bool", [
   koffi.out(koffi.pointer(POINT)),
 ]);
+
+export const GetSystemMetrics = user32.func("GetSystemMetrics", "int", [
+  "int", // nIndex
+]);
+
+// GetSystemMetrics用の定数
+export const SM_CXSCREEN = 0; // プライマリモニターの幅
+export const SM_CYSCREEN = 1; // プライマリモニターの高さ
+export const SM_CXVIRTUALSCREEN = 78; // 仮想スクリーン全体の幅（マルチモニター）
+export const SM_CYVIRTUALSCREEN = 79; // 仮想スクリーン全体の高さ（マルチモニター）

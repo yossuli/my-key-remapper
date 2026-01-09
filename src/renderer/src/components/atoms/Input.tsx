@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Show } from "../control/Show";
-import { VStack } from "../template/Flex";
+import { HStack, VStack } from "../template/Flex";
 
 interface InputProps
   extends AddPrefix<InputHTMLAttributes<HTMLInputElement>, "input-">,
@@ -14,6 +14,7 @@ interface InputProps
   id: string;
   className?: string;
   setFocused?: (focused: boolean) => void;
+  horizontal?: boolean; // labelとinputを横並びにするかどうか
 }
 
 export function Input({
@@ -24,6 +25,7 @@ export function Input({
   className,
   id,
   setFocused,
+  horizontal = false,
   ...props
 }: InputProps) {
   const labelProps = Object.fromEntries(
@@ -36,30 +38,37 @@ export function Input({
       .filter(([key]) => key.startsWith("input-"))
       .map(([key, value]) => [key.replace("input-", ""), value])
   );
+
+  const Container = horizontal ? HStack : VStack;
+  const containerProps = horizontal ? { gap: 2, className: cn("items-center", className) } as const : { gap: 2, className } as const
+
   return (
     <VStack gap={2} className={className}>
-      <Show condition={Boolean(label)}>
-        <Label
+      <Container {...containerProps}>
+        <Show condition={Boolean(label)}>
+          <Label
+            className={cn(
+              "font-medium text-muted-foreground text-xs",
+              horizontal && "whitespace-nowrap",
+              labelClassName
+            )}
+            htmlFor={id}
+            {...labelProps}
+          >
+            {label}
+          </Label>
+        </Show>
+        <ShadcnInput
           className={cn(
-            "font-medium text-muted-foreground text-xs",
-            labelClassName
+            Boolean(error) && "border-destructive focus-visible:ring-destructive",
+            inputClassName
           )}
-          htmlFor={id}
-          {...labelProps}
-        >
-          {label}
-        </Label>
-      </Show>
-      <ShadcnInput
-        className={cn(
-          Boolean(error) && "border-destructive focus-visible:ring-destructive",
-          inputClassName
-        )}
-        id={id}
-        onBlur={() => setFocused?.(false)}
-        onFocus={() => setFocused?.(true)}
-        {...inputProps}
-      />
+          id={id}
+          onBlur={() => setFocused?.(false)}
+          onFocus={() => setFocused?.(true)}
+          {...inputProps}
+        />
+      </Container>
       <Show condition={Boolean(error)}>
         <p className="text-destructive text-xs">{error}</p>
       </Show>

@@ -4,6 +4,7 @@ import { getCursorPosition } from "../native/mouseSender";
 import { getPressedKeys } from "../native/pressedKeysTracker";
 import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
+import { GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN } from "../native/bindings";
 
 /**
  * IPCハンドラの登録
@@ -67,4 +68,12 @@ export function setupIPCHandlers(): void {
 
   // マウス位置取得
   ipcMain.handle("get-cursor-position", () => getCursorPosition());
+
+  // 画面解像度取得
+  ipcMain.handle("get-screen-size", () => {
+    return {
+      width: GetSystemMetrics(SM_CXSCREEN),
+      height: GetSystemMetrics(SM_CYSCREEN),
+    };
+  });
 }

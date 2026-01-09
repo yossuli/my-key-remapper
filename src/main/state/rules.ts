@@ -202,7 +202,6 @@ export class RemapRules {
     return layers.find((l) => l.id === stack.at(-1));
   }
 
-
   /**
    * グローバル設定を更新
    */

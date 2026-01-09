@@ -1,5 +1,5 @@
-import { Button } from "../atoms/Button";
 import { cn } from "../../utils/cn";
+import { Button } from "../atoms/Button";
 
 interface ToggleButtonProps<T extends string | number> {
   value: T;
@@ -31,19 +31,19 @@ export function ToggleButton<T extends string | number>({
   return (
     <div className="flex flex-col gap-1">
       <Button
+        className={className}
         label={labels[value]}
         onClick={handleClick}
         variant="outline"
-        className={className}
       />
-      <div className="h-0.5 flex gap-0.5 px-0.5">
-        {options.map((_, index) => (
+      <div className="flex h-0.5 gap-0.5 px-0.5">
+        {options.map((option, index) => (
           <div
-            key={index}
             className={cn(
               "flex-1 transition-colors duration-200",
               index === currentIndex ? "bg-primary" : "bg-border"
             )}
+            key={String(option)}
           />
         ))}
       </div>

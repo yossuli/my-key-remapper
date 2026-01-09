@@ -1,4 +1,4 @@
-import type { GlobalSettings } from "../../../../shared/types/remapConfig";
+import type { JSX } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -6,8 +6,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
-import { JSX } from "react";
 
 interface GlobalSettingsModalProps {
   /** モーダル開閉状態 */

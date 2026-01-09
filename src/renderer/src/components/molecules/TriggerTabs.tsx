@@ -1,5 +1,7 @@
-import type { ReactNode } from "react";
+// biome-ignore lint/style/noExportedImports: 内部でも使用するため
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+export { Tabs, TabsContent, TabsList, TabsTrigger };
+
 import type { TriggerType } from "../../../../shared/types/remapConfig";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
@@ -87,6 +89,7 @@ export function TriggerTabs({
                   key={value}
                   value={value}
                 >
+                  {/* biome-ignore lint/nursery/noLeakedRender: テキストを表示するだけなので安全 */}
                   {isCompact ? shortLabel : label}
                 </TabsTrigger>
               )}
@@ -99,4 +102,4 @@ export function TriggerTabs({
   );
 }
 
-export { TabsContent };
+export type { TabsContent };

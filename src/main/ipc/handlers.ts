@@ -1,10 +1,10 @@
 import { ipcMain } from "electron";
 import { applyGlobalSettings, setRemapEnabled } from "../hook/keyHandler";
+import { GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN } from "../native/bindings";
 import { getCursorPosition } from "../native/mouseSender";
 import { getPressedKeys } from "../native/pressedKeysTracker";
 import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
-import { GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN } from "../native/bindings";
 
 /**
  * IPCハンドラの登録
@@ -70,10 +70,8 @@ export function setupIPCHandlers(): void {
   ipcMain.handle("get-cursor-position", () => getCursorPosition());
 
   // 画面解像度取得
-  ipcMain.handle("get-screen-size", () => {
-    return {
-      width: GetSystemMetrics(SM_CXSCREEN),
-      height: GetSystemMetrics(SM_CYSCREEN),
-    };
-  });
+  ipcMain.handle("get-screen-size", () => ({
+    width: GetSystemMetrics(SM_CXSCREEN),
+    height: GetSystemMetrics(SM_CYSCREEN),
+  }));
 }

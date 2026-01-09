@@ -1,4 +1,5 @@
 import type { ReactNode, SelectHTMLAttributes } from "react";
+import { Label } from "@/components/ui/label";
 import {
   SelectContent,
   SelectItem,
@@ -6,7 +7,6 @@ import {
   SelectValue,
   Select as ShadcnSelect,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import type { AddPrefix } from "../../types";
 import { cn } from "../../utils/cn";
 import { Mapped } from "../control/Mapped";
@@ -41,8 +41,8 @@ export function Select<T extends string>({
 }: SelectProps<T>) {
   const labelProps = Object.fromEntries(
     Object.entries(props)
-      .filter(([key]) => key.startsWith("label-"))
-      .map(([key, value]) => [key.replace("label-", ""), value])
+      .filter(([propKey]) => propKey.startsWith("label-"))
+      .map(([propKey, propValue]) => [propKey.replace("label-", ""), propValue])
   );
 
   return (

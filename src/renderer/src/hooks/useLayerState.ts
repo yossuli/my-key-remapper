@@ -9,6 +9,8 @@ import type {
 import { remove, upsert } from "../utils/handleMapping";
 import { useIpc } from "./useIpc";
 
+const REFRESH_DELAY_MS = 100;
+
 interface UseLayerStateReturn {
   layers: Layer[];
   layerOrder: string[]; // 追加
@@ -91,7 +93,7 @@ export function useLayerState(): UseLayerStateReturn {
 
   // マッピング保存
   const saveMapping = useCallback<UseLayerStateReturn["saveMapping"]>(
-    async (from, trigger, action, timing) => {
+    (from, trigger, action, timing) => {
       // triggerに応じたtimingMsを決定
       const timingMs =
         trigger === "hold" || trigger === "doubleTap" ? timing : undefined;
@@ -106,7 +108,7 @@ export function useLayerState(): UseLayerStateReturn {
       // 設定が変更された場合は再読み込みしてUIを更新
       setTimeout(() => {
         loadLayers();
-      }, 100);
+      }, REFRESH_DELAY_MS);
     },
     [send, layerId, loadLayers]
   );

@@ -148,7 +148,7 @@ export class KeyStateManager {
 
     // 長押しが既に発火していた場合
     if (state.holdFired) {
-      return "hold";
+      return null;
     }
 
     // ダブルタップバインディングがない場合は即座に tap を発火

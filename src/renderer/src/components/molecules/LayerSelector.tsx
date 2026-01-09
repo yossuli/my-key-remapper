@@ -21,7 +21,7 @@ export function LayerSelector({
   className,
 }: LayerSelectorProps) {
   return (
-    <VStack gap={2} className={className}>
+    <VStack className={className} gap={2}>
       <Select
         id="selectLayer"
         label={
@@ -31,12 +31,12 @@ export function LayerSelector({
           </>
         }
         label-className="flex items-center gap-1 font-medium text-muted-foreground text-xs"
+        onValueChange={(e) => onLayerChange(e)}
         options={layers.map((layer) => ({
           id: layer.id,
           value: layer.id,
           label: layer.id,
         }))}
-        onValueChange={(e) => onLayerChange(e)}
         select-value={selectedLayerId}
       />
       <Show condition={Boolean(description)}>

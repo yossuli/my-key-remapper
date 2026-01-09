@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { Button } from "../atoms/Button";
 import { Card } from "../atoms/Card";
 import { Text } from "../atoms/Text";
-import { VStack, HStack, Wrap } from "../template/Flex";
+import { HStack, VStack, Wrap } from "../template/Flex";
 
 interface LayerStatusPanelProps {
   /** 現在のレイヤースタック */
@@ -45,7 +45,7 @@ export function LayerStatusPanel({
           <Text size="lg" weight="semibold">
             レイヤーステータス
           </Text>
-          <Button onClick={onRefresh} variant="ghost" size="icon">
+          <Button onClick={onRefresh} size="icon" variant="ghost">
             <RefreshCw className="h-4 w-4" />
           </Button>
         </HStack>
@@ -82,8 +82,8 @@ export function LayerStatusPanel({
           <Wrap gap={2}>
             {availableLayers.map((layerId) => (
               <Button
-                label={layerId}
                 key={layerId}
+                label={layerId}
                 onClick={handleResetClick(layerId)}
                 variant={
                   stack.length === 1 && stack[0] === layerId

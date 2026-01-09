@@ -93,6 +93,7 @@ function processPendingHoldKeys(): void {
     if (remapKeys !== null) {
       // 複数キーを順番に送信
       for (const remapKey of remapKeys) {
+        // biome-ignore lint/style/noMagicNumbers: 連続送信の遅延時間はここで定義
         sendKey(remapKey, false, 11);
       }
       return;
@@ -120,7 +121,10 @@ export function handleKeyUp(vkCode: number): number {
   for (const binding of bindings) {
     if (binding.trigger === "hold" && binding.timingMs !== undefined) {
       holdThresholdMs = binding.timingMs;
-    } else if (binding.trigger === "doubleTap" && binding.timingMs !== undefined) {
+    } else if (
+      binding.trigger === "doubleTap" &&
+      binding.timingMs !== undefined
+    ) {
       tapIntervalMs = binding.timingMs;
     }
   }
@@ -169,7 +173,10 @@ export function handleKeyDown(vkCode: number): number {
   for (const binding of bindingsForTiming) {
     if (binding.trigger === "hold" && binding.timingMs !== undefined) {
       holdThresholdMs = binding.timingMs;
-    } else if (binding.trigger === "doubleTap" && binding.timingMs !== undefined) {
+    } else if (
+      binding.trigger === "doubleTap" &&
+      binding.timingMs !== undefined
+    ) {
       tapIntervalMs = binding.timingMs;
     }
   }

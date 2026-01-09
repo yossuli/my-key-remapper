@@ -3,7 +3,7 @@ import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
 import { Text } from "../atoms/Text";
-import { VStack, HStack } from "../template/Flex";
+import { HStack, VStack } from "../template/Flex";
 
 interface GlobalSettingsFormProps {
   globalSettings: GlobalSettings;
@@ -48,7 +48,6 @@ export function GlobalSettingsForm({
         <VStack gap={1}>
           <Input
             id="global-hold-threshold"
-            label="長押し判定時間 (ms)"
             input-min="1"
             input-onChange={(e) => {
               const val = e.target.value;
@@ -59,6 +58,7 @@ export function GlobalSettingsForm({
             }}
             input-type="number"
             input-value={holdThresholdMs}
+            label="長押し判定時間 (ms)"
           />
           <Text size="xs" variant="muted">
             キーを長押しと判定するまでの時間
@@ -68,7 +68,6 @@ export function GlobalSettingsForm({
         <VStack gap={1}>
           <Input
             id="global-tap-interval"
-            label="ダブルタップ判定間隔 (ms)"
             input-min="1"
             input-onChange={(e) => {
               const val = e.target.value;
@@ -79,6 +78,7 @@ export function GlobalSettingsForm({
             }}
             input-type="number"
             input-value={tapIntervalMs}
+            label="ダブルタップ判定間隔 (ms)"
           />
           <Text size="xs" variant="muted">
             2回のタップをダブルタップと判定する間隔
@@ -86,7 +86,7 @@ export function GlobalSettingsForm({
         </VStack>
       </VStack>
 
-      <HStack gap={2} className="justify-end">
+      <HStack className="justify-end" gap={2}>
         <Button
           disabled={!hasChanges}
           label="保存"

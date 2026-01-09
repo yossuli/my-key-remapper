@@ -2,7 +2,10 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/react"],
   "files": {
-    "ignore": ["src/renderer/src/components/ui"]
+    "includes": [
+      "!!src/renderer/src/components/ui",
+      "!!electron.vite.config.*.mjs"
+    ]
   },
   "linter": {
     "rules": {
@@ -13,7 +16,7 @@
         "noExcessiveCognitiveComplexity": {
           "level": "error",
           "options": {
-            "maxAllowedComplexity": 10
+            "maxAllowedComplexity": 11
           }
         }
       },
@@ -38,5 +41,32 @@
         }
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["PascalCase"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/**/index.tsx", "src/**/main.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ]
 }

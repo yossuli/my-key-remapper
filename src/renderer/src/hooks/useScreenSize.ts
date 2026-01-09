@@ -16,11 +16,14 @@ export function useScreenSize(): ScreenSize | null {
       try {
         // Electron環境でのみ画面サイズを取得
         if (window.electron?.ipcRenderer) {
-          const size = await window.electron.ipcRenderer.invoke("get-screen-size");
+          const size =
+            await window.electron.ipcRenderer.invoke("get-screen-size");
           setScreenSize(size);
         } else {
           // ブラウザ環境ではデフォルト値を使用(AIがブラウザでUIを確認するときに使用)
-          console.warn("Running in browser environment, using default screen size");
+          console.warn(
+            "Running in browser environment, using default screen size"
+          );
           setScreenSize({ width: 1920, height: 1080 });
         }
       } catch (error) {

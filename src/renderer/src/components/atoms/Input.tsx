@@ -40,16 +40,18 @@ export function Input({
   );
 
   const Container = horizontal ? HStack : VStack;
-  const containerProps = horizontal ? { gap: 2, className: cn("items-center", className) } as const : { gap: 2, className } as const
+  const containerProps = horizontal
+    ? ({ gap: 2, className: cn("items-center", className) } as const)
+    : ({ gap: 2, className } as const);
 
   return (
-    <VStack gap={2} className={className}>
+    <VStack className={className} gap={2}>
       <Container {...containerProps}>
         <Show condition={Boolean(label)}>
           <Label
             className={cn(
               "font-medium text-muted-foreground text-xs",
-              horizontal && "whitespace-nowrap",
+              !!horizontal && "whitespace-nowrap",
               labelClassName
             )}
             htmlFor={id}
@@ -60,7 +62,8 @@ export function Input({
         </Show>
         <ShadcnInput
           className={cn(
-            Boolean(error) && "border-destructive focus-visible:ring-destructive",
+            Boolean(error) &&
+              "border-destructive focus-visible:ring-destructive",
             inputClassName
           )}
           id={id}

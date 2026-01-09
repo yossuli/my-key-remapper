@@ -13,23 +13,20 @@ import type { LayoutType } from "../../types";
 import { Show } from "../control/Show";
 import { PressedKeysPanel } from "../molecules/PressedKeysPanel";
 import { AppHeader } from "../organisms/AppHeader";
-import { GlobalSettingsModal } from "../molecules/GlobalSettingsModal";
+import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
 import { KeyEditorForm } from "../organisms/KeyEditorForm";
 import { KeyRemapSection } from "../organisms/KeyRemapSection";
 import { LayerStatusPanel } from "../organisms/LayerStatusPanel";
 import { LogList } from "../organisms/LogList";
+import { VStack } from "../template/Flex";
 import { Header, Main, MainLayout, Side } from "../template/MainLayout";
 import { ModalLayout } from "../template/ModalLayout";
-import { VStack } from "../template/Flex";
-import { With } from "../control/With";
-import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
   const { logs } = useKeyEventLog();
   const {
     layers,
-    layerOrder,
     layerId,
     setLayerId,
     currentBindings,
@@ -42,8 +39,7 @@ export function KeyRemapperPage() {
   const { isActive, toggleActive, enableRemap, disableRemap } =
     useRemapControl();
   const { stack, refresh, resetToLayer } = useLayerStack();
-  const { globalSettings, updateGlobalSettings, isLoading } =
-    useGlobalSettings();
+  const { globalSettings, updateGlobalSettings } = useGlobalSettings();
 
   // UI状態
   const [editingKey, setEditingKey] = useState<number | null>(null);
@@ -118,7 +114,7 @@ export function KeyRemapperPage() {
         </Side>
       </MainLayout>
 
-      <ModalLayout value={editingKey} onClose={handleCloseEditor}>
+      <ModalLayout onClose={handleCloseEditor} value={editingKey}>
         {(e) => (
           <KeyEditorForm
             defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs}
@@ -138,12 +134,12 @@ export function KeyRemapperPage() {
       </ModalLayout>
 
       <ModalLayout
-        value={settingsModalOpen ? globalSettings : null}
         onClose={() => setSettingsModalOpen(false)}
+        value={settingsModalOpen ? globalSettings : null}
       >
-        {(globalSettings) => (
+        {(currentSettings) => (
           <GlobalSettingsForm
-            globalSettings={globalSettings}
+            globalSettings={currentSettings}
             onSave={updateGlobalSettings}
           />
         )}

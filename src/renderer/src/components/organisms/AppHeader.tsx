@@ -2,7 +2,7 @@ import { Eye, EyeOff, Keyboard, Power, Settings } from "lucide-react";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { Text } from "../atoms/Text";
-import { HStack, VStack, Box } from "../template/Flex";
+import { Box, HStack, VStack } from "../template/Flex";
 
 interface AppHeaderProps {
   isActive: boolean;
@@ -30,10 +30,10 @@ export function AppHeader({
           <Icon className="text-primary" icon={Keyboard} size="lg" />
         </Box>
         <VStack>
-          <Text as="h1" weight="bold" size="xl" className="tracking-tight">
+          <Text as="h1" className="tracking-tight" size="xl" weight="bold">
             Key Remapper
           </Text>
-          <Text variant="muted" size="xs">
+          <Text size="xs" variant="muted">
             Windows Native Hook
           </Text>
         </VStack>

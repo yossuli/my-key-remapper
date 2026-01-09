@@ -18,8 +18,8 @@ import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
 import { LayerTabs } from "../molecules/LayerTabs";
 import { LayoutToggle } from "../molecules/LayoutToggle";
-import { HStack, VStack } from "../template/Flex";
 import { TriggerTabs } from "../molecules/TriggerTabs";
+import { HStack, VStack } from "../template/Flex";
 import { KeyboardGrid } from "./KeyboardGrid";
 
 interface KeyRemapSectionProps {

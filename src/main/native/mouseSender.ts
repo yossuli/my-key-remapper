@@ -101,7 +101,7 @@ export async function clickAt(
   x: number,
   y: number,
   button: "left" | "right" | "middle",
-  clickCount: number = 1
+  clickCount = 1
 ): Promise<void> {
   console.log("clickAt", x, y, button, clickCount);
 
@@ -116,6 +116,7 @@ export async function clickAt(
     // ダブルクリックの場合、少し待つ
     if (i < clickCount - 1) {
       // 次のクリックまで非同期で待つ（50ms）
+      // biome-ignore lint/style/noMagicNumbers: クリック間隔
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   }

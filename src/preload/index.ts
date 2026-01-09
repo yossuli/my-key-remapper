@@ -1,9 +1,10 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 // リスナーのラッパー関数を管理するMap
-// biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
 const listenerMap = new Map<
+  // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
   (...args: any[]) => void,
+  // biome-ignore lint/suspicious/noExplicitAny: IPC引数は動的です
   (...args: any[]) => void
 >();
 

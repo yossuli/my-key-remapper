@@ -17,7 +17,7 @@ export function ModalLayout<T>({
   const isOpen = !!value;
 
   return (
-    <Dialog open={isOpen} onClose={onClose} title={title}>
+    <Dialog onClose={onClose} open={isOpen} title={title}>
       {value !== null && children(value)}
     </Dialog>
   );

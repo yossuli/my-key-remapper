@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
+import { useScreenSize } from "../../hooks/useScreenSize";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
 import { Center, VStack } from "../template/Flex";
-import { useScreenSize } from "../../hooks/useScreenSize";
 
 interface MousePositionInputProps {
   mouseX: number;
@@ -35,12 +35,14 @@ export function MousePositionInput({
 }: MousePositionInputProps) {
   const screenSize = useScreenSize();
 
+  // biome-ignore lint/style/noMagicNumbers: UI計算用
   const relativeX = screenSize ? (mouseX / screenSize.width) * 100 : 50;
+  // biome-ignore lint/style/noMagicNumbers: UI計算用
   const relativeY = screenSize ? (mouseY / screenSize.height) * 100 : 50;
   return (
     <Center>
-      <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center w-fit">
-        <VStack gap={2} className="justify-around h-full">
+      <div className="grid w-fit grid-cols-[auto_1fr_auto] items-center gap-4">
+        <VStack className="h-full justify-around" gap={2}>
           <Input
             horizontal
             id={`${idPrefix}-x`}
@@ -66,21 +68,22 @@ export function MousePositionInput({
         </VStack>
 
         <Button
+          className="relative flex h-24 flex-col items-center justify-center gap-1"
           disabled={isCapturing}
           onClick={onGetPosition}
-          variant="outline"
           size="lg"
-          className="h-24 relative flex flex-col items-center justify-center gap-1"
           style={
+            // biome-ignore lint/nursery/noLeakedRender: styleプロパティへのundefined渡しはReactで有効
             screenSize
               ? { aspectRatio: `${screenSize.width} / ${screenSize.height}` }
               : undefined
           }
+          variant="outline"
         >
-          <div className="absolute inset-2 flex items-center justify-center pointer-events-none">
-            <div className="relative w-full h-full border border-primary/20 rounded">
+          <div className="pointer-events-none absolute inset-2 flex items-center justify-center">
+            <div className="relative h-full w-full rounded border border-primary/20">
               <div
-                className="absolute w-3 h-3 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-200"
+                className="-translate-x-1/2 -translate-y-1/2 absolute h-3 w-3 rounded-full bg-primary transition-all duration-200"
                 style={{
                   left: `${relativeX}%`,
                   top: `${relativeY}%`,

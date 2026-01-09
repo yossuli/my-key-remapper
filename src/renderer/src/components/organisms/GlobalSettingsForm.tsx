@@ -89,12 +89,11 @@ export function GlobalSettingsForm({
       <HStack gap={2} className="justify-end">
         <Button
           disabled={!hasChanges}
+          label="保存"
           onClick={handleSave}
           size="default"
           variant="default"
-        >
-          保存
-        </Button>
+        />
       </HStack>
     </VStack>
   );

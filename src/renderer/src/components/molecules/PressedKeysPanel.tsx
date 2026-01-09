@@ -84,11 +84,10 @@ export function PressedKeysPanel({
       <Show condition={pressedKeys.length > 0}>
         <Button
           className="w-full"
+          label="すべてリリース"
           onClick={handleReleaseAll}
           variant="destructive"
-        >
-          すべてリリース
-        </Button>
+        />
       </Show>
     </VStack>
   );

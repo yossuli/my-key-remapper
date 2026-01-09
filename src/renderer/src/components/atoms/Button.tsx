@@ -5,9 +5,10 @@ import {
 } from "@/components/ui/button";
 
 interface ButtonProps extends ShadcnButtonProps {
-  children: ReactNode;
+  children?: ReactNode;
+  label?: string;
 }
 
-export function Button({ children, ...props }: ButtonProps) {
-  return <ShadcnButton {...props}>{children}</ShadcnButton>;
+export function Button({ children, label, ...props }: ButtonProps): ReactNode {
+  return <ShadcnButton {...props}>{children ?? label}</ShadcnButton>;
 }

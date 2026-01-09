@@ -308,14 +308,13 @@ export function KeyEditorForm({
               </HandleEmpty>
               <Show condition={newTargetKeys.length > 0}>
                 <Button
+                label="クリア"
                   onClick={() => {
                     resetState();
                     clearTargetKeys();
                   }}
                   variant="ghost"
-                >
-                  クリア
-                </Button>
+              />
               </Show>
             </HStack>
 
@@ -457,18 +456,20 @@ export function KeyEditorForm({
       </TriggerTabs>
       <HStack className="justify-end" gap={2}>
         <Show condition={hasExistingBinding}>
-          <Button onClick={handleRemove} size="default" variant="destructive">
-            削除
-          </Button>
+          <Button
+            label="削除"
+            onClick={handleRemove}
+            size="default"
+            variant="destructive"
+          />
         </Show>
         <Button
           disabled={!canSave}
+          label="保存"
           onClick={handleSave}
           size="default"
           variant="default"
-        >
-          保存
-        </Button>
+        />
       </HStack>
     </VStack>
   );

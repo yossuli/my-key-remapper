@@ -42,7 +42,9 @@ export function LayerStatusPanel({
       <VStack gap={4}>
         {/* ヘッダー */}
         <HStack className="justify-between">
-          <Text size="lg" weight="semibold">レイヤーステータス</Text>
+          <Text size="lg" weight="semibold">
+            レイヤーステータス
+          </Text>
           <Button onClick={onRefresh} variant="ghost" size="icon">
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -50,7 +52,9 @@ export function LayerStatusPanel({
 
         {/* 現在のスタック表示 */}
         <VStack gap={2}>
-          <Text size="sm" variant="muted">現在のスタック</Text>
+          <Text size="sm" variant="muted">
+            現在のスタック
+          </Text>
           <Wrap gap={2}>
             {stack.map((layerId, index) => (
               <div
@@ -72,10 +76,13 @@ export function LayerStatusPanel({
 
         {/* 強制リセットボタン */}
         <VStack gap={2}>
-          <Text size="sm" variant="muted">強制リセット</Text>
+          <Text size="sm" variant="muted">
+            強制リセット
+          </Text>
           <Wrap gap={2}>
             {availableLayers.map((layerId) => (
               <Button
+                label={layerId}
                 key={layerId}
                 onClick={handleResetClick(layerId)}
                 variant={
@@ -83,9 +90,7 @@ export function LayerStatusPanel({
                     ? "ghost"
                     : "secondary"
                 }
-              >
-                {layerId}
-              </Button>
+              />
             ))}
           </Wrap>
         </VStack>

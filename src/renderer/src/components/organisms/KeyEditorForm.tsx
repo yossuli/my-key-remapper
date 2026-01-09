@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MAX_VK_CODE, MIN_VK_CODE, VK } from "../../../../shared/constants/vk";
 import type {
   Action,
@@ -72,7 +72,7 @@ export function KeyEditorForm({
   const [countdown, setCountdown] = useState(0);
 
   const {
-    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
+    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding, mouseX: loadedMouseX, mouseY: loadedMouseY },
     existingTiming,
     setSelectedLayerId,
     loadBindingForTrigger,
@@ -183,6 +183,7 @@ export function KeyEditorForm({
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
+          // カウントダウン終了後に座標を取得
           getCursorPosition().then((position) => {
             setMouseX(position.x);
             setMouseY(position.y);
@@ -194,6 +195,16 @@ export function KeyEditorForm({
       });
     }, 1000);
   };
+
+  // 読み込んだ座標で初期化
+  useEffect(() => {
+    if (loadedMouseX !== undefined) {
+      setMouseX(loadedMouseX);
+    }
+    if (loadedMouseY !== undefined) {
+      setMouseY(loadedMouseY);
+    }
+  }, [loadedMouseX, loadedMouseY]);
 
   return (
     <VStack className="px-6" gap={4}>

@@ -8,6 +8,8 @@ export interface BindingState {
   targetKeys: number[];
   selectedLayerId: string;
   hasExistingBinding: boolean;
+  mouseX?: number;
+  mouseY?: number;
 }
 
 /**
@@ -26,6 +28,9 @@ export function actionToBindingState(action: Action): Partial<BindingState> {
       },
       layerMomentary: (act) => {
         result = { actionType: "layerMomentary", selectedLayerId: act.layerId };
+      },
+      mouseMove: (act) => {
+        result = { actionType: "mouseMove", mouseX: act.x, mouseY: act.y };
       },
       none: () => {
         result = { actionType: "none" };

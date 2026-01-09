@@ -129,6 +129,13 @@ export function useKeyEditorActions({
           x: 0,
           y: 0,
         }),
+        mouseClick: () => ({
+          type: "mouseClick",
+          x: 0,
+          y: 0,
+          button: "left",
+          clickCount: 1,
+        }),
         none: () => ({ type: "none" }),
       },
       actionType

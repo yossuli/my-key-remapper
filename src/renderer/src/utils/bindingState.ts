@@ -10,6 +10,8 @@ export interface BindingState {
   hasExistingBinding: boolean;
   mouseX?: number;
   mouseY?: number;
+  mouseButton?: "left" | "right" | "middle";
+  clickCount?: number;
 }
 
 /**
@@ -31,6 +33,15 @@ export function actionToBindingState(action: Action): Partial<BindingState> {
       },
       mouseMove: (act) => {
         result = { actionType: "mouseMove", mouseX: act.x, mouseY: act.y };
+      },
+      mouseClick: (act) => {
+        result = {
+          actionType: "mouseClick",
+          mouseX: act.x,
+          mouseY: act.y,
+          mouseButton: act.button,
+          clickCount: act.clickCount ?? 1,
+        };
       },
       none: () => {
         result = { actionType: "none" };

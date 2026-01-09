@@ -13,10 +13,12 @@ import { useMousePosition } from "../../hooks/useMousePosition";
 import type { LayoutType } from "../../types";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
+import { Select } from "../atoms/Select";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
 import { ActionSelector, ActionSelectorContent } from "../molecules/ActionSelector";
 import { KeyDisplay } from "../molecules/KeyDisplay";
+import { MousePositionInput } from "../molecules/MousePositionInput";
 import { TimingInput } from "../molecules/TimingInput";
 
 import { TabsContent, TriggerTabs } from "../molecules/TriggerTabs";
@@ -68,11 +70,13 @@ export function KeyEditorForm({
   const [vkInputValue, setVkInputValue] = useState("");
   const [mouseX, setMouseX] = useState<number>(0);
   const [mouseY, setMouseY] = useState<number>(0);
+  const [mouseButton, setMouseButton] = useState<"left" | "right" | "middle">("left");
+  const [clickCount, setClickCount] = useState<number>(1);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
   const {
-    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding, mouseX: loadedMouseX, mouseY: loadedMouseY },
+    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding, mouseX: loadedMouseX, mouseY: loadedMouseY, mouseButton: loadedMouseButton, clickCount: loadedClickCount },
     existingTiming,
     setSelectedLayerId,
     loadBindingForTrigger,
@@ -106,13 +110,16 @@ export function KeyEditorForm({
 
   const handleSaveAction = useCallback(
     (trigger: TriggerType, action: Action) => {
+      // mouseMoveアクションの場合は座標を設定
       if (action.type === "mouseMove") {
         handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY });
+      } else if (action.type === "mouseClick") {
+        handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY, button: mouseButton, clickCount });
       } else {
         handleSaveWithTiming(trigger, action);
       }
     },
-    [handleSaveWithTiming, mouseX, mouseY]
+    [handleSaveWithTiming, mouseX, mouseY, mouseButton, clickCount]
   );
 
   const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, resetState, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave: handleSaveAction, onRemove, onClose }); // biome-ignore format: 引数に関心はない
@@ -196,7 +203,7 @@ export function KeyEditorForm({
     }, 1000);
   };
 
-  // 読み込んだ座標で初期化
+  // 読み込んだ設定で初期化
   useEffect(() => {
     if (loadedMouseX !== undefined) {
       setMouseX(loadedMouseX);
@@ -204,7 +211,13 @@ export function KeyEditorForm({
     if (loadedMouseY !== undefined) {
       setMouseY(loadedMouseY);
     }
-  }, [loadedMouseX, loadedMouseY]);
+    if (loadedMouseButton !== undefined) {
+      setMouseButton(loadedMouseButton);
+    }
+    if (loadedClickCount !== undefined) {
+      setClickCount(loadedClickCount);
+    }
+  }, [loadedMouseX, loadedMouseY, loadedMouseButton, loadedClickCount]);
 
   return (
     <VStack className="px-6" gap={4}>
@@ -313,39 +326,68 @@ export function KeyEditorForm({
               <p className="text-muted-foreground text-sm">
                 マウスカーソルを指定座標に移動します
               </p>
-              <HStack className="items-end justify-center" gap={2}>
-                <Input
-                  id="mouse-x"
-                  input-className="w-24 font-mono text-center"
-                  input-onChange={(e) => setMouseX(Number(e.target.value))}
-                  input-placeholder="X"
-                  input-type="number"
-                  input-value={mouseX.toString()}
-                  label="X座標"
-                  setFocused={setIsInputFocused}
-                />
-                <Input
-                  id="mouse-y"
-                  input-className="w-24 font-mono text-center"
-                  input-onChange={(e) => setMouseY(Number(e.target.value))}
-                  input-placeholder="Y"
-                  input-type="number"
-                  input-value={mouseY.toString()}
-                  label="Y座標"
-                  setFocused={setIsInputFocused}
-                />
-                <Button
-                  disabled={isCapturing}
-                  onClick={handleGetMousePosition}
-                  variant="outline"
-                >
-                  {isCapturing ? `取得中... ${countdown}秒` : "位置を取得 (3秒後)"}
-                </Button>
-              </HStack>
+              <MousePositionInput
+                countdown={countdown}
+                idPrefix="mouse"
+                isCapturing={isCapturing}
+                mouseX={mouseX}
+                mouseY={mouseY}
+                onGetPosition={handleGetMousePosition}
+                onMouseXChange={setMouseX}
+                onMouseYChange={setMouseY}
+                setFocused={setIsInputFocused}
+              />
               <p className="text-muted-foreground text-xs">
                 {isCapturing
                   ? "マウスを目的の位置に移動してください..."
                   : `設定座標: (${mouseX}, ${mouseY})`}
+              </p>
+            </VStack>
+          </ActionSelectorContent>
+
+          <ActionSelectorContent value="mouseClick">
+            <VStack gap={3}>
+              <p className="text-muted-foreground text-sm">
+                指定座標をクリックします
+              </p>
+              <MousePositionInput
+                countdown={countdown}
+                idPrefix="click"
+                isCapturing={isCapturing}
+                mouseX={mouseX}
+                mouseY={mouseY}
+                onGetPosition={handleGetMousePosition}
+                onMouseXChange={setMouseX}
+                onMouseYChange={setMouseY}
+                setFocused={setIsInputFocused}
+              />
+              <HStack className="justify-center" gap={2}>
+                <Select
+                  id="mouse-button"
+                  label="ボタン"
+                  onValueChange={(value: "left" | "right" | "middle") => setMouseButton(value)}
+                  options={[
+                    { id: "left", value: "left", label: "左クリック" },
+                    { id: "right", value: "right", label: "右クリック" },
+                    { id: "middle", value: "middle", label: "中クリック" },
+                  ]}
+                  select-value={mouseButton}
+                />
+                <Select
+                  id="click-count"
+                  label="回数"
+                  onValueChange={(value: string) => setClickCount(Number(value))}
+                  options={[
+                    { id: 1, value: "1", label: "シングル" },
+                    { id: 2, value: "2", label: "ダブル" },
+                  ]}
+                  select-value={clickCount.toString()}
+                />
+              </HStack>
+              <p className="text-muted-foreground text-xs">
+                {isCapturing
+                  ? "マウスを目的の位置に移動してください..."
+                  : `設定: (${mouseX}, ${mouseY}) ${mouseButton === "left" ? "左" : mouseButton === "right" ? "右" : "中"}クリック × ${clickCount}`}
               </p>
             </VStack>
           </ActionSelectorContent>

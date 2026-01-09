@@ -1,7 +1,7 @@
 import { VK } from "../../shared/constants";
 import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { sendKey } from "../native/sender";
-import { moveMouse } from "../native/mouseSender";
+import { clickAt, moveMouse } from "../native/mouseSender";
 import { remapRules } from "../state/rules";
 
 /**
@@ -121,8 +121,10 @@ function executeActionInternal(
 ): void {
   switch (action.type) {
     case "mouseMove":
-      console.log("mouseMove", action.x, action.y);
       moveMouse(action.x, action.y);
+      break;
+    case "mouseClick":
+      clickAt(action.x, action.y, action.button, action.clickCount ?? 1);
       break;
     case "layerToggle":
       remapRules.setLayer(action.layerId);
@@ -178,6 +180,9 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
       break;
     case "mouseMove":
       moveMouse(action.x, action.y);
+      break;
+    case "mouseClick":
+      clickAt(action.x, action.y, action.button, action.clickCount ?? 1);
       break;
     case "layerToggle":
       remapRules.setLayer(action.layerId);

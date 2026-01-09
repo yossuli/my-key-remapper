@@ -98,6 +98,21 @@ export interface MouseMoveAction {
 }
 
 /**
+ * マウスクリックアクション
+ */
+export interface MouseClickAction {
+  type: "mouseClick";
+  /** クリック座標X (絶対ピクセル座標) */
+  x: number;
+  /** クリック座標Y (絶対ピクセル座標) */
+  y: number;
+  /** クリックボタン */
+  button: "left" | "right" | "middle";
+  /** クリック回数 (1: シングル, 2: ダブル) */
+  clickCount?: number;
+}
+
+/**
  * すべてのアクション種別
  */
 export type Action =
@@ -107,6 +122,7 @@ export type Action =
   | LayerMomentaryAction
   | NoneAction
   | MouseMoveAction
+  | MouseClickAction
   // | PassthroughAction;
 
 export type ActionType = Action["type"];

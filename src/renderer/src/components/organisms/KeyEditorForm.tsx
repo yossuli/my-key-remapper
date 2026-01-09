@@ -13,7 +13,7 @@ import { useMousePosition } from "../../hooks/useMousePosition";
 import type { LayoutType } from "../../types";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
-import { Select } from "../atoms/Select";
+import { ToggleButton } from "../atoms/ToggleButton";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
 import {
@@ -309,11 +309,11 @@ export function KeyEditorForm({
               <Show condition={newTargetKeys.length > 0}>
                 <Button
                 label="クリア"
-                  onClick={() => {
-                    resetState();
-                    clearTargetKeys();
-                  }}
-                  variant="ghost"
+                onClick={() => {
+                  resetState();
+                  clearTargetKeys();
+                }}
+                variant="ghost"
               />
               </Show>
             </HStack>
@@ -397,35 +397,28 @@ export function KeyEditorForm({
                 setFocused={setIsInputFocused}
               >
                 <VStack gap={2} className="justify-around h-full">
-                  <Button
-                    onClick={() => {
-                      setMouseButton((prev) =>
-                        prev === "left"
-                          ? "middle"
-                          : prev === "middle"
-                          ? "right"
-                          : "left"
-                      );
+                  <ToggleButton
+                    value={mouseButton}
+                    options={["left", "middle", "right"] as const}
+                    labels={{
+                      left: "左クリック",
+                      middle: "中クリック",
+                      right: "右クリック",
                     }}
-                    variant="outline"
+                    onChange={setMouseButton}
                     className="w-full"
-                  >
-                    {mouseButton === "left"
-                      ? "左クリック"
-                      : mouseButton === "middle"
-                      ? "中クリック"
-                      : "右クリック"}
-                  </Button>
+                  />
 
-                  <Button
-                    onClick={() => {
-                      setClickCount((prev) => (prev === 1 ? 2 : 1));
+                  <ToggleButton
+                    value={clickCount}
+                    options={[1, 2] as const}
+                    labels={{
+                      1: "シングル",
+                      2: "ダブル",
                     }}
-                    variant="outline"
+                    onChange={setClickCount}
                     className="w-full"
-                  >
-                    {clickCount === 1 ? "シングル" : "ダブル"}
-                  </Button>
+                  />
                 </VStack>
               </MousePositionInput>
             </VStack>

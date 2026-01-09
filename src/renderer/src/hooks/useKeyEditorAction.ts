@@ -124,6 +124,11 @@ export function useKeyEditorActions({
           type: "layerMomentary",
           layerId: selectedLayerId,
         }),
+        mouseMove: () => ({
+          type: "mouseMove",
+          x: 0,
+          y: 0,
+        }),
         none: () => ({ type: "none" }),
       },
       actionType

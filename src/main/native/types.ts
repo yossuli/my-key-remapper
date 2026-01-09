@@ -8,8 +8,19 @@ export const WM_SYSKEYDOWN = 0x01_04;
 export const WM_SYSKEYUP = 0x01_05;
 
 export const INPUT_KEYBOARD = 1;
+export const INPUT_MOUSE = 0;
 export const KEYEVENTF_KEYUP = 0x00_02;
 export const KEYEVENTF_SCANCODE = 0x00_08;
+
+// マウスイベントフラグ
+export const MOUSEEVENTF_MOVE = 0x00_01;
+export const MOUSEEVENTF_LEFTDOWN = 0x00_02;
+export const MOUSEEVENTF_LEFTUP = 0x00_04;
+export const MOUSEEVENTF_RIGHTDOWN = 0x00_08;
+export const MOUSEEVENTF_RIGHTUP = 0x00_10;
+export const MOUSEEVENTF_MIDDLEDOWN = 0x00_20;
+export const MOUSEEVENTF_MIDDLEUP = 0x00_40;
+export const MOUSEEVENTF_ABSOLUTE = 0x80_00;
 
 // 基本型のエイリアス（関数シグネチャの可読性向上のため）
 export const HHOOK = koffi.alias("HHOOK", "intptr_t");

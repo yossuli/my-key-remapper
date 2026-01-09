@@ -87,6 +87,17 @@ export interface PassthroughAction {
 }
 
 /**
+ * マウスカーソル移動アクション
+ */
+export interface MouseMoveAction {
+  type: "mouseMove";
+  /** 移動先X座標 (絶対ピクセル座標) */
+  x: number;
+  /** 移動先Y座標 (絶対ピクセル座標) */
+  y: number;
+}
+
+/**
  * すべてのアクション種別
  */
 export type Action =
@@ -95,6 +106,7 @@ export type Action =
   | LayerToggleAction
   | LayerMomentaryAction
   | NoneAction
+  | MouseMoveAction
   // | PassthroughAction;
 
 export type ActionType = Action["type"];

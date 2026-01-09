@@ -1,6 +1,7 @@
 import { VK } from "../../shared/constants";
 import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { sendKey } from "../native/sender";
+import { moveMouse } from "../native/mouseSender";
 import { remapRules } from "../state/rules";
 
 /**
@@ -87,10 +88,20 @@ export function handleTapOnlyBindings(
 
   const action = remapRules.getAction(vkCode, "tap");
 
-  // tap アクションがある場合（修飾キーなしで送信）
-  if (action?.type === "remap") {
-    for (const key of action.keys) {
-      sendKey(key, isUp);
+  // tap アクションがある場合
+  if (action) {
+    // remapアクションの場合はここで処理（修飾キーなしで送信）
+    if (action.type === "remap") {
+      for (const key of action.keys) {
+        sendKey(key, isUp);
+      }
+      return 1;
+    }
+    // remap以外（mouseMove等）の場合はexecuteActionに委譲
+    // isUpがtrueの場合のみ実行（キーアップ時に1回だけ実行）
+    if (isUp) {
+      executeActionInternal(vkCode, "tap", action);
+      return 1;
     }
     return 1;
   }
@@ -98,6 +109,37 @@ export function handleTapOnlyBindings(
   // tap アクションがない場合、レイヤーの修飾キーを付与して送信
   sendKeyWithLayerModifiers(vkCode, isUp);
   return 1;
+}
+
+/**
+ * アクションを実行する内部関数（再帰を避けるため）
+ */
+function executeActionInternal(
+  vkCode: number,
+  trigger: TriggerType,
+  action: NonNullable<ReturnType<typeof remapRules.getAction>>
+): void {
+  switch (action.type) {
+    case "mouseMove":
+      console.log("mouseMove", action.x, action.y);
+      moveMouse(action.x, action.y);
+      break;
+    case "layerToggle":
+      remapRules.setLayer(action.layerId);
+      break;
+    case "layerMomentary":
+      releaseMomentaryLayer(vkCode);
+      break;
+    case "none":
+      break;
+    case "remap":
+      // remapは既にhandleTapOnlyBindingsで処理済み
+      break;
+    default: {
+      const _: never = action;
+      break;
+    }
+  }
 }
 
 /**
@@ -133,6 +175,9 @@ export function executeAction(vkCode: number, trigger_: TriggerType) {
       for (const key of action.keys.toReversed()) {
         sendKey(key, true, 10);
       }
+      break;
+    case "mouseMove":
+      moveMouse(action.x, action.y);
       break;
     case "layerToggle":
       remapRules.setLayer(action.layerId);

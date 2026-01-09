@@ -12,6 +12,12 @@ import {
 const user32 = koffi.load("user32.dll");
 const kernel32 = koffi.load("kernel32.dll");
 
+// マウス座標用の構造体
+const POINT = koffi.struct("POINT", {
+  x: "long",
+  y: "long",
+});
+
 // コールバックのシグネチャ
 export const HookCallbackProto = koffi.proto("HookCallbackProto", LRESULT, [
   "int",
@@ -45,4 +51,13 @@ export const UnhookWindowsHookEx = user32.func("UnhookWindowsHookEx", "bool", [
 
 export const GetModuleHandleA = kernel32.func("GetModuleHandleA", HINSTANCE, [
   "str",
+]);
+
+export const SetCursorPos = user32.func("SetCursorPos", "bool", [
+  "int", // x
+  "int", // y
+]);
+
+export const GetCursorPos = user32.func("GetCursorPos", "bool", [
+  koffi.out(koffi.pointer(POINT)),
 ]);

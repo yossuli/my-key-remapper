@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 import { applyGlobalSettings, setRemapEnabled } from "../hook/keyHandler";
+import { getCursorPosition } from "../native/mouseSender";
 import { getPressedKeys } from "../native/pressedKeysTracker";
 import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
@@ -63,4 +64,7 @@ export function setupIPCHandlers(): void {
     // 設定を即座に反映
     applyGlobalSettings();
   });
+
+  // マウス位置取得
+  ipcMain.handle("get-cursor-position", () => getCursorPosition());
 }

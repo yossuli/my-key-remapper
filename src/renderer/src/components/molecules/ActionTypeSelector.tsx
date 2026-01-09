@@ -13,6 +13,7 @@ const ACTION_TYPE_OPTIONS = [
     value: "layerMomentary",
     label: "レイヤー（押下中）",
   },
+  { id: "mouseMove", value: "mouseMove", label: "マウス移動" },
   { id: "none", value: "none", label: "無効化" },
 ] as const satisfies { id: ActionType; value: ActionType; label: string }[];
 

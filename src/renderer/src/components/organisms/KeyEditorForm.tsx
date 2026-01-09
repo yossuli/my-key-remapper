@@ -9,6 +9,7 @@ import { useBindingConfig } from "../../hooks/useBindingConfig";
 import { useKeyEditorActions } from "../../hooks/useKeyEditorAction";
 import { useKeyEventInput } from "../../hooks/useKeyEventInput";
 import { useKeyHoldAction } from "../../hooks/useKeyHoldAction";
+import { useMousePosition } from "../../hooks/useMousePosition";
 import type { LayoutType } from "../../types";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
@@ -65,6 +66,10 @@ export function KeyEditorForm({
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showVkInput, setShowVkInput] = useState(false);
   const [vkInputValue, setVkInputValue] = useState("");
+  const [mouseX, setMouseX] = useState<number>(0);
+  const [mouseY, setMouseY] = useState<number>(0);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   const {
     state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
@@ -99,7 +104,18 @@ export function KeyEditorForm({
     [holdThresholdMs, tapIntervalMs, onSave]
   );
 
-  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, resetState, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave: handleSaveWithTiming, onRemove, onClose }); // biome-ignore format: 引数に関心はない
+  const handleSaveAction = useCallback(
+    (trigger: TriggerType, action: Action) => {
+      if (action.type === "mouseMove") {
+        handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY });
+      } else {
+        handleSaveWithTiming(trigger, action);
+      }
+    },
+    [handleSaveWithTiming, mouseX, mouseY]
+  );
+
+  const { newTargetKeys, canSave, addHoldKey, removeHoldKey, removeKey, resetState, handleSave, handleRemove } = useKeyEditorActions({ state: { actionType, selectedLayerId, targetKeys, hasExistingBinding }, layerId, targetVk, selectedTrigger, onSave: handleSaveAction, onRemove, onClose }); // biome-ignore format: 引数に関心はない
 
   const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({ targetKey: VK.ENTER }); // biome-ignore format: 引数に関心はない
 
@@ -155,6 +171,28 @@ export function KeyEditorForm({
       addHoldKey(vk);
       setVkInputValue("");
     }
+  };
+
+  const { getCursorPosition } = useMousePosition();
+
+  const handleGetMousePosition = (): void => {
+    setIsCapturing(true);
+    setCountdown(3);
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          getCursorPosition().then((position) => {
+            setMouseX(position.x);
+            setMouseY(position.y);
+            setIsCapturing(false);
+          });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
   return (
@@ -257,6 +295,48 @@ export function KeyEditorForm({
               onLayerChange={setSelectedLayerId}
               selectedLayerId={selectedLayerId}
             />
+          </ActionSelectorContent>
+
+          <ActionSelectorContent value="mouseMove">
+            <VStack gap={3}>
+              <p className="text-muted-foreground text-sm">
+                マウスカーソルを指定座標に移動します
+              </p>
+              <HStack className="items-end justify-center" gap={2}>
+                <Input
+                  id="mouse-x"
+                  input-className="w-24 font-mono text-center"
+                  input-onChange={(e) => setMouseX(Number(e.target.value))}
+                  input-placeholder="X"
+                  input-type="number"
+                  input-value={mouseX.toString()}
+                  label="X座標"
+                  setFocused={setIsInputFocused}
+                />
+                <Input
+                  id="mouse-y"
+                  input-className="w-24 font-mono text-center"
+                  input-onChange={(e) => setMouseY(Number(e.target.value))}
+                  input-placeholder="Y"
+                  input-type="number"
+                  input-value={mouseY.toString()}
+                  label="Y座標"
+                  setFocused={setIsInputFocused}
+                />
+                <Button
+                  disabled={isCapturing}
+                  onClick={handleGetMousePosition}
+                  variant="outline"
+                >
+                  {isCapturing ? `取得中... ${countdown}秒` : "位置を取得 (3秒後)"}
+                </Button>
+              </HStack>
+              <p className="text-muted-foreground text-xs">
+                {isCapturing
+                  ? "マウスを目的の位置に移動してください..."
+                  : `設定座標: (${mouseX}, ${mouseY})`}
+              </p>
+            </VStack>
           </ActionSelectorContent>
         </ActionSelector>
 

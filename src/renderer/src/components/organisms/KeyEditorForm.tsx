@@ -1,4 +1,13 @@
+﻿import { ArrowRight, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { TabsContent } from "@/components/ui/tabs";
+import { getLayerDescription } from "@/utils/getLayerDescription";
 import { MAX_VK_CODE, MIN_VK_CODE, VK } from "../../../../shared/constants/vk";
 import type {
   Action,
@@ -11,33 +20,24 @@ import { useKeyEventInput } from "../../hooks/useKeyEventInput";
 import { useKeyHoldAction } from "../../hooks/useKeyHoldAction";
 import { useMousePosition } from "../../hooks/useMousePosition";
 import type { LayoutType } from "../../types";
-import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
-import { ToggleButton } from "../atoms/ToggleButton";
+import { Button } from "../atoms/button";
+import { Icon } from "../atoms/icon";
+import { Input } from "../atoms/input";
+import { WithRemoveBadge } from "../atoms/removeBadge";
+import { ToggleButton } from "../atoms/toggleButton";
+import { HandleEmpty } from "../control/handleEmpty";
 import { Mapped } from "../control/Mapped";
 import { Show } from "../control/Show";
 import {
   ActionSelector,
   ActionSelectorContent,
-} from "../molecules/ActionSelector";
-import { KeyDisplay } from "../molecules/KeyDisplay";
-import { MousePositionInput } from "../molecules/MousePositionInput";
-import { TimingInput } from "../molecules/TimingInput";
-
-import { TabsContent, TriggerTabs } from "../molecules/TriggerTabs";
-import { HStack, VStack } from "../template/Flex";
-import { ArrowRight, MousePointer2, Plus } from "lucide-react";
-import { getLayerDescription } from "@/utils/getLayerDescription";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { WithRemoveBadge } from "../atoms/RemoveBadge";
-import { HandleEmpty } from "../control/HandleEmpty";
-import { LayerSelector } from "../molecules/LayerSelector";
-import { Input } from "../atoms/Input";
+} from "../molecules/actionSelector";
+import { KeyDisplay } from "../molecules/keyDisplay";
+import { LayerSelector } from "../molecules/layerSelector";
+import { MousePositionInput } from "../molecules/mousePositionInput";
+import { TimingInput } from "../molecules/timingInput";
+import { TriggerTabs } from "../molecules/triggerTabs";
+import { HStack, VStack } from "../template/flex";
 
 interface KeyEditorFormProps {
   targetVk: number;
@@ -55,6 +55,10 @@ interface KeyEditorFormProps {
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
 }
+
+const MOUSE_CAPTURE_COUNTDOWN_START = 3;
+const COUNTDOWN_INTERVAL_MS = 1000;
+const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 
 export function KeyEditorForm({
   targetVk,
@@ -79,6 +83,9 @@ export function KeyEditorForm({
   const [clickCount, setClickCount] = useState<number>(1);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [cursorReturnDelayMs, setCursorReturnDelayMs] = useState<number>(
+    DEFAULT_CURSOR_RETURN_DELAY_MS
+  );
 
   const {
     state: {
@@ -90,6 +97,7 @@ export function KeyEditorForm({
       mouseY: loadedMouseY,
       mouseButton: loadedMouseButton,
       clickCount: loadedClickCount,
+      cursorReturnDelayMs: loadedCursorReturnDelayMs,
     },
     existingTiming,
     setSelectedLayerId,
@@ -111,12 +119,11 @@ export function KeyEditorForm({
 
   const handleSaveWithTiming = useCallback(
     (trigger: TriggerType, action: Action) => {
-      const timing =
-        trigger === "hold"
-          ? holdThresholdMs
-          : trigger === "doubleTap"
-          ? tapIntervalMs
-          : undefined;
+      const timingObj: Record<string, number | undefined> = {
+        hold: holdThresholdMs,
+        doubleTap: tapIntervalMs,
+      };
+      const timing = timingObj[trigger];
       onSave(trigger, action, timing);
     },
     [holdThresholdMs, tapIntervalMs, onSave]
@@ -135,11 +142,23 @@ export function KeyEditorForm({
           button: mouseButton,
           clickCount,
         });
+      } else if (action.type === "cursorReturn") {
+        handleSaveWithTiming(trigger, {
+          ...action,
+          delayMs: cursorReturnDelayMs,
+        });
       } else {
         handleSaveWithTiming(trigger, action);
       }
     },
-    [handleSaveWithTiming, mouseX, mouseY, mouseButton, clickCount]
+    [
+      handleSaveWithTiming,
+      mouseX,
+      mouseY,
+      mouseButton,
+      clickCount,
+      cursorReturnDelayMs,
+    ]
   );
 
   const {
@@ -187,8 +206,7 @@ export function KeyEditorForm({
     (e: number) => {
       handleHoldKeyUp(e, {
         onTap() {
-          const enterKeyCode = 13;
-          if (!targetKeys.includes(enterKeyCode)) {
+          if (!targetKeys.includes(VK.ENTER)) {
             addHoldKey(e);
           }
         },
@@ -223,7 +241,7 @@ export function KeyEditorForm({
 
   const handleGetMousePosition = (): void => {
     setIsCapturing(true);
-    setCountdown(3);
+    setCountdown(MOUSE_CAPTURE_COUNTDOWN_START);
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -239,7 +257,7 @@ export function KeyEditorForm({
         }
         return prev - 1;
       });
-    }, 1000);
+    }, COUNTDOWN_INTERVAL_MS);
   };
 
   // 読み込んだ設定で初期化
@@ -256,7 +274,16 @@ export function KeyEditorForm({
     if (loadedClickCount !== undefined) {
       setClickCount(loadedClickCount);
     }
-  }, [loadedMouseX, loadedMouseY, loadedMouseButton, loadedClickCount]);
+    if (loadedCursorReturnDelayMs !== undefined) {
+      setCursorReturnDelayMs(loadedCursorReturnDelayMs);
+    }
+  }, [
+    loadedMouseX,
+    loadedMouseY,
+    loadedMouseButton,
+    loadedClickCount,
+    loadedCursorReturnDelayMs,
+  ]);
 
   return (
     <VStack className="px-6" gap={4}>
@@ -278,9 +305,9 @@ export function KeyEditorForm({
       >
         <ActionSelector
           actionType={actionType}
+          gap={2}
           onActionTypeChange={setActionType}
           triggerType={selectedTrigger}
-          gap={2}
         >
           <ActionSelectorContent value="remap">
             <HStack
@@ -308,13 +335,13 @@ export function KeyEditorForm({
               </HandleEmpty>
               <Show condition={newTargetKeys.length > 0}>
                 <Button
-                label="クリア"
-                onClick={() => {
-                  resetState();
-                  clearTargetKeys();
-                }}
-                variant="ghost"
-              />
+                  label="クリア"
+                  onClick={() => {
+                    resetState();
+                    clearTargetKeys();
+                  }}
+                  variant="ghost"
+                />
               </Show>
             </HStack>
 
@@ -361,7 +388,7 @@ export function KeyEditorForm({
 
           <ActionSelectorContent value="mouseMove">
             <VStack gap={4}>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 マウスカーソルを指定座標に移動します
               </p>
 
@@ -380,8 +407,8 @@ export function KeyEditorForm({
           </ActionSelectorContent>
 
           <ActionSelectorContent value="mouseClick">
-            <VStack gap={4} className="w-full justify-center">
-              <p className="text-sm text-muted-foreground">
+            <VStack className="w-full justify-center" gap={4}>
+              <p className="text-muted-foreground text-sm">
                 指定座標をクリックします
               </p>
 
@@ -396,31 +423,50 @@ export function KeyEditorForm({
                 onMouseYChange={setMouseY}
                 setFocused={setIsInputFocused}
               >
-                <VStack gap={2} className="justify-around h-full">
+                <VStack className="h-full justify-around" gap={2}>
                   <ToggleButton
-                    value={mouseButton}
-                    options={["left", "middle", "right"] as const}
+                    className="w-full"
                     labels={{
                       left: "左クリック",
                       middle: "中クリック",
                       right: "右クリック",
                     }}
                     onChange={setMouseButton}
-                    className="w-full"
+                    options={["left", "middle", "right"] as const}
+                    value={mouseButton}
                   />
 
                   <ToggleButton
-                    value={clickCount}
-                    options={[1, 2] as const}
+                    className="w-full"
                     labels={{
                       1: "シングル",
                       2: "ダブル",
                     }}
                     onChange={setClickCount}
-                    className="w-full"
+                    options={[1, 2] as const}
+                    value={clickCount}
                   />
                 </VStack>
               </MousePositionInput>
+            </VStack>
+          </ActionSelectorContent>
+
+          <ActionSelectorContent value="cursorReturn">
+            <VStack gap={4}>
+              <p className="text-muted-foreground text-sm">
+                キー押下時のカーソル位置を記録し、指定時間後に戻ります
+              </p>
+
+              <TimingInput
+                defaultValue={DEFAULT_CURSOR_RETURN_DELAY_MS}
+                id="cursorReturnDelay"
+                label="遅延時間 (ms)"
+                onValueChange={(val) =>
+                  val !== undefined && setCursorReturnDelayMs(val)
+                }
+                setFocused={setIsInputFocused}
+                value={cursorReturnDelayMs}
+              />
             </VStack>
           </ActionSelectorContent>
         </ActionSelector>

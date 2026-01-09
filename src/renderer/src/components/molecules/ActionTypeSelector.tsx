@@ -15,6 +15,7 @@ const ACTION_TYPE_OPTIONS = [
   },
   { id: "mouseMove", value: "mouseMove", label: "マウス移動" },
   { id: "mouseClick", value: "mouseClick", label: "マウスクリック" },
+  { id: "cursorReturn", value: "cursorReturn", label: "カーソル位置復帰" },
   { id: "none", value: "none", label: "無効化" },
 ] as const satisfies { id: ActionType; value: ActionType; label: string }[];
 

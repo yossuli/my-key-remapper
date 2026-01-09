@@ -1,4 +1,4 @@
-// 保存・削除アクションのフック
+﻿// 保存・削除アクションのフック
 
 import { useCallback, useMemo, useState } from "react";
 import type {
@@ -135,6 +135,10 @@ export function useKeyEditorActions({
           y: 0,
           button: "left",
           clickCount: 1,
+        }),
+        cursorReturn: () => ({
+          type: "cursorReturn",
+          delayMs: 1000,
         }),
         none: () => ({ type: "none" }),
       },

@@ -1,4 +1,4 @@
-// ActionからBindingStateへの変換ユーティリティ
+﻿// ActionからBindingStateへの変換ユーティリティ
 
 import type { Action, ActionType } from "../../../shared/types/remapConfig";
 import { objectiveDiscriminantSwitch } from "./objectiveSwitch";
@@ -12,46 +12,45 @@ export interface BindingState {
   mouseY?: number;
   mouseButton?: "left" | "right" | "middle";
   clickCount?: number;
+  cursorReturnDelayMs?: number;
 }
 
 /**
  * ActionからBindingStateへ変換
  */
 export function actionToBindingState(action: Action): Partial<BindingState> {
-  let result: Partial<BindingState> = {};
-
-  objectiveDiscriminantSwitch(
+  return objectiveDiscriminantSwitch(
     {
-      remap: (act) => {
-        result = { actionType: "remap", targetKeys: act.keys };
-      },
-      layerToggle: (act) => {
-        result = { actionType: "layerToggle", selectedLayerId: act.layerId };
-      },
-      layerMomentary: (act) => {
-        result = { actionType: "layerMomentary", selectedLayerId: act.layerId };
-      },
-      mouseMove: (act) => {
-        result = { actionType: "mouseMove", mouseX: act.x, mouseY: act.y };
-      },
-      mouseClick: (act) => {
-        result = {
-          actionType: "mouseClick",
-          mouseX: act.x,
-          mouseY: act.y,
-          mouseButton: act.button,
-          clickCount: act.clickCount ?? 1,
-        };
-      },
-      none: () => {
-        result = { actionType: "none" };
-      },
+      remap: (act) => ({ actionType: "remap", targetKeys: act.keys }),
+      layerToggle: (act) => ({
+        actionType: "layerToggle",
+        selectedLayerId: act.layerId,
+      }),
+      layerMomentary: (act) => ({
+        actionType: "layerMomentary",
+        selectedLayerId: act.layerId,
+      }),
+      mouseMove: (act) => ({
+        actionType: "mouseMove",
+        mouseX: act.x,
+        mouseY: act.y,
+      }),
+      mouseClick: (act) => ({
+        actionType: "mouseClick",
+        mouseX: act.x,
+        mouseY: act.y,
+        mouseButton: act.button,
+        clickCount: act.clickCount ?? 1,
+      }),
+      none: () => ({ actionType: "none" }),
+      cursorReturn: (act) => ({
+        actionType: "cursorReturn",
+        cursorReturnDelayMs: act.delayMs,
+      }),
     },
     action,
     "type"
   );
-
-  return result;
 }
 
 /**

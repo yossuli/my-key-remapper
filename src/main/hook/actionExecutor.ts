@@ -1,46 +1,50 @@
-import { VK } from "../../shared/constants";
+﻿import { VK } from "../../shared/constants";
 import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
+import { clickAt, getCursorPosition, moveMouse } from "../native/mouseSender";
 import { sendKey } from "../native/sender";
-import { clickAt, moveMouse } from "../native/mouseSender";
 import { remapRules } from "../state/rules";
 
 /**
  * アクションの実行とレイヤー管理
  */
 
-/** レイヤーモーメンタリー用：どのキーがどのレイヤーを有効にしているか */
+/** レイヤーモーメンタリ用：どのキーがどのレイヤーを有効にしているか */
 const momentaryLayerKeys = new Map<number, string>();
 
 /**
- * キーアップ時のモーメンタリーレイヤー解除
+ * キーアップ時のモーメンタリレイヤー解除
  */
 export function releaseMomentaryLayer(vkCode: number) {
   const layerId = momentaryLayerKeys.get(vkCode);
   if (layerId) {
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
-  }
-  if (layerId === "shift") {
-    sendKey(VK.SHIFT, true, "layer-remove");
+
+    // Shiftレイヤーの場合は物理キーアップも送信
+    if (layerId === "shift") {
+      sendKey(VK.SHIFT, true, "layer-remove");
+    }
   }
 }
 
 /**
- * モーメンタリーレイヤーを追加
+ * モーメンタリレイヤーを追加
  */
 export function addMomentaryLayer(vkCode: number, layerId: string) {
   const isLayerSetCurrent = momentaryLayerKeys.get(vkCode);
   if (isLayerSetCurrent === undefined) {
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
-  }
-  if (layerId === "shift") {
-    sendKey(VK.SHIFT, false, "layer-add");
+
+    // Shiftレイヤーの場合は物理キーダウンも送信
+    if (layerId === "shift") {
+      sendKey(VK.SHIFT, false, "layer-add");
+    }
   }
 }
 
 /**
- * 指定キーがモーメンタリーレイヤーを発動中かどうか
+ * 指定キーがモーメンタリレイヤーを発火中かどうか
  */
 export function isLayerMomentaryKey(vkCode: number): boolean {
   return momentaryLayerKeys.has(vkCode);
@@ -54,7 +58,6 @@ function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
   const layerId = layer?.id;
 
   if (layerId === "shift") {
-    sendKey(VK.SHIFT, true, "shift key");
     if (isUp) {
       // keyUp: キーを離してから Shift を離す
       sendKey(vkCode, true);
@@ -97,7 +100,7 @@ export function handleTapOnlyBindings(
       }
       return 1;
     }
-    // remap以外（mouseMove等）の場合はexecuteActionに委譲
+    // remap以外（mouseMove等）の場合はexecuteActionInternalに委譲
     // isUpがtrueの場合のみ実行（キーアップ時に1回だけ実行）
     if (isUp) {
       executeActionInternal(vkCode, "tap", action);
@@ -116,7 +119,7 @@ export function handleTapOnlyBindings(
  */
 function executeActionInternal(
   vkCode: number,
-  trigger: TriggerType,
+  _trigger: TriggerType,
   action: NonNullable<ReturnType<typeof remapRules.getAction>>
 ): void {
   switch (action.type) {
@@ -130,13 +133,22 @@ function executeActionInternal(
       remapRules.setLayer(action.layerId);
       break;
     case "layerMomentary":
-      releaseMomentaryLayer(vkCode);
+      addMomentaryLayer(vkCode, action.layerId);
       break;
     case "none":
       break;
     case "remap":
       // remapは既にhandleTapOnlyBindingsで処理済み
       break;
+    case "cursorReturn": {
+      // 現在のカーソル位置を記録
+      const savedPosition = getCursorPosition();
+      // 指定時間後に元の位置に戻す
+      setTimeout(() => {
+        moveMouse(savedPosition.x, savedPosition.y);
+      }, action.delayMs);
+      break;
+    }
     default: {
       const _: never = action;
       break;
@@ -147,54 +159,32 @@ function executeActionInternal(
 /**
  * トリガーに対応するアクションを実行
  */
-export function executeAction(vkCode: number, trigger_: TriggerType) {
-  const action = remapRules.getAction(vkCode, trigger_);
+export function executeAction(vkCode: number, trigger: TriggerType) {
+  const action = remapRules.getAction(vkCode, trigger);
   const bindings = remapRules.getBindings(vkCode);
 
   // tap のみのバインディングを先に処理
   const tapResult = handleTapOnlyBindings(vkCode, bindings, true);
   if (tapResult !== null) {
-    return tapResult;
-  }
-
-  const layer = remapRules.getCurrentLayer();
-  const layerId = layer?.id;
-  if (!action) {
-    // アクションがない場合、レイヤーの修飾キーを付与して送信
-    if (layerId === "base" || layerId === "shift") {
-      sendKeyWithLayerModifiers(vkCode, false);
-      sendKeyWithLayerModifiers(vkCode, true);
-      return 1;
-    }
     return;
   }
-  switch (action.type) {
-    case "remap":
-      // 複数キーを順番にdown、逆順でup
-      for (const key of action.keys) {
-        sendKey(key, false, 9);
-      }
-      for (const key of action.keys.toReversed()) {
-        sendKey(key, true, 10);
-      }
-      break;
-    case "mouseMove":
-      moveMouse(action.x, action.y);
-      break;
-    case "mouseClick":
-      clickAt(action.x, action.y, action.button, action.clickCount ?? 1);
-      break;
-    case "layerToggle":
-      remapRules.setLayer(action.layerId);
-      break;
-    case "layerMomentary":
-      releaseMomentaryLayer(vkCode);
-      break;
-    case "none":
-      break;
-    default: {
-      const _: never = action;
-      break;
+
+  if (!action) {
+    // アクションがない場合、レイヤーの修飾キーを付与して送信
+    sendKeyWithLayerModifiers(vkCode, false);
+    sendKeyWithLayerModifiers(vkCode, true);
+    return;
+  }
+
+  executeActionInternal(vkCode, trigger, action);
+
+  // remap アクションの場合の特別な処理（down/upを一度に行う）
+  if (action.type === "remap") {
+    for (const key of action.keys) {
+      sendKey(key, false);
+    }
+    for (const key of action.keys.toReversed()) {
+      sendKey(key, true);
     }
   }
 }

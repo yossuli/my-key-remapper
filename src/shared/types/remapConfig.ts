@@ -1,4 +1,4 @@
-// =====================================
+﻿// =====================================
 // トリガー種別
 // =====================================
 
@@ -113,6 +113,16 @@ export interface MouseClickAction {
 }
 
 /**
+ * カーソル位置復帰アクション
+ * キー押下時のカーソル位置を記録し、一定時間後に戻る
+ */
+export interface CursorReturnAction {
+  type: "cursorReturn";
+  /** 復帰までの遅延時間（ミリ秒） */
+  delayMs: number;
+}
+
+/**
  * すべてのアクション種別
  */
 export type Action =
@@ -123,7 +133,8 @@ export type Action =
   | NoneAction
   | MouseMoveAction
   | MouseClickAction
-  // | PassthroughAction;
+  | CursorReturnAction;
+// | PassthroughAction;
 
 export type ActionType = Action["type"];
 
@@ -132,12 +143,12 @@ export type ActionType = Action["type"];
 // =====================================
 
 /**
- * キーバインディング（1つのトリガーに対する1つのアクション）
+ * キーバインディング：１つのトリガーに対する1つのアクション
  */
 export interface KeyBinding {
   trigger: TriggerType;
   action: Action;
-  /** タイミング設定(ms)。triggerに応じて意味が変わる: hold=長押し判定時間, doubleTap=タップ間隔 */
+  /** タイミング設定(ms)。Triggerに応じて意味が変わる。 hold=長押し判定時間、doubleTap=タップ間隔 */
   timingMs?: number;
 }
 
@@ -151,9 +162,9 @@ export interface Layer {
   id: string;
   /** キーコード → バインディング配列 */
   bindings: Record<number, KeyBinding[]>;
-  /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する（未実装） */
+  /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する（未実装）*/
   // passThroughKeys?: number[];
-  /** レイヤーアクティブ時にデフォルトで送信する修飾キー（tap アクションが設定されているキーは除外） */
+  /** レイヤーアクティブ時にデフォルトで送信する修飾キー。tap アクションが設定されているキーは除外。*/
   defaultModifiers?: {
     shift?: boolean | "left" | "right";
   };
@@ -167,9 +178,9 @@ export interface Layer {
  * グローバル設定
  */
 export interface GlobalSettings {
-  /** 長押し判定のしきい値（ミリ秒） */
+  /** 長押し判定のしきい値（ミリ秒）*/
   defaultHoldThresholdMs: number;
-  /** ダブルタップ判定の間隔（ミリ秒） */
+  /** ダブルタップ判定の間隔（ミリ秒）*/
   defaultTapIntervalMs: number;
 }
 
@@ -179,7 +190,7 @@ export interface GlobalSettings {
 export interface RemapConfig {
   version: number;
   layers: Layer[];
-  /** レイヤーの表示順序（レイヤーIDの配列） */
+  /** レイヤーの表示順（レイヤーIDの配列）*/
   layerOrder: string[];
   globalSettings: GlobalSettings;
 }
@@ -187,9 +198,7 @@ export interface RemapConfig {
 /**
  * デフォルト設定
  */
-/** VK_LSHIFT */
 const VK_LSHIFT = 160;
-/** VK_RSHIFT */
 const VK_RSHIFT = 161;
 
 export const DEFAULT_REMAP_CONFIG: RemapConfig = {
@@ -218,7 +227,7 @@ export const DEFAULT_REMAP_CONFIG: RemapConfig = {
       bindings: {},
       defaultModifiers: { shift: true },
     },
-  ] satisfies RemapConfig["layers"],
+  ],
   layerOrder: ["base", "shift"],
   globalSettings: {
     defaultHoldThresholdMs: 200,

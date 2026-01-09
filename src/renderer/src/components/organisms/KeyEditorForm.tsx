@@ -23,7 +23,7 @@ import { TimingInput } from "../molecules/TimingInput";
 
 import { TabsContent, TriggerTabs } from "../molecules/TriggerTabs";
 import { HStack, VStack } from "../template/Flex";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, MousePointer2, Plus } from "lucide-react";
 import { getLayerDescription } from "@/utils/getLayerDescription";
 import {
   Accordion,
@@ -35,6 +35,7 @@ import { WithRemoveBadge } from "../atoms/RemoveBadge";
 import { HandleEmpty } from "../control/HandleEmpty";
 import { LayerSelector } from "../molecules/LayerSelector";
 import { Input } from "../atoms/Input";
+
 
 interface KeyEditorFormProps {
   targetVk: number;
@@ -322,10 +323,11 @@ export function KeyEditorForm({
           </ActionSelectorContent>
 
           <ActionSelectorContent value="mouseMove">
-            <VStack gap={3}>
-              <p className="text-muted-foreground text-sm">
+            <VStack gap={4}>
+              <p className="text-sm text-muted-foreground">
                 マウスカーソルを指定座標に移動します
               </p>
+
               <MousePositionInput
                 countdown={countdown}
                 idPrefix="mouse"
@@ -337,7 +339,8 @@ export function KeyEditorForm({
                 onMouseYChange={setMouseY}
                 setFocused={setIsInputFocused}
               />
-              <p className="text-muted-foreground text-xs">
+
+              <p className="text-xs text-muted-foreground">
                 {isCapturing
                   ? "マウスを目的の位置に移動してください..."
                   : `設定座標: (${mouseX}, ${mouseY})`}
@@ -346,10 +349,11 @@ export function KeyEditorForm({
           </ActionSelectorContent>
 
           <ActionSelectorContent value="mouseClick">
-            <VStack gap={3}>
-              <p className="text-muted-foreground text-sm">
+            <VStack gap={4} className="w-full">
+              <p className="text-sm text-muted-foreground">
                 指定座標をクリックします
               </p>
+
               <MousePositionInput
                 countdown={countdown}
                 idPrefix="click"
@@ -361,33 +365,36 @@ export function KeyEditorForm({
                 onMouseYChange={setMouseY}
                 setFocused={setIsInputFocused}
               />
-              <HStack className="justify-center" gap={2}>
+
+              <div className="grid grid-cols-2 gap-3">
                 <Select
                   id="mouse-button"
                   label="ボタン"
-                  onValueChange={(value: "left" | "right" | "middle") => setMouseButton(value)}
+                  onValueChange={(value) => setMouseButton(value as any)}
                   options={[
                     { id: "left", value: "left", label: "左クリック" },
-                    { id: "right", value: "right", label: "右クリック" },
                     { id: "middle", value: "middle", label: "中クリック" },
+                    { id: "right", value: "right", label: "右クリック" },
                   ]}
                   select-value={mouseButton}
                 />
+
                 <Select
                   id="click-count"
                   label="回数"
-                  onValueChange={(value: string) => setClickCount(Number(value))}
+                  onValueChange={(value) => setClickCount(Number(value))}
                   options={[
                     { id: 1, value: "1", label: "シングル" },
                     { id: 2, value: "2", label: "ダブル" },
                   ]}
                   select-value={clickCount.toString()}
                 />
-              </HStack>
-              <p className="text-muted-foreground text-xs">
-                {isCapturing
-                  ? "マウスを目的の位置に移動してください..."
-                  : `設定: (${mouseX}, ${mouseY}) ${mouseButton === "left" ? "左" : mouseButton === "right" ? "右" : "中"}クリック × ${clickCount}`}
+              </div>
+
+              <p className="text-xs text-muted-foreground pt-2">
+                設定: ({mouseX}, {mouseY}) を
+                {mouseButton === "left" ? "左" : mouseButton === "middle" ? "中" : "右"}
+                クリック × {clickCount}
               </p>
             </VStack>
           </ActionSelectorContent>

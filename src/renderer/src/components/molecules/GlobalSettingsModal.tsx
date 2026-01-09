@@ -2,6 +2,7 @@ import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -38,6 +39,9 @@ export function GlobalSettingsModal({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>グローバル設定</AlertDialogTitle>
+          <AlertDialogDescription className="sr-only">
+            グローバル設定
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <GlobalSettingsForm
           globalSettings={globalSettings}

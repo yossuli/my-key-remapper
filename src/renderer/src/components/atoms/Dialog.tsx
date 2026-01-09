@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import {
   Dialog as ShadcnDialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Show } from "../control/Show";
 
 interface ModalLayoutProps {
   title?: string;
@@ -22,12 +22,15 @@ export function Dialog({
 }: ModalLayoutProps) {
   return (
     <ShadcnDialog onOpenChange={(open) => !open && onClose()} open={open}>
-      <DialogContent>
-        <Show condition={Boolean(title)}>
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-          </DialogHeader>
-        </Show>
+      <DialogContent className={!title ? "gap-0" : ""}>
+        <DialogHeader>
+          <DialogTitle className={!title ? "sr-only h-0" : ""}>
+            {title || "ダイアログ"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            設定ダイアログ
+          </DialogDescription>
+        </DialogHeader>
         {children}
       </DialogContent>
     </ShadcnDialog>

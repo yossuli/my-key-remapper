@@ -61,15 +61,13 @@ export function Select<T extends string>({
         <SelectTrigger className={cn("w-full", selectClassName)} id={id}>
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
-          <Mapped as={SelectContent} value={options}>
-            {(opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            )}
-          </Mapped>
-        </SelectContent>
+        <Mapped as={SelectContent} value={options}>
+          {(opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          )}
+        </Mapped>
       </ShadcnSelect>
     </VStack>
   );

@@ -120,12 +120,16 @@ export function KeyRemapperPage() {
     removeLayer,
     reorderLayers,
   };
-  const mappingActions = {
+  const mappingActions: MappingActions = {
     saveMapping,
     removeMapping: (from: number) => removeMapping(from, selectedTrigger),
   };
-  const remapActions = { toggleActive, disableRemap, enableRemap };
-  const layerState = { layers, layerId };
+  const remapActions: RemapActions = {
+    toggleActive,
+    disableRemap,
+    enableRemap,
+  };
+  const layerState: LayerState = { layers, layerId };
   return (
     <>
       <MainLayout>

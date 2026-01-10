@@ -2,6 +2,7 @@ import { Eye, EyeOff, Keyboard, Power, Settings } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import { Text } from "@/components/atoms/Text";
+import { With } from "@/components/control/With";
 import { Box, HStack, VStack } from "@/components/template/Flex";
 
 interface AppHeaderProps {
@@ -40,26 +41,30 @@ export function AppHeader({
       </HStack>
 
       <HStack gap={2}>
-        {onOpenSettings ? (
-          <Button
-            className="gap-2 rounded-full"
-            onClick={onOpenSettings}
-            variant="ghost"
-          >
-            <Icon icon={Settings} />
-            グローバル設定
-          </Button>
-        ) : null}
-        {onToggleSimpleMode ? (
-          <Button
-            className="gap-2 rounded-full"
-            onClick={onToggleSimpleMode}
-            variant="ghost"
-          >
-            <Icon icon={icon} />
-            {simpleMode ? "詳細表示" : "シンプル表示"}
-          </Button>
-        ) : null}
+        <With value={onOpenSettings}>
+          {(onClick) => (
+            <Button
+              className="gap-2 rounded-full"
+              onClick={onClick}
+              variant="ghost"
+            >
+              <Icon icon={Settings} />
+              グローバル設定
+            </Button>
+          )}
+        </With>
+        <With value={onToggleSimpleMode}>
+          {(onClick) => (
+            <Button
+              className="gap-2 rounded-full"
+              onClick={onClick}
+              variant="ghost"
+            >
+              <Icon icon={icon} />
+              {simpleMode ? "詳細表示" : "シンプル表示"}
+            </Button>
+          )}
+        </With>
         <Button
           className="gap-2 rounded-full"
           onClick={onToggleActive}

@@ -153,6 +153,16 @@ export function KeyEditorForm({
     existingTiming?.tapIntervalMs
   );
 
+  // 読み込んだタイミング設定で初期化
+  useEffect(() => {
+    if (existingTiming?.holdThresholdMs !== undefined) {
+      setHoldThresholdMs(existingTiming.holdThresholdMs);
+    }
+    if (existingTiming?.tapIntervalMs !== undefined) {
+      setTapIntervalMs(existingTiming.tapIntervalMs);
+    }
+  }, [existingTiming]);
+
   const handleSaveWithTiming = useCallback(
     (trigger: TriggerType, action: Action) => {
       const timingObj: Record<string, number | undefined> = {

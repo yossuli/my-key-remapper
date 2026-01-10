@@ -1,4 +1,5 @@
 import type { TriggerType } from "../../shared/types/remapConfig";
+import { debugLog } from "../utils/debugLogger";
 
 /**
  * 個別キーの状態
@@ -16,6 +17,8 @@ interface KeyState {
   holdFired: boolean;
   /** タップ遅延タイマーID（ダブルタップ待機用） */
   tapTimerId: ReturnType<typeof setTimeout> | null;
+  /** 割り込み等で既にトリガーが解決済みか */
+  alreadyResolved: boolean;
 }
 
 /** トリガー発火時のコールバック */
@@ -66,6 +69,7 @@ export class KeyStateManager {
         holdTimerId: null,
         holdFired: false,
         tapTimerId: null,
+        alreadyResolved: false,
       });
     }
     // biome-ignore lint/style/noNonNullAssertion: 上で必ずセットしている
@@ -92,12 +96,19 @@ export class KeyStateManager {
 
     // 既に押されている場合は無視（キーリピート）
     if (state.isDown) {
+      debugLog("keyState.ts-onKeyDown-already-down-ignore", {
+        code,
+        holdFired: state.holdFired,
+        alreadyResolved: state.alreadyResolved,
+      });
       return;
     }
 
+    debugLog("keyState.ts-onKeyDown-new-press", { code });
     state.isDown = true;
     state.downTime = now;
     state.holdFired = false;
+    state.alreadyResolved = false;
 
     // タップ遅延タイマーをクリア（ダブルタップの可能性があるため）
     if (state.tapTimerId) {
@@ -108,6 +119,7 @@ export class KeyStateManager {
 
     // 長押しタイマーを開始
     if (state.holdTimerId) {
+      debugLog("keyState.ts-clear-hold-timer", { code, reason: "new-down" });
       clearTimeout(state.holdTimerId);
       this.pendingHoldKeys.delete(code);
     }
@@ -117,11 +129,20 @@ export class KeyStateManager {
 
     state.holdTimerId = setTimeout(() => {
       if (state.isDown && !state.holdFired) {
+        debugLog("keyState.ts-hold-timer-fired", {
+          code,
+          alreadyResolved: state.alreadyResolved,
+        });
         state.holdFired = true;
         this.pendingHoldKeys.delete(code); // 発火したらペンディングから削除
         this.states.set(code, state);
-        console.log(`[HOOK] Hold detected for key ${code}`);
         this.fireTrigger(code, "hold");
+      } else {
+        debugLog("keyState.ts-hold-timer-fired-skipped", {
+          code,
+          isDown: state.isDown,
+          holdFired: state.holdFired,
+        });
       }
     }, holdMs);
     this.pendingHoldKeys.add(code);
@@ -147,6 +168,7 @@ export class KeyStateManager {
 
     // 長押しタイマーをクリア
     if (state.holdTimerId) {
+      debugLog("keyState.ts-clear-hold-timer", { code, reason: "up" });
       clearTimeout(state.holdTimerId);
       state.holdTimerId = null;
       this.pendingHoldKeys.delete(code);
@@ -154,8 +176,13 @@ export class KeyStateManager {
 
     state.isDown = false;
 
-    // 長押しが既に発火していた場合
-    if (state.holdFired) {
+    // 長押しが既に発火していた、または割り込みで解決済みの場合
+    if (state.holdFired || state.alreadyResolved) {
+      debugLog("keyState.ts-onKeyUp-already-resolved", {
+        code,
+        holdFired: state.holdFired,
+        alreadyResolved: state.alreadyResolved,
+      });
       return null;
     }
 
@@ -186,6 +213,7 @@ export class KeyStateManager {
     // タップは遅延発火：tapIntervalMs 後に tap を発火
     state.lastTapTime = now;
     state.tapTimerId = setTimeout(() => {
+      debugLog("keyState.ts-tap-timer-fired", { code });
       state.tapTimerId = null;
       this.pendingTapKeys.delete(code);
       state.lastTapTime = 0; // タイムアウト後リセット
@@ -244,6 +272,31 @@ export class KeyStateManager {
 
       return "tap";
     }
+    return null;
+  }
+
+  /**
+   * 指定されたキーのホールド待機を強制的に解消する
+   * @returns 発火すべきトリガー（通常は "tap"）、待機中でなければ null
+   */
+  forceResolveHold(code: number): TriggerType | null {
+    const state = this.getState(code);
+    if (state.holdTimerId) {
+      debugLog("keyState.ts-forceResolveHold-resolving", {
+        code,
+        holdFired: state.holdFired,
+      });
+      clearTimeout(state.holdTimerId);
+      state.holdTimerId = null;
+      this.pendingHoldKeys.delete(code);
+      state.alreadyResolved = true;
+      return "tap";
+    }
+    debugLog("keyState.ts-forceResolveHold-no-timer", {
+      code,
+      holdFired: state.holdFired,
+      alreadyResolved: state.alreadyResolved,
+    });
     return null;
   }
 }

@@ -8,6 +8,7 @@ import {
   handleTapOnlyBindings,
   isLayerMomentaryKey,
   releaseMomentaryLayer,
+  stopRemapAction,
 } from "./actionExecutor";
 
 /**
@@ -60,18 +61,23 @@ export function setupTriggerCallback() {
  */
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 早さ優先
-function processPendingHoldKeys(): void {
+function processPendingHoldKeys(currentVkCode: number): void {
   const holdKeys = keyStateManager.getPendingHoldKeys();
   if (holdKeys.length > 0) {
     debugLog("keyHandler.ts-62-processPendingHoldKeys-keys", { holdKeys });
   }
   for (const key of holdKeys) {
     // 既にモーメンタリーレイヤーを発動中のキーはスキップ
-    // 既にモーメンタリーレイヤーを発動中のキーはスキップ
     if (isLayerMomentaryKey(key)) {
       debugLog("keyHandler.ts-66-skip-layerMomentaryKey", { key });
       continue;
     }
+
+    // 自分自身（同じキー）のリピート入力は割り込みとみなさない
+    if (key === currentVkCode) {
+      continue;
+    }
+
     const bindings = remapRules.getBindings(key);
     let holdRemapKeys: number[] | null = null;
     let tapRemapKeys: number[] | null = null;
@@ -80,12 +86,12 @@ function processPendingHoldKeys(): void {
       const { trigger, action } = binding;
 
       // holdトリガーのlayerMomentaryは最優先で即時return
-      // holdトリガーのlayerMomentaryは最優先で即時return
       if (trigger === "hold" && action.type === "layerMomentary") {
         debugLog("keyHandler.ts-76-hold-layerMomentary", {
           key,
           layerId: action.layerId,
         });
+        keyStateManager.forceResolveHold(key); // タイマー停止
         addMomentaryLayer(key, action.layerId);
         return;
       }
@@ -99,22 +105,29 @@ function processPendingHoldKeys(): void {
         }
       }
     }
-    debugLog("keyHandler.ts-89-remapKeys-resolved", {
-      holdRemapKeys,
-      tapRemapKeys,
-    });
 
     // hold優先、なければtap
     const remapKeys = holdRemapKeys ?? tapRemapKeys;
     if (remapKeys !== null) {
-      // 複数キーを順番に送信
+      debugLog("keyHandler.ts-remap-interrupted-triggering", {
+        key,
+        remapKeys,
+        reason: holdRemapKeys ? "hold-binding-found" : "tap-binding-found",
+        currentVkCode,
+      });
+      keyStateManager.forceResolveHold(key); // タイマー停止 & resolvedマーク
+      // 複数キーを順番に送信 (Tapとして完結させる)
       for (const remapKey of remapKeys) {
-        // biome-ignore lint/style/noMagicNumbers: 連続送信の遅延時間はここで定義
-        sendKey(remapKey, false, 11);
+        debugLog("keyHandler.ts-remap-interrupted-sendKey-tap", { remapKey });
+        sendKey(remapKey, false, "remap-interrupted-down");
+        // sendKey(remapKey, true, "remap-interrupted-up");
       }
       return;
     }
-    debugLog("keyHandler.ts-101-no-remap-found-for-hold", { key });
+    debugLog("keyHandler.ts-no-remap-found-for-hold-interruption", {
+      key,
+      currentVkCode,
+    });
   }
 }
 
@@ -162,6 +175,7 @@ export function handleKeyUp(vkCode: number): number {
   }
 
   releaseMomentaryLayer(vkCode);
+  stopRemapAction(vkCode);
 
   // 現在のレイヤーからバインディングを取得し、タイミング設定を抽出
   const bindings = remapRules.getBindings(vkCode);
@@ -216,7 +230,7 @@ export function handleKeyDown(vkCode: number): number {
   processPendingTapKeys(vkCode);
 
   // 2. 他のキーのホールド待機を処理
-  processPendingHoldKeys();
+  processPendingHoldKeys(vkCode);
 
   const bindings = remapRules.getBindings(vkCode);
 

@@ -12,6 +12,30 @@ import { buildModifierKeys } from "../utils/modifierKeys";
 /** レイヤーモーメンタリ用：どのキーがどのレイヤーを有効にしているか */
 const momentaryLayerKeys = new Map<number, string>();
 
+/** 現在押しっぱなし（Hold）状態のリマップキー（物理vkCode -> 送信中vkCode配列） */
+const activeRemapKeys = new Map<number, number[]>();
+
+/**
+ * リマップアクション（ホールド）を停止
+ */
+export function stopRemapAction(vkCode: number): void {
+  const activeKeys = activeRemapKeys.get(vkCode);
+  if (activeKeys) {
+    debugLog("actionExecutor.ts-stopRemapAction-releasing", {
+      vkCode,
+      activeKeys,
+    });
+    // 逆順にキーアップを送信
+    for (const key of activeKeys.toReversed()) {
+      sendKey(key, true, "remap-stop");
+    }
+    activeRemapKeys.delete(vkCode);
+  } else {
+    // 頻繁に呼ばれるため、ログは出さないか、詳細な場合のみ
+    // debugLog("actionExecutor.ts-stopRemapAction-no-active-keys", { vkCode });
+  }
+}
+
 /**
  * 指定レイヤーのアクティブキーリスト（Modifiers + ActiveKeys）を取得
  */
@@ -251,14 +275,42 @@ export function executeAction(vkCode: number, trigger: TriggerType) {
 
   executeActionInternal(vkCode, trigger, action);
 
-  // remap アクションの場合の特別な処理（down/upを一度に行う）
+  // remap アクションの場合の特別な処理
   if (action.type === "remap") {
-    debugLog("actionExecutor.ts-183-executeAction-remap-special");
-    for (const key of action.keys) {
-      sendKey(key, false);
-    }
-    for (const key of action.keys.toReversed()) {
-      sendKey(key, true);
+    debugLog("actionExecutor.ts-executeAction-remap", {
+      vkCode,
+      trigger,
+    });
+
+    // 既存のアクションがあれば停止
+    stopRemapAction(vkCode);
+
+    const pressKeys = () => {
+      debugLog("actionExecutor.ts-executeAction-remap-pressKeys", {
+        keys: action.keys,
+      });
+      for (const key of action.keys) {
+        sendKey(key, false, "remap-down");
+      }
+    };
+
+    const releaseKeys = () => {
+      debugLog("actionExecutor.ts-executeAction-remap-releaseKeys", {
+        keys: action.keys,
+      });
+      for (const key of action.keys.toReversed()) {
+        sendKey(key, true, "remap-up");
+      }
+    };
+
+    if (trigger === "hold") {
+      // 押しっぱなしにする
+      pressKeys();
+      activeRemapKeys.set(vkCode, [...action.keys]);
+    } else {
+      // tap / doubleTap は1回だけ叩く
+      pressKeys();
+      releaseKeys();
     }
   }
 }

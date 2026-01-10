@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
 import { Text } from "@/components/atoms/Text";
-import type { LayerStackControl } from "@/components/pages/KeyRemapperPage";
+import type { LayerStackControl } from "@/components/organisms/KeyRemapSection";
 import { HStack, VStack, Wrap } from "@/components/template/Flex";
 
 interface LayerStatusPanelProps {

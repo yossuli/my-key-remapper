@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
 import { Text } from "@/components/atoms/Text";
-import type { GlobalSettingsControl } from "@/components/pages/KeyRemapperPage";
+import type { GlobalSettingsControl } from "@/components/organisms/KeyRemapSection";
 import { HStack, VStack } from "@/components/template/Flex";
 import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 

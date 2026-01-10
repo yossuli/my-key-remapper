@@ -11,20 +11,46 @@ import { LayoutToggle } from "@/components/molecules/display/LayoutToggle";
 import { TriggerTabs } from "@/components/molecules/forms/TriggerTabs";
 import { KeyboardGrid } from "@/components/organisms/KeyboardGrid";
 import { LayerTabs } from "@/components/organisms/keyboard/LayerTabs";
-import type {
-  LayerActions,
-  LayerState,
-  MappingActions,
-  RemapActions,
-} from "@/components/pages/KeyRemapperPage";
+import type { MappingActions } from "@/components/pages/KeyRemapperPage";
 import { HStack, VStack } from "@/components/template/Flex";
+import type { UseGlobalSettingsReturn } from "@/hooks/useGlobalSettings";
+import type { UseKeyEventLogReturn } from "@/hooks/useKeyEventLog";
+import type { UseLayerStackReturn } from "@/hooks/useLayerStack";
+import type { UseLayerStateReturn } from "@/hooks/useLayerState";
 import { useQuickRemap } from "@/hooks/useQuickRemap";
+import type { UseRemapControlReturn } from "@/hooks/useRemapControl";
 import type { KeyboardLayout, LayoutType } from "@/types";
 import { cn } from "@/utils/cn";
 import type {
   KeyBinding,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
+
+// --- 型定義 ---
+
+export type LayerActions = Pick<
+  UseLayerStateReturn,
+  "setLayerId" | "addLayer" | "removeLayer" | "reorderLayers"
+>;
+
+export type LayerState = Pick<UseLayerStateReturn, "layers" | "layerId">;
+
+export type RemapActions = Pick<
+  UseRemapControlReturn,
+  "toggleActive" | "enableRemap" | "disableRemap"
+>;
+
+export type GlobalSettingsControl = Pick<
+  UseGlobalSettingsReturn,
+  "updateGlobalSettings"
+>;
+
+export type LayerStackControl = Pick<
+  UseLayerStackReturn,
+  "stack" | "refresh" | "resetToLayer"
+>;
+
+export type LogState = Pick<UseKeyEventLogReturn, "logs">;
 
 interface KeyRemapSectionProps {
   // Layer state & actions

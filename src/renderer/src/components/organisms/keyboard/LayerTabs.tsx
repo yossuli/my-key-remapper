@@ -9,7 +9,7 @@ import { Else, Ternary, Then } from "@/components/control/Ternary";
 import type {
   LayerActions,
   LayerState,
-} from "@/components/pages/KeyRemapperPage";
+} from "@/components/organisms/KeyRemapSection";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // TODO - まとめる必要はなさそう

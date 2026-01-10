@@ -1,9 +1,7 @@
 import { KeyButton } from "@/components/atoms/KeyButton";
 import { Mapped } from "@/components/control/Mapped";
-import type {
-  LayerState,
-  MappingActions,
-} from "@/components/pages/KeyRemapperPage";
+import type { LayerState } from "@/components/organisms/KeyRemapSection";
+import type { MappingActions } from "@/components/pages/KeyRemapperPage";
 import type { KeyboardLayout, LayoutType } from "@/types";
 import {
   KEYBOARD_LAYOUT_BASE,

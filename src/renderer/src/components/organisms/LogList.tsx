@@ -2,7 +2,7 @@ import { AlertCircle } from "lucide-react";
 import { Icon } from "@/components/atoms/Icon";
 import { HandleEmpty } from "@/components/control/HandleEmpty";
 import { LogEntry } from "@/components/molecules/display/LogEntry";
-import type { LogState } from "@/components/pages/KeyRemapperPage";
+import type { LogState } from "@/components/organisms/KeyRemapSection";
 import { VStack } from "@/components/template/Flex";
 
 interface LogListProps {

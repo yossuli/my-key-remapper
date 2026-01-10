@@ -3,6 +3,7 @@ import { Show } from "@/components/control/Show";
 import { AppHeader } from "@/components/organisms/AppHeader";
 import { KeyEditorForm } from "@/components/organisms/editor/KeyEditorForm";
 import { GlobalSettingsForm } from "@/components/organisms/GlobalSettingsForm";
+import type { LayerState } from "@/components/organisms/KeyRemapSection";
 import { KeyRemapSection } from "@/components/organisms/KeyRemapSection";
 import { LayerStatusPanel } from "@/components/organisms/LayerStatusPanel";
 import { LogList } from "@/components/organisms/LogList";
@@ -15,20 +16,11 @@ import {
   Side,
 } from "@/components/template/MainLayout";
 import { ModalLayout } from "@/components/template/ModalLayout";
-import {
-  type UseGlobalSettingsReturn,
-  useGlobalSettings,
-} from "@/hooks/useGlobalSettings";
-import {
-  type UseKeyEventLogReturn,
-  useKeyEventLog,
-} from "@/hooks/useKeyEventLog";
-import { type UseLayerStackReturn, useLayerStack } from "@/hooks/useLayerStack";
-import { type UseLayerStateReturn, useLayerState } from "@/hooks/useLayerState";
-import {
-  type UseRemapControlReturn,
-  useRemapControl,
-} from "@/hooks/useRemapControl";
+import { useGlobalSettings } from "@/hooks/useGlobalSettings";
+import { useKeyEventLog } from "@/hooks/useKeyEventLog";
+import { useLayerStack } from "@/hooks/useLayerStack";
+import { useLayerState } from "@/hooks/useLayerState";
+import { useRemapControl } from "@/hooks/useRemapControl";
 import type { LayoutType } from "@/types";
 import {
   KEYBOARD_LAYOUT,
@@ -38,41 +30,10 @@ import type { Action, TriggerType } from "../../../../shared/types/remapConfig";
 
 // --- 型定義 ---
 
-// レイヤー操作関連
-export type LayerActions = Pick<
-  UseLayerStateReturn,
-  "setLayerId" | "addLayer" | "removeLayer" | "reorderLayers"
->;
-
-// レイヤー状態関連
-export type LayerState = Pick<UseLayerStateReturn, "layers" | "layerId">;
-
-// リマップ制御関連
-export type RemapActions = Pick<
-  UseRemapControlReturn,
-  "toggleActive" | "enableRemap" | "disableRemap"
->;
-
-// マッピング操作関連
 export interface MappingActions {
   saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
   removeMapping: (from: number) => void;
 }
-
-// グローバル設定関連
-export type GlobalSettingsControl = Pick<
-  UseGlobalSettingsReturn,
-  "updateGlobalSettings"
->;
-
-// レイヤースタック関連
-export type LayerStackControl = Pick<
-  UseLayerStackReturn,
-  "stack" | "refresh" | "resetToLayer"
->;
-
-// ログ関連
-export type LogState = Pick<UseKeyEventLogReturn, "logs">;
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
@@ -80,16 +41,12 @@ export function KeyRemapperPage() {
   const {
     layers,
     layerId,
-    setLayerId,
     currentBindings,
-    addLayer,
-    removeLayer,
-    reorderLayers,
     saveMapping,
     removeMapping,
+    ...layerActions
   } = useLayerState();
-  const { isActive, toggleActive, enableRemap, disableRemap } =
-    useRemapControl();
+  const { isActive, ...remapActions } = useRemapControl();
   const { stack, refresh, resetToLayer } = useLayerStack();
   const { globalSettings, updateGlobalSettings } = useGlobalSettings();
 
@@ -111,25 +68,15 @@ export function KeyRemapperPage() {
   };
 
   const handleCloseEditor = () => {
-    enableRemap();
+    remapActions.enableRemap();
     setEditingKey(null);
   };
-  const layerActions: LayerActions = {
-    setLayerId,
-    addLayer,
-    removeLayer,
-    reorderLayers,
-  };
+
+  const layerState: LayerState = { layers, layerId };
   const mappingActions: MappingActions = {
     saveMapping,
     removeMapping: (from: number) => removeMapping(from, selectedTrigger),
   };
-  const remapActions: RemapActions = {
-    toggleActive,
-    disableRemap,
-    enableRemap,
-  };
-  const layerState: LayerState = { layers, layerId };
   return (
     <>
       <MainLayout>
@@ -137,7 +84,7 @@ export function KeyRemapperPage() {
           <AppHeader
             isActive={isActive} // 🆕 → 🔥 (E. App Header Control)
             onOpenSettings={() => setSettingsModalOpen(true)} // 🆕 → 🔥 (E. App Header Control)
-            onToggleActive={toggleActive} // 🆕 → 🔥 (E. App Header Control)
+            onToggleActive={remapActions.toggleActive} // 🆕 → 🔥 (E. App Header Control)
             onToggleSimpleMode={() => setSimpleMode((prev) => !prev)} // 🆕 → 🔥 (E. App Header Control)
             simpleMode={simpleMode} // 🆕 → 🔥 (E. App Header Control)
           />

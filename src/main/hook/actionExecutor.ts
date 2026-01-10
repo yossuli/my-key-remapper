@@ -3,6 +3,7 @@ import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { clickAt, getCursorPosition, moveMouse } from "../native/mouseSender";
 import { sendKey } from "../native/sender";
 import { remapRules } from "../state/rules";
+import { debugLog } from "../utils/debugLogger";
 
 /**
  * アクションの実行とレイヤー管理
@@ -17,6 +18,10 @@ const momentaryLayerKeys = new Map<number, string>();
 export function releaseMomentaryLayer(vkCode: number) {
   const layerId = momentaryLayerKeys.get(vkCode);
   if (layerId) {
+    debugLog("actionExecutor.ts-19-releaseMomentaryLayer", {
+      vkCode,
+      layerId,
+    });
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
 
@@ -33,6 +38,8 @@ export function releaseMomentaryLayer(vkCode: number) {
 export function addMomentaryLayer(vkCode: number, layerId: string) {
   const isLayerSetCurrent = momentaryLayerKeys.get(vkCode);
   if (isLayerSetCurrent === undefined) {
+    debugLog("actionExecutor.ts-36-addMomentaryLayer", { vkCode, layerId });
+
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
 
@@ -56,6 +63,11 @@ export function isLayerMomentaryKey(vkCode: number): boolean {
 function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
   const layer = remapRules.getCurrentLayer();
   const layerId = layer?.id;
+  debugLog("actionExecutor.ts-59-sendKeyWithLayerModifiers", {
+    vkCode,
+    isUp,
+    layerId,
+  });
 
   if (layerId === "shift") {
     if (isUp) {
@@ -85,6 +97,9 @@ export function handleTapOnlyBindings(
   // tap 以外のトリガーがある場合は処理しない
   for (const { trigger } of bindings) {
     if (trigger !== "tap") {
+      debugLog("actionExecutor.ts-88-handleTapOnlyBindings-skip-non-tap", {
+        trigger,
+      });
       return null;
     }
   }
@@ -95,6 +110,7 @@ export function handleTapOnlyBindings(
   if (action) {
     // remapアクションの場合はここで処理（修飾キーなしで送信）
     if (action.type === "remap") {
+      debugLog("actionExecutor.ts-98-handleTapOnlyBindings-remap", { action });
       for (const key of action.keys) {
         sendKey(key, isUp);
       }
@@ -103,6 +119,9 @@ export function handleTapOnlyBindings(
     // remap以外（mouseMove等）の場合はexecuteActionInternalに委譲
     // isUpがtrueの場合のみ実行（キーアップ時に1回だけ実行）
     if (isUp) {
+      debugLog("actionExecutor.ts-106-handleTapOnlyBindings-up-action", {
+        action,
+      });
       executeActionInternal(vkCode, "tap", action);
       return 1;
     }
@@ -110,6 +129,7 @@ export function handleTapOnlyBindings(
   }
 
   // tap アクションがない場合、レイヤーの修飾キーを付与して送信
+  debugLog("actionExecutor.ts-113-handleTapOnlyBindings-passthrough");
   sendKeyWithLayerModifiers(vkCode, isUp);
   return 1;
 }
@@ -122,6 +142,9 @@ function executeActionInternal(
   _trigger: TriggerType,
   action: NonNullable<ReturnType<typeof remapRules.getAction>>
 ): void {
+  debugLog("actionExecutor.ts-124-executeActionInternal-start", {
+    actionType: action.type,
+  });
   switch (action.type) {
     case "mouseMove":
       moveMouse(action.x, action.y);
@@ -160,16 +183,19 @@ function executeActionInternal(
  * トリガーに対応するアクションを実行
  */
 export function executeAction(vkCode: number, trigger: TriggerType) {
+  debugLog("actionExecutor.ts-163-executeAction-start", { vkCode, trigger });
   const action = remapRules.getAction(vkCode, trigger);
   const bindings = remapRules.getBindings(vkCode);
 
   // tap のみのバインディングを先に処理
   const tapResult = handleTapOnlyBindings(vkCode, bindings, true);
   if (tapResult !== null) {
+    debugLog("actionExecutor.ts-169-executeAction-handled-by-tap-logic");
     return;
   }
 
   if (!action) {
+    debugLog("actionExecutor.ts-173-executeAction-no-action");
     // アクションがない場合、レイヤーの修飾キーを付与して送信
     sendKeyWithLayerModifiers(vkCode, false);
     sendKeyWithLayerModifiers(vkCode, true);
@@ -180,6 +206,7 @@ export function executeAction(vkCode: number, trigger: TriggerType) {
 
   // remap アクションの場合の特別な処理（down/upを一度に行う）
   if (action.type === "remap") {
+    debugLog("actionExecutor.ts-183-executeAction-remap-special");
     for (const key of action.keys) {
       sendKey(key, false);
     }

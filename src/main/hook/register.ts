@@ -6,6 +6,7 @@ import {
   SetWindowsHookExA,
 } from "../native/bindings";
 import { WH_KEYBOARD_LL } from "../native/types";
+import { debugLog } from "../utils/debugLogger";
 import { decodeKeyEvent, isKeyEvent, isKeyUpEvent } from "./eventProcessor";
 
 /**
@@ -23,24 +24,32 @@ let hookCallback: any = null;
 export function registerKeyboardHook(
   callback: (vkCode: number, isUp: boolean) => number
 ) {
+  debugLog("register.ts-23-registerKeyboardHook-start");
   // biome-ignore lint/suspicious/noExplicitAny: FFIコールバック型
   const outerCallback = (nCode: number, wParam: number, lParam: any) => {
-    const next = () =>
-      CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
+    debugLog("register.ts-27-outerCallback-entry", { nCode, wParam });
+    const next = () => {
+      debugLog("register.ts-29-next-call");
+      return CallNextHookEx(hHook, nCode, wParam, koffi.address(lParam));
+    };
     if (nCode < 0) {
+      debugLog("register.ts-30-nCode-negative");
       return next();
     }
     if (!isKeyEvent(wParam)) {
+      debugLog("register.ts-33-not-key-event");
       return next();
     }
     const eventInfo = decodeKeyEvent(lParam);
     if (!eventInfo || eventInfo.isInjected) {
+      debugLog("register.ts-37-injected-or-invalid", eventInfo);
       return next();
     }
 
     const { vkCode } = eventInfo;
     const isUp = isKeyUpEvent(wParam);
 
+    debugLog("register.ts-43-calling-callback", { vkCode, isUp });
     return callback(vkCode, isUp);
   };
   try {

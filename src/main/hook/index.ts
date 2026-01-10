@@ -1,5 +1,6 @@
 import type { EventSender } from "../ipc/types";
 import { UnhookWindowsHookEx } from "../native/bindings";
+import { debugLog } from "../utils/debugLogger";
 import {
   applyGlobalSettings,
   handleKeyDown,
@@ -19,6 +20,7 @@ let eventSender: EventSender | null = null;
  * キーボードフックをセットアップ
  */
 export function setupKeyboardHook(sender: EventSender) {
+  debugLog("index.ts-21-setupKeyboardHook-entry");
   if (process.platform !== "win32") {
     console.log("Not on Windows, skipping keyboard hook setup.");
     return;
@@ -29,8 +31,11 @@ export function setupKeyboardHook(sender: EventSender) {
   setupTriggerCallback();
 
   registerKeyboardHook((vkCode, isUp) => {
+    debugLog("index.ts-31-callback-entry", { vkCode, isUp });
     if (eventSender) {
+      debugLog("index.ts-33-ipc-send-start", { vkCode, isUp });
       eventSender("key-event", { vkCode, isUp });
+      debugLog("index.ts-34-ipc-send-end");
     }
     return isUp ? handleKeyUp(vkCode) : handleKeyDown(vkCode);
   });

@@ -5,6 +5,7 @@ import { getCursorPosition } from "../native/mouseSender";
 import { getPressedKeys } from "../native/pressedKeysTracker";
 import { releaseAllPressedKeys } from "../native/sender";
 import { remapRules } from "../state/rules";
+import { setDebugLogEnabled } from "../utils/debugLogger";
 
 /**
  * IPCハンドラの登録
@@ -74,4 +75,9 @@ export function setupIPCHandlers(): void {
     width: GetSystemMetrics(SM_CXSCREEN),
     height: GetSystemMetrics(SM_CYSCREEN),
   }));
+
+  // デバッグログ有効/無効設定
+  ipcMain.on("set-debug-log-enabled", (_event, { enabled }) => {
+    setDebugLogEnabled(enabled);
+  });
 }

@@ -1,6 +1,7 @@
 import { sendKey } from "../native/sender";
 import { KeyStateManager } from "../state/keyState";
 import { remapRules } from "../state/rules";
+import { debugLog } from "../utils/debugLogger";
 import {
   addMomentaryLayer,
   executeAction,
@@ -22,6 +23,7 @@ let remapEnabled = true;
  * リマップ有効/無効を設定
  */
 export function setRemapEnabled(enabled: boolean) {
+  debugLog("keyHandler.ts-24-setRemapEnabled", { enabled });
   remapEnabled = enabled;
 }
 
@@ -60,9 +62,14 @@ export function setupTriggerCallback() {
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 早さ優先
 function processPendingHoldKeys(): void {
   const holdKeys = keyStateManager.getPendingHoldKeys();
+  if (holdKeys.length > 0) {
+    debugLog("keyHandler.ts-62-processPendingHoldKeys-keys", { holdKeys });
+  }
   for (const key of holdKeys) {
     // 既にモーメンタリーレイヤーを発動中のキーはスキップ
+    // 既にモーメンタリーレイヤーを発動中のキーはスキップ
     if (isLayerMomentaryKey(key)) {
+      debugLog("keyHandler.ts-66-skip-layerMomentaryKey", { key });
       continue;
     }
     const bindings = remapRules.getBindings(key);
@@ -73,7 +80,12 @@ function processPendingHoldKeys(): void {
       const { trigger, action } = binding;
 
       // holdトリガーのlayerMomentaryは最優先で即時return
+      // holdトリガーのlayerMomentaryは最優先で即時return
       if (trigger === "hold" && action.type === "layerMomentary") {
+        debugLog("keyHandler.ts-76-hold-layerMomentary", {
+          key,
+          layerId: action.layerId,
+        });
         addMomentaryLayer(key, action.layerId);
         return;
       }
@@ -87,6 +99,10 @@ function processPendingHoldKeys(): void {
         }
       }
     }
+    debugLog("keyHandler.ts-89-remapKeys-resolved", {
+      holdRemapKeys,
+      tapRemapKeys,
+    });
 
     // hold優先、なければtap
     const remapKeys = holdRemapKeys ?? tapRemapKeys;
@@ -98,6 +114,7 @@ function processPendingHoldKeys(): void {
       }
       return;
     }
+    debugLog("keyHandler.ts-101-no-remap-found-for-hold", { key });
   }
 }
 
@@ -105,8 +122,10 @@ function processPendingHoldKeys(): void {
  * キーアップイベントを処理
  */
 export function handleKeyUp(vkCode: number): number {
+  debugLog("keyHandler.ts-107-handleKeyUp-entry", { vkCode });
   // リマップ無効時はパススルー
   if (!remapEnabled) {
+    debugLog("keyHandler.ts-109-remapDisabled");
     return 0;
   }
 
@@ -130,16 +149,21 @@ export function handleKeyUp(vkCode: number): number {
   }
 
   const keyTiming = { holdThresholdMs, tapIntervalMs };
+  debugLog("keyHandler.ts-132-keyTiming", keyTiming);
   const hasDoubleTapBinding = !!remapRules.getAction(vkCode, "doubleTap");
   const trigger = keyStateManager.onKeyUp(
     vkCode,
     hasDoubleTapBinding,
     keyTiming
   );
+  debugLog("keyHandler.ts-134-onKeyUp-result", { trigger });
 
   // トリガーが null の場合は遅延発火待ち（コールバックで後から発火）
   if (trigger !== null) {
+    debugLog("keyHandler.ts-141-executeAction", { trigger });
     executeAction(vkCode, trigger);
+  } else {
+    debugLog("keyHandler.ts-143-delayed-trigger-wait");
   }
 
   return 1;
@@ -149,8 +173,10 @@ export function handleKeyUp(vkCode: number): number {
  * キーダウンイベントを処理
  */
 export function handleKeyDown(vkCode: number): number {
+  debugLog("keyHandler.ts-151-handleKeyDown-entry", { vkCode });
   // リマップ無効時はパススルー
   if (!remapEnabled) {
+    debugLog("keyHandler.ts-153-remapDisabled");
     return 0;
   }
 
@@ -161,6 +187,7 @@ export function handleKeyDown(vkCode: number): number {
   // tap のみのバインディングを先に処理
   const tapResult = handleTapOnlyBindings(vkCode, bindings, false);
   if (tapResult !== null) {
+    debugLog("keyHandler.ts-164-tapResult-handled", { tapResult });
     return tapResult;
   }
 
@@ -182,6 +209,7 @@ export function handleKeyDown(vkCode: number): number {
   }
 
   const keyTiming = { holdThresholdMs, tapIntervalMs };
+  debugLog("keyHandler.ts-185-onKeyDown-call", keyTiming);
   keyStateManager.onKeyDown(vkCode, keyTiming);
   return 1;
 }

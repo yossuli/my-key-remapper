@@ -1,4 +1,5 @@
 import koffi from "koffi";
+import { debugLog, log } from "../utils/debugLogger";
 import { SendInput } from "./bindings";
 import { getPressedKeys, markKeyDown, markKeyUp } from "./pressedKeysTracker";
 import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
@@ -8,7 +9,8 @@ import { INPUT, INPUT_KEYBOARD, KEYEVENTF_KEYUP } from "./types";
  */
 
 export const sendKey = (vk: number, up: boolean, m?: unknown): void => {
-  console.log("sendkey", vk, up ? "up" : "down", m);
+  debugLog("sender.ts-10-sendKey", { vk, up, m });
+  log("sendkey", vk, up ? "up" : "down", m);
 
   // 押下キーを追跡
   if (up) {
@@ -33,6 +35,7 @@ export const sendKey = (vk: number, up: boolean, m?: unknown): void => {
 
     // SendInputは挿入されたイベント数を返す
     const sent = SendInput(1, [input], koffi.sizeof(INPUT));
+    debugLog("sender.ts-35-SendInput-result", { sent });
     if (sent !== 1) {
       console.error(`SendInput failed. Sent: ${sent}`);
     }
@@ -48,7 +51,8 @@ export const sendKey = (vk: number, up: boolean, m?: unknown): void => {
 export function releaseAllPressedKeys(): number {
   // 先に配列にコピー（ループ中に sendKey 内で markKeyUp が呼ばれセットが変更されるため）
   const keys = getPressedKeys();
-  console.log("releaseAllPressedKeys", keys);
+  debugLog("sender.ts-51-releaseAllPressedKeys", keys);
+  log("releaseAllPressedKeys", keys);
   for (const vk of keys) {
     sendKey(vk, true, "release-all");
   }

@@ -19,19 +19,19 @@ import { ModalLayout } from "@/components/template/ModalLayout";
 import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 import { useKeyEventLog } from "@/hooks/useKeyEventLog";
 import { useLayerStack } from "@/hooks/useLayerStack";
-import { useLayerState } from "@/hooks/useLayerState";
+import { type UseLayerStateReturn, useLayerState } from "@/hooks/useLayerState";
 import { useRemapControl } from "@/hooks/useRemapControl";
 import type { LayoutType } from "@/types";
 import {
   KEYBOARD_LAYOUT,
   SWITCH_LAYOUT_RULE,
 } from "../../../../shared/constants";
-import type { Action, TriggerType } from "../../../../shared/types/remapConfig";
+import type { TriggerType } from "../../../../shared/types/remapConfig";
 
 // --- 型定義 ---
 
 export interface MappingActions {
-  saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
+  saveMapping: UseLayerStateReturn["saveMapping"];
   removeMapping: (from: number) => void;
 }
 
@@ -133,9 +133,7 @@ export function KeyRemapperPage() {
             layout={layout} // 🆕 → 🧩🔥 (C. UI Configuration)
             onClose={handleCloseEditor} // 🆕 → 🔥 (I. Key Editor Modal)
             onRemove={(trigger) => removeMapping(e, trigger)} // 🆕 → 🔥 (I. Key Editor Modal)
-            onSave={(trigger, action, timing) =>
-              saveMapping(e, trigger, action, timing)
-            } // 🆕 → 🔥 (I. Key Editor Modal)
+            onSave={saveMapping(e)} // 🆕 → 🔥 (I. Key Editor Modal)
             targetVk={e} // 🆕 → 🔥 (I. Key Editor Modal)
             trigger={selectedTrigger} // 🆕 → 🧩🔥 (C. UI Configuration)
           />

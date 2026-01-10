@@ -21,11 +21,8 @@ export interface UseLayerStateReturn {
   removeLayer: (targetLayerId: string) => void;
   reorderLayers: (newOrder: string[]) => void; // 追加
   saveMapping: (
-    from: number,
-    trigger: TriggerType,
-    action: Action,
-    timing?: number | null
-  ) => void;
+    from: number
+  ) => (trigger: TriggerType, action: Action, timing?: number | null) => void;
   removeMapping: (from: number, trigger: TriggerType) => void;
   reloadLayers: () => Promise<void>; // 追加
 }
@@ -93,7 +90,7 @@ export function useLayerState(): UseLayerStateReturn {
 
   // マッピング保存
   const saveMapping = useCallback<UseLayerStateReturn["saveMapping"]>(
-    (from, trigger, action, timing) => {
+    (from) => (trigger, action, timing) => {
       // triggerに応じたtimingMsを決定
       const timingMs =
         trigger === "hold" || trigger === "doubleTap" ? timing : undefined;

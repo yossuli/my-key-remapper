@@ -7,6 +7,7 @@ import { useKeyEventInput } from "@/hooks/useKeyEventInput";
 import type { KeyboardLayout } from "@/types";
 import { getNextKeyVk } from "@/utils/getNextKeyVk";
 import type { Action, TriggerType } from "../../../shared/types/remapConfig";
+import type { UseLayerStateReturn } from "./useLayerState";
 
 export interface UseQuickRemapOptions {
   enabled: boolean;
@@ -16,7 +17,7 @@ export interface UseQuickRemapOptions {
   targetKeys: number[];
   keyboardLayout: KeyboardLayout;
 
-  onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
+  onSaveMapping: UseLayerStateReturn["saveMapping"];
 }
 
 export interface UseQuickRemapReturn {
@@ -58,7 +59,7 @@ export function useQuickRemap({
       onSave: (trigger: TriggerType, action: Action) => {
         if (editingKey !== null) {
           console.log("save", editingKey, trigger, action);
-          onSaveMapping(editingKey, trigger, action);
+          onSaveMapping(editingKey)(trigger, action);
         }
       },
     });

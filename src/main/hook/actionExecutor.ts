@@ -1,9 +1,9 @@
-﻿import { VK } from "../../shared/constants";
-import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
+﻿import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
 import { clickAt, getCursorPosition, moveMouse } from "../native/mouseSender";
 import { sendKey } from "../native/sender";
 import { remapRules } from "../state/rules";
 import { debugLog } from "../utils/debugLogger";
+import { buildModifierKeys } from "../utils/modifierKeys";
 
 /**
  * アクションの実行とレイヤー管理
@@ -11,6 +11,35 @@ import { debugLog } from "../utils/debugLogger";
 
 /** レイヤーモーメンタリ用：どのキーがどのレイヤーを有効にしているか */
 const momentaryLayerKeys = new Map<number, string>();
+
+/**
+ * 指定レイヤーのアクティブキーリスト（Modifiers + ActiveKeys）を取得
+ */
+function getLayerActiveKeys(layerId: string): number[] {
+  const layer = remapRules.getLayers().find((l) => l.id === layerId);
+  if (!layer) {
+    return [];
+  }
+
+  const keys = new Set<number>();
+
+  // 1. defaultModifiers
+  if (layer.defaultModifiers) {
+    const modKeys = buildModifierKeys(layer.defaultModifiers);
+    for (const k of modKeys) {
+      keys.add(k);
+    }
+  }
+
+  // 2. activeKeys
+  if (layer.activeKeys) {
+    for (const k of layer.activeKeys) {
+      keys.add(k);
+    }
+  }
+
+  return Array.from(keys);
+}
 
 /**
  * キーアップ時のモーメンタリレイヤー解除
@@ -22,12 +51,15 @@ export function releaseMomentaryLayer(vkCode: number) {
       vkCode,
       layerId,
     });
+    const layerKeys = getLayerActiveKeys(layerId);
+
     remapRules.popLayer(layerId);
     momentaryLayerKeys.delete(vkCode);
 
-    // Shiftレイヤーの場合は物理キーアップも送信
-    if (layerId === "shift") {
-      sendKey(VK.SHIFT, true, "layer-remove");
+    // レイヤー設定に基づく修飾キーの解除（物理キーUP）
+    // 押したときと逆順で離すのが一般的だが、同時押し解除なら順序はあまり問わない
+    for (const vk of layerKeys.toReversed()) {
+      sendKey(vk, true, "layer-remove");
     }
   }
 }
@@ -40,12 +72,14 @@ export function addMomentaryLayer(vkCode: number, layerId: string) {
   if (isLayerSetCurrent === undefined) {
     debugLog("actionExecutor.ts-36-addMomentaryLayer", { vkCode, layerId });
 
+    const layerKeys = getLayerActiveKeys(layerId);
+
     remapRules.pushLayer(layerId);
     momentaryLayerKeys.set(vkCode, layerId);
 
-    // Shiftレイヤーの場合は物理キーダウンも送信
-    if (layerId === "shift") {
-      sendKey(VK.SHIFT, false, "layer-add");
+    // レイヤー設定に基づく修飾キーの送信（物理キーDOWN）
+    for (const vk of layerKeys) {
+      sendKey(vk, false, "layer-add");
     }
   }
 }
@@ -69,14 +103,20 @@ function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
     layerId,
   });
 
-  if (layerId === "shift") {
+  const layerKeys = layerId ? getLayerActiveKeys(layerId) : [];
+
+  if (layerKeys.length > 0) {
     if (isUp) {
-      // keyUp: キーを離してから Shift を離す
+      // keyUp: キーを離してから アクティブキー を離す
       sendKey(vkCode, true);
-      sendKey(VK.SHIFT, true);
+      for (const vk of layerKeys.toReversed()) {
+        sendKey(vk, true);
+      }
     } else {
-      // keyDown: Shift を押してからキーを押す
-      sendKey(VK.SHIFT, false);
+      // keyDown: アクティブキー を押してからキーを押す
+      for (const vk of layerKeys) {
+        sendKey(vk, false);
+      }
       sendKey(vkCode, false);
     }
   } else {

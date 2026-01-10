@@ -165,9 +165,9 @@ export interface Layer {
   /** "layerMomentary"で有効にしている場合、ほかのキーを押したときにこのキーを送信する（未実装）*/
   // passThroughKeys?: number[];
   /** レイヤーアクティブ時にデフォルトで送信する修飾キー。tap アクションが設定されているキーは除外。*/
-  defaultModifiers?: {
-    shift?: boolean | "left" | "right";
-  };
+  defaultModifiers?: ModifierOutput;
+  /** レイヤーアクティブ時に押しっぱなしにする追加キー（任意のキーコード） */
+  activeKeys?: number[];
 }
 
 // =====================================

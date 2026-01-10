@@ -15,7 +15,24 @@ import { layerState } from "./layerState";
 export class RemapRules {
   async init() {
     await configStorage.load();
-    // shiftレイヤーが存在しない場合は自動生成
+    const config = configStorage.getConfig();
+
+    // Migration: 自動生成または後方互換性のための補正
+    // 既存の "shift" レイヤーが defaultModifiers を持っていない場合、明示的に付与する
+    const shiftLayer = config.layers.find((l) => l.id === "shift");
+    if (shiftLayer) {
+      if (!shiftLayer.defaultModifiers) {
+        shiftLayer.defaultModifiers = { shift: true };
+        console.log(
+          "Migrated 'shift' layer to have defaultModifiers: { shift: true }"
+        );
+        configStorage.save(config);
+      }
+    } else {
+      // shiftレイヤー自体が存在しない場合は自動生成 (既存コメント通り)
+      // Note: DEFAULT_REMAP_CONFIG で生成されるので、ここで明示的に作る必要はないかもしれないが
+      // 既存の処理があればそれに従う。ここでは変更を最小限に。
+    }
   }
 
   // =====================================
@@ -200,6 +217,23 @@ export class RemapRules {
     const stack = layerState.getStack();
     const layers = this.getLayers();
     return layers.find((l) => l.id === stack.at(-1));
+  }
+
+  /**
+   * レイヤー情報を更新
+   */
+  updateLayer(layerId: string, updates: Partial<Layer>): void {
+    const config = configStorage.getConfig();
+    const layer = config.layers.find((l) => l.id === layerId);
+    if (!layer) {
+      return;
+    }
+
+    // 更新対象のプロパティをマージ
+    // bindingsは上書きしないように注意（updatesに含まれている場合のみ）
+    Object.assign(layer, updates);
+
+    configStorage.save(config);
   }
 
   /**

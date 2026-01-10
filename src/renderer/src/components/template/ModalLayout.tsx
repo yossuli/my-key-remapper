@@ -1,24 +1,6 @@
-import type { ReactNode } from "react";
-import { Dialog } from "../atoms/Dialog";
+/**
+ * 後方互換性のための re-export
+ */
 
-interface ModalLayoutProps<T> {
-  value: T | null;
-  title?: string;
-  children: (value: T) => ReactNode;
-  onClose: () => void;
-}
-
-export function ModalLayout<T>({
-  value,
-  title,
-  children,
-  onClose,
-}: ModalLayoutProps<T>) {
-  const isOpen = !!value;
-
-  return (
-    <Dialog onClose={onClose} open={isOpen} title={title}>
-      {value !== null && children(value)}
-    </Dialog>
-  );
-}
+// biome-ignore lint/performance/noBarrelFile: 後方互換性のため
+export { ModalLayout } from "@/components/molecules/forms/ModalLayout";

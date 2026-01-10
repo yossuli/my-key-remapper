@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useIpc, useIpcEvent } from "./useIpc";
 
-interface UseLayerStackReturn {
+export interface UseLayerStackReturn {
   /** 現在のレイヤースタック */
   stack: string[];
   /** 手動でスタックを再取得 */

@@ -1,17 +1,18 @@
 import type { ReactNode } from "react";
-import { useScreenSize } from "../../hooks/useScreenSize";
-import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
-import { Center, VStack } from "../template/Flex";
+import { useScreenSize } from "../../../hooks/useScreenSize";
+import type {
+  MouseCaptureState,
+  MouseHandlers,
+  MousePosition,
+} from "../../../types/tree/branches";
+import { Button } from "../../atoms/Button";
+import { Input } from "../../atoms/Input";
+import { Center, VStack } from "../../template/Flex";
 
 interface MousePositionInputProps {
-  mouseX: number;
-  mouseY: number;
-  isCapturing: boolean;
-  countdown: number;
-  onMouseXChange: (value: number) => void;
-  onMouseYChange: (value: number) => void;
-  onGetPosition: () => void;
+  mousePosition: MousePosition; // { x, y }
+  captureState: MouseCaptureState; // { isCapturing, countdown }
+  mouseHandlers: MouseHandlers; // グループのまま受け取る
   setFocused: (focused: boolean) => void;
   idPrefix?: string;
   children?: ReactNode;
@@ -22,23 +23,24 @@ interface MousePositionInputProps {
  * X・Y座標の入力フィールドと位置取得ボタンを提供
  */
 export function MousePositionInput({
-  mouseX,
-  mouseY,
-  isCapturing,
-  countdown,
-  onMouseXChange,
-  onMouseYChange,
-  onGetPosition,
+  mousePosition,
+  captureState,
+  mouseHandlers,
   setFocused,
   idPrefix = "mouse",
   children,
 }: MousePositionInputProps) {
   const screenSize = useScreenSize();
 
-  // biome-ignore lint/style/noMagicNumbers: UI計算用
-  const relativeX = screenSize ? (mouseX / screenSize.width) * 100 : 50;
-  // biome-ignore lint/style/noMagicNumbers: UI計算用
-  const relativeY = screenSize ? (mouseY / screenSize.height) * 100 : 50;
+  const PERCENTAGE_MULTIPLIER = 100;
+  const DEFAULT_POSITION_PERCENT = 50;
+
+  const relativeX = screenSize
+    ? (mousePosition.x / screenSize.width) * PERCENTAGE_MULTIPLIER
+    : DEFAULT_POSITION_PERCENT;
+  const relativeY = screenSize
+    ? (mousePosition.y / screenSize.height) * PERCENTAGE_MULTIPLIER
+    : DEFAULT_POSITION_PERCENT;
   return (
     <Center>
       <div className="grid w-fit grid-cols-[auto_1fr_auto] items-center gap-4">
@@ -47,10 +49,12 @@ export function MousePositionInput({
             horizontal
             id={`${idPrefix}-x`}
             input-className="w-16 font-mono text-center p-1"
-            input-onChange={(e) => onMouseXChange(Number(e.target.value))}
+            input-onChange={(e) =>
+              mouseHandlers.setMouseX(Number(e.target.value))
+            }
             input-placeholder="0"
             input-type="number"
-            input-value={mouseX.toString()}
+            input-value={mousePosition.x.toString()}
             label="X"
             setFocused={setFocused}
           />
@@ -58,10 +62,12 @@ export function MousePositionInput({
             horizontal
             id={`${idPrefix}-y`}
             input-className="w-16 font-mono text-center p-1"
-            input-onChange={(e) => onMouseYChange(Number(e.target.value))}
+            input-onChange={(e) =>
+              mouseHandlers.setMouseY(Number(e.target.value))
+            }
             input-placeholder="0"
             input-type="number"
-            input-value={mouseY.toString()}
+            input-value={mousePosition.y.toString()}
             label="Y"
             setFocused={setFocused}
           />
@@ -69,8 +75,8 @@ export function MousePositionInput({
 
         <Button
           className="relative flex h-24 flex-col items-center justify-center gap-1"
-          disabled={isCapturing}
-          onClick={onGetPosition}
+          disabled={captureState.isCapturing}
+          onClick={mouseHandlers.onGetMousePosition}
           size="lg"
           style={
             // biome-ignore lint/nursery/noLeakedRender: styleプロパティへのundefined渡しはReactで有効
@@ -92,7 +98,9 @@ export function MousePositionInput({
             </div>
           </div>
           <span className="relative z-10 font-medium">
-            {isCapturing ? `${countdown}秒後` : "位置を取得"}
+            {captureState.isCapturing
+              ? `${captureState.countdown}秒後`
+              : "位置を取得"}
           </span>
         </Button>
 

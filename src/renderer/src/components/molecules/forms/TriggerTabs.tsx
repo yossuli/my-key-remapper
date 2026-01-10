@@ -2,12 +2,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export { Tabs, TabsContent, TabsList, TabsTrigger };
 
-import type { TriggerType } from "../../../../shared/types/remapConfig";
-import { cn } from "../../utils/cn";
-import { Mapped } from "../control/Mapped";
-import { Show } from "../control/Show";
-import { Then } from "../control/Ternary";
-import { VStack } from "../template/Flex";
+import type { ReactNode } from "react";
+import type { TriggerType } from "../../../../../shared/types/remapConfig";
+import { cn } from "../../../utils/cn";
+import { Mapped } from "../../control/Mapped";
+import { Show } from "../../control/Show";
+import { Then } from "../../control/Ternary";
+import { VStack } from "../../template/Flex";
 
 interface TriggerOption {
   value: TriggerType;
@@ -101,5 +102,3 @@ export function TriggerTabs({
     </div>
   );
 }
-
-export type { TabsContent };

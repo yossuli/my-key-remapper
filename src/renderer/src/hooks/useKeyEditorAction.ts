@@ -9,7 +9,7 @@ import type {
 import type { BindingState } from "../utils/bindingState";
 import { objectiveSwitch } from "../utils/objectiveSwitch";
 
-interface UseKeyEditorActionsProps {
+export interface UseKeyEditorActionsProps {
   state: BindingState;
   layerId: string;
   targetVk: number | null;
@@ -19,7 +19,7 @@ interface UseKeyEditorActionsProps {
   onClose?: () => void;
 }
 
-interface UseKeyEditorActionsReturn {
+export interface UseKeyEditorActionsReturn {
   canSave: boolean;
   holds: number[];
   newTargetKeys: number[];

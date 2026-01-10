@@ -11,7 +11,7 @@ interface LogEntry {
 
 const MAX_LOG_ENTRIES = 19;
 
-interface UseKeyEventLogReturn {
+export interface UseKeyEventLogReturn {
   logs: LogEntry[];
   clearLogs: () => void;
 }

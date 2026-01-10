@@ -2,41 +2,45 @@ import {
   KEYBOARD_LAYOUT_BASE,
   KEYBOARD_LAYOUT_SHIFT,
 } from "../../../../shared/constants";
-import type { Layer, TriggerType } from "../../../../shared/types/remapConfig";
+import type { KeyBinding, TriggerType } from "../../../../shared/types/remapConfig";
 import type { KeyboardLayout, LayoutType } from "../../types";
+import type { LayerState } from "../../types/tree/roots/layer";
 import { KeyButton } from "../atoms/KeyButton";
 import { Mapped } from "../control/Mapped";
 
 interface KeyboardGridProps {
-  bindings: Layer["bindings"];
+  bindings: Record<number, KeyBinding[]>;
   keyboardLayout: KeyboardLayout;
   layout: LayoutType;
-  layerId: string;
+  layerState: LayerState; // { layers, layerId }
+  mappingActions: {
+    removeMapping: (from: number) => void;
+  };
   selectedTrigger: TriggerType;
-  quickEditingKey?: number | null; // クイック設定モードで入力待ち中のキー
+  quickEditingKey?: number | null;
   onKeyClick: (vk: number) => void;
-  onRemoveMapping: (from: number) => void;
 }
 
 export function KeyboardGrid({
   bindings,
-  // keyboardLayout,
+  keyboardLayout,
   layout,
-  layerId,
+  layerState,
+  mappingActions,
   selectedTrigger,
   quickEditingKey,
   onKeyClick,
-  onRemoveMapping,
 }: KeyboardGridProps) {
-  const keyboardLayout: KeyboardLayout =
-    layerId === "shift"
+  // layerId === "shift" の場合はShiftレイアウトを使用
+  const effectiveLayout: KeyboardLayout =
+    layerState.layerId === "shift"
       ? KEYBOARD_LAYOUT_SHIFT[layout]
-      : KEYBOARD_LAYOUT_BASE[layout];
+      : (keyboardLayout ?? KEYBOARD_LAYOUT_BASE[layout]);
   return (
     <Mapped
       as="div"
       className="flex select-none flex-col gap-2 rounded-xl border bg-card p-4 shadow-sm"
-      value={keyboardLayout}
+      value={effectiveLayout}
     >
       {({ row }) => (
         <Mapped as="div" className="flex justify-center gap-1.5" value={row}>
@@ -47,10 +51,10 @@ export function KeyboardGrid({
                 bindings={bindings[baseVk]}
                 isQuickEditing={quickEditingKey === baseVk}
                 keyDef={keyDef}
-                layerId={layerId}
+                layerId={layerState.layerId}
                 layout={layout}
                 onClick={onKeyClick}
-                onRemove={() => onRemoveMapping(baseVk)}
+                onRemove={() => mappingActions.removeMapping(baseVk)}
                 selectedTrigger={selectedTrigger}
               />
             );

@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useIpc } from "./useIpc";
 
-interface UseRemapControlReturn {
+export interface UseRemapControlReturn {
   isActive: boolean;
   setIsActive: (active: boolean) => void;
   toggleActive: () => void;

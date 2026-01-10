@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { Icon } from "../atoms/Icon";
 import { HandleEmpty } from "../control/HandleEmpty";
-import { LogEntry } from "../molecules/LogEntry";
+import { LogEntry } from "../molecules/display/LogEntry";
 import { VStack } from "../template/Flex";
 
 interface LogItem {

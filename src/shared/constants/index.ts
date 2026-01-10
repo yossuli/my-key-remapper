@@ -4,8 +4,8 @@ import type {
   LayoutType,
 } from "../../../src/renderer/src/types/index";
 
-import { KEYBOARD_LAYOUT_JIS, KEYBOARD_LAYOUT_JIS_SHIFT } from "./JIS";
-import { KEYBOARD_LAYOUT_US, KEYBOARD_LAYOUT_US_SHIFT } from "./US";
+import { KEYBOARD_LAYOUT_JIS, KEYBOARD_LAYOUT_JIS_SHIFT } from "./jis";
+import { KEYBOARD_LAYOUT_US, KEYBOARD_LAYOUT_US_SHIFT } from "./us";
 
 export const KEY_SIZE_REM = 3;
 

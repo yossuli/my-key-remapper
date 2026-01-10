@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import type {
   ActionType,
   TriggerType,
-} from "../../../../shared/types/remapConfig";
-import { Select } from "../atoms/Select";
+} from "../../../../../shared/types/remapConfig";
+import { Select } from "../../atoms/Select";
 
 const ACTION_TYPE_OPTIONS = [
   { id: "remap", value: "remap", label: "キーリマップ" },

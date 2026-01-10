@@ -12,13 +12,13 @@ import {
 } from "../utils/bindingState";
 import { useGetMappings } from "./useInvoke";
 
-interface UseBindingConfigProps {
+export interface UseBindingConfigProps {
   targetVk: number;
   layerId: string;
   defaultLayerId: string;
 }
 
-interface UseBindingConfigReturn {
+export interface UseBindingConfigReturn {
   state: BindingState;
   existingTiming: {
     holdThresholdMs: number | undefined;

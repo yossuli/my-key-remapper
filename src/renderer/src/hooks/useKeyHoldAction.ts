@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 
-interface UseKeyHoldActionProps {
+export interface UseKeyHoldActionProps {
   /** 対象キー（例: "Enter", "Space" など） */
   targetKey: number;
   /** 長押し判定時間（ミリ秒） */
@@ -25,7 +25,7 @@ interface KeyUpCallbacks {
   onOtherKeyUp?: (e: number) => void;
 }
 
-interface UseKeyHoldActionReturn {
+export interface UseKeyHoldActionReturn {
   /**
    * keydown ハンドラー。
    * @param e - number

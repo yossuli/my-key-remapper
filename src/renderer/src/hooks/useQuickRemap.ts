@@ -8,7 +8,7 @@ import { getNextKeyVk } from "../utils/getNextKeyVk";
 import { useKeyEditorActions } from "./useKeyEditorAction";
 import { useKeyEventInput } from "./useKeyEventInput";
 
-interface UseQuickRemapOptions {
+export interface UseQuickRemapOptions {
   enabled: boolean;
   hasExistingBinding: boolean;
   selectedLayerId: string;
@@ -19,7 +19,7 @@ interface UseQuickRemapOptions {
   onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
 }
 
-interface UseQuickRemapReturn {
+export interface UseQuickRemapReturn {
   editingKey: number | null;
   startEditing: (vk: number) => void;
   cancelEditing: () => void;

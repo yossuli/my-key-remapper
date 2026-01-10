@@ -11,13 +11,13 @@ import { useLayerState } from "../../hooks/useLayerState";
 import { useRemapControl } from "../../hooks/useRemapControl";
 import type { LayoutType } from "../../types";
 import { Show } from "../control/Show";
-import { PressedKeysPanel } from "../molecules/PressedKeysPanel";
 import { AppHeader } from "../organisms/AppHeader";
+import { KeyEditorForm } from "../organisms/editor/KeyEditorForm";
 import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
-import { KeyEditorForm } from "../organisms/KeyEditorForm";
 import { KeyRemapSection } from "../organisms/KeyRemapSection";
 import { LayerStatusPanel } from "../organisms/LayerStatusPanel";
 import { LogList } from "../organisms/LogList";
+import { PressedKeysPanel } from "../organisms/PressedKeysPanel";
 import { VStack } from "../template/Flex";
 import { Header, Main, MainLayout, Side } from "../template/MainLayout";
 import { ModalLayout } from "../template/ModalLayout";
@@ -62,7 +62,13 @@ export function KeyRemapperPage() {
     enableRemap();
     setEditingKey(null);
   };
-
+  const layerActions = { setLayerId, addLayer, removeLayer, reorderLayers };
+  const mappingActions = {
+    saveMapping,
+    removeMapping: (from: number) => removeMapping(from, selectedTrigger),
+  };
+  const remapActions = { toggleActive, disableRemap, enableRemap };
+  const layerState = { layers, layerId };
   return (
     <>
       <MainLayout>
@@ -79,20 +85,14 @@ export function KeyRemapperPage() {
           <Show condition={!simpleMode}>
             <KeyRemapSection
               bindings={currentBindings}
-              disableRemap={disableRemap}
-              enableRemap={enableRemap}
               keyboardLayout={keyboardLayout}
-              layerId={layerId}
-              layers={layers}
+              layerActions={layerActions}
+              layerState={layerState}
               layout={layout}
-              onAddLayer={addLayer}
-              onLayerChange={setLayerId}
+              mappingActions={mappingActions}
               onLayoutToggle={toggleLayout}
-              onRemoveLayer={removeLayer}
-              onRemoveMapping={(from) => removeMapping(from, selectedTrigger)}
-              onReorderLayers={reorderLayers}
-              onSaveMapping={saveMapping}
               onTriggerChange={setSelectedTrigger}
+              remapActions={remapActions}
               selectedTrigger={selectedTrigger}
               setEditingKey={setEditingKey}
             />

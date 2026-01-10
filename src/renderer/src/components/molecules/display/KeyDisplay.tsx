@@ -1,6 +1,6 @@
-import type { LayoutType } from "../../types";
-import { getKeyLabel } from "../../utils/getKeyLabel";
-import { Badge } from "../atoms/Badge";
+import type { LayoutType } from "../../../types";
+import { getKeyLabel } from "../../../utils/getKeyLabel";
+import { Badge } from "../../atoms/Badge";
 
 interface KeyDisplayProps {
   vkCode: number;

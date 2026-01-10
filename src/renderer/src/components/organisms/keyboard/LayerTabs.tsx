@@ -2,40 +2,30 @@ import { Reorder } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Layer } from "../../../../shared/types/remapConfig";
-import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
-import { Input } from "../atoms/Input";
-import { WithRemoveBadge } from "../atoms/RemoveBadge";
-import { Else, Ternary, Then } from "../control/Ternary";
-import { ConfirmModal } from "./ConfirmModal";
+import type { LayerActions, LayerState } from "../../../types/tree/roots/layer";
+import { Button } from "../../atoms/Button";
+import { Icon } from "../../atoms/Icon";
+import { Input } from "../../atoms/Input";
+import { WithRemoveBadge } from "../../atoms/RemoveBadge";
+import { Else, Ternary, Then } from "../../control/Ternary";
 
 interface LayerTabsProps {
-  layers: Layer[];
-  activeLayerId: string;
-  onLayerChange: (layerId: string) => void;
-  onAddLayer: (layerId: string) => void;
-  onRemoveLayer: (layerId: string) => void;
-  onReorder: (newOrder: string[]) => void;
+  layerState: LayerState; // { layers, layerId }
+  layerActions: LayerActions; // { setLayerId, addLayer, removeLayer, reorderLayers }
 }
 
-export function LayerTabs({
-  layers,
-  activeLayerId,
-  onLayerChange,
-  onAddLayer,
-  onRemoveLayer,
-  onReorder,
-}: LayerTabsProps) {
+export function LayerTabs({ layerState, layerActions }: LayerTabsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newLayerName, setNewLayerName] = useState("");
-  const [layerToRemove, setLayerToRemove] = useState<string | null>(null);
 
-  const orderedLayerIds = useMemo(() => layers.map((l) => l.id), [layers]);
+  const orderedLayerIds = useMemo(
+    () => layerState.layers.map((l) => l.id),
+    [layerState.layers]
+  );
 
   const handleAdd = () => {
     if (newLayerName.trim()) {
-      onAddLayer(newLayerName.trim());
+      layerActions.addLayer(newLayerName.trim());
       setNewLayerName("");
       setIsAdding(false);
     }
@@ -51,23 +41,13 @@ export function LayerTabs({
   };
 
   const handleRemoveClick = (layerId: string) => {
-    setLayerToRemove(layerId);
-  };
-
-  const handleConfirmRemove = () => {
-    if (layerToRemove) {
-      onRemoveLayer(layerToRemove);
-      setLayerToRemove(null);
-    }
-  };
-
-  const handleCancelRemove = () => {
-    setLayerToRemove(null);
+    // TODO: ModalLayoutを使った確認ダイアログを実装
+    layerActions.removeLayer(layerId);
   };
 
   return (
     <>
-      <Tabs onValueChange={onLayerChange} value={activeLayerId}>
+      <Tabs onValueChange={layerActions.setLayerId} value={layerState.layerId}>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-sm">Layer:</span>
 
@@ -76,7 +56,7 @@ export function LayerTabs({
               as="div"
               axis="x"
               className="flex items-center gap-1"
-              onReorder={onReorder}
+              onReorder={layerActions.reorderLayers}
               values={orderedLayerIds}
             >
               {orderedLayerIds.map((id) => (
@@ -125,20 +105,7 @@ export function LayerTabs({
           </Ternary>
         </div>
       </Tabs>
-      <ConfirmModal
-        confirmLabel="削除"
-        isOpen={layerToRemove !== null}
-        message={
-          <>
-            レイヤー「<strong>{layerToRemove}</strong>」を削除しますか？
-            <br />
-            この操作は元に戻せません。
-          </>
-        }
-        onCancel={handleCancelRemove}
-        onConfirm={handleConfirmRemove}
-        title="レイヤーの削除"
-      />
+      {/* TODO: ModalLayoutを使った確認ダイアログを追加 */}
     </>
   );
 }

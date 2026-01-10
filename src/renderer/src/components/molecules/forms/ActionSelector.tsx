@@ -3,8 +3,8 @@ import { createContext, useContext } from "react";
 import type {
   ActionType,
   TriggerType,
-} from "../../../../shared/types/remapConfig";
-import { VStack } from "../template/Flex";
+} from "../../../../../shared/types/remapConfig";
+import { VStack } from "../../template/Flex";
 import { ActionTypeSelector } from "./ActionTypeSelector";
 
 interface ActionSelectorContextValue {

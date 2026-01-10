@@ -11,7 +11,7 @@ import { useIpc } from "./useIpc";
 
 const REFRESH_DELAY_MS = 100;
 
-interface UseLayerStateReturn {
+export interface UseLayerStateReturn {
   layers: Layer[];
   layerOrder: string[]; // 追加
   layerId: string;

@@ -8,55 +8,54 @@ import {
 import type {
   Action,
   KeyBinding,
-  Layer,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
 import { useQuickRemap } from "../../hooks/useQuickRemap";
 import type { KeyboardLayout, LayoutType } from "../../types";
+import type { LayerActions, LayerState } from "../../types/tree/roots/layer";
+import type { RemapActions } from "../../types/tree/roots/remap";
 import { cn } from "../../utils/cn";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
-import { LayerTabs } from "../molecules/LayerTabs";
-import { LayoutToggle } from "../molecules/LayoutToggle";
-import { TriggerTabs } from "../molecules/TriggerTabs";
+import { LayoutToggle } from "../molecules/display/LayoutToggle";
+import { TriggerTabs } from "../molecules/forms/TriggerTabs";
 import { HStack, VStack } from "../template/Flex";
 import { KeyboardGrid } from "./KeyboardGrid";
+import { LayerTabs } from "./keyboard/LayerTabs";
 
 interface KeyRemapSectionProps {
-  layers: Layer[];
-  layerId: string;
+  // Layer state & actions
+  layerState: LayerState;
+  layerActions: LayerActions;
+
+  // Mapping actions
+  mappingActions: {
+    saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
+    removeMapping: (from: number) => void;
+  };
+
+  // Remap actions
+  remapActions: RemapActions;
+
+  // UI state
   layout: LayoutType;
   keyboardLayout: KeyboardLayout;
   bindings: Record<number, KeyBinding[]>;
   selectedTrigger: TriggerType;
-  disableRemap: () => void;
-  enableRemap: () => void;
-  onLayerChange: (layerId: string) => void;
-  onAddLayer: (layerId: string) => void;
-  onRemoveLayer: (layerId: string) => void;
-  onReorderLayers: (newOrder: string[]) => void;
-  onRemoveMapping: (from: number) => void;
-  onSaveMapping: (from: number, trigger: TriggerType, action: Action) => void;
   onLayoutToggle: () => void;
   onTriggerChange: (trigger: TriggerType) => void;
   setEditingKey: Dispatch<SetStateAction<number | null>>;
 }
 
 export function KeyRemapSection({
-  layers,
-  layerId,
+  layerState,
+  layerActions,
+  mappingActions,
+  remapActions,
   layout,
   keyboardLayout,
   bindings,
   selectedTrigger,
-  disableRemap,
-  enableRemap,
-  onLayerChange,
-  onAddLayer,
-  onSaveMapping,
-  onRemoveLayer,
-  onReorderLayers,
-  onRemoveMapping,
   onLayoutToggle,
   onTriggerChange,
   setEditingKey,
@@ -68,11 +67,11 @@ export function KeyRemapSection({
     useQuickRemap({
       enabled: isQuickEditMode,
       hasExistingBinding: false,
-      selectedLayerId: layerId,
+      selectedLayerId: layerState.layerId,
       targetKeys: [],
       selectedTrigger,
       keyboardLayout,
-      onSaveMapping,
+      onSaveMapping: mappingActions.saveMapping,
     });
 
   const onKeyClick = (vk: number) => {
@@ -82,7 +81,7 @@ export function KeyRemapSection({
       return;
     }
     // 通常モードの場合はモーダルを開く
-    disableRemap();
+    remapActions.disableRemap();
     setEditingKey(vk);
   };
 
@@ -91,25 +90,18 @@ export function KeyRemapSection({
       const next = !prev;
       // クイックモード開始時はリマップを無効化、終了時は有効化
       if (next) {
-        disableRemap();
+        remapActions.disableRemap();
       } else {
-        enableRemap();
+        remapActions.enableRemap();
       }
       return next;
     });
-  }, [disableRemap, enableRemap]);
+  }, [remapActions]);
 
   return (
     <VStack as="section" gap={4}>
       <HStack className="justify-between gap-4">
-        <LayerTabs
-          activeLayerId={layerId}
-          layers={layers}
-          onAddLayer={onAddLayer}
-          onLayerChange={onLayerChange}
-          onRemoveLayer={onRemoveLayer}
-          onReorder={onReorderLayers}
-        />
+        <LayerTabs layerActions={layerActions} layerState={layerState} />
         <HStack className="gap-2">
           <TriggerTabs
             onTriggerChange={onTriggerChange}
@@ -134,10 +126,10 @@ export function KeyRemapSection({
         <KeyboardGrid
           bindings={bindings}
           keyboardLayout={keyboardLayout}
-          layerId={layerId}
+          layerState={layerState}
           layout={layout}
+          mappingActions={mappingActions}
           onKeyClick={onKeyClick}
-          onRemoveMapping={onRemoveMapping}
           quickEditingKey={quickEditingKey}
           selectedTrigger={selectedTrigger}
         />

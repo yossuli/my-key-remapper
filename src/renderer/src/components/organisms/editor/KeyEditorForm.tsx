@@ -26,6 +26,47 @@ const MOUSE_CAPTURE_COUNTDOWN_START = 3;
 const COUNTDOWN_INTERVAL_MS = 1000;
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 
+// キーエディタ操作関連
+export type KeyEditorUIActions = Pick<
+  ReturnType<typeof useKeyEditorActions>,
+  "addHoldKey" | "removeKey" | "resetState" | "handleSave" | "handleRemove"
+> &
+  Pick<ReturnType<typeof useBindingConfig>, "clearTargetKeys">;
+
+// キーエディタUI制御関連
+export interface KeyEditorUIHandlers {
+  setShowVkInput: (show: boolean) => void;
+  setVkInputValue: (value: string) => void;
+  setIsInputFocused: (focused: boolean) => void;
+}
+
+// キーエディタUI状態関連
+export interface KeyEditorUIState {
+  showVkInput: boolean;
+  vkInputValue: string;
+}
+
+// マウス操作関連
+export interface MouseHandlers {
+  setMouseX: (x: number) => void;
+  setMouseY: (y: number) => void;
+  setMouseButton: (button: "left" | "right" | "middle") => void;
+  setClickCount: (count: number) => void;
+  setCursorReturnDelayMs: (ms: number) => void;
+  onGetMousePosition: () => void;
+}
+
+// マウス状態関連
+export interface MouseState {
+  x: number;
+  y: number;
+  button: "left" | "right" | "middle";
+  clickCount: number;
+  isCapturing: boolean;
+  countdown: number;
+  cursorReturnDelayMs: number;
+}
+
 interface KeyEditorFormProps {
   targetVk: number;
   layerId: string;
@@ -258,6 +299,45 @@ export function KeyEditorForm({
     loadedCursorReturnDelayMs,
   ]);
 
+  const keyEditorActions: KeyEditorUIActions = {
+    addHoldKey,
+    removeKey,
+    resetState,
+    clearTargetKeys,
+    handleSave,
+    handleRemove,
+  };
+
+  const keyEditorUIHandlers: KeyEditorUIHandlers = {
+    setShowVkInput,
+    setVkInputValue,
+    setIsInputFocused,
+  };
+
+  const mouseHandlers: MouseHandlers = {
+    setMouseX,
+    setMouseY,
+    setMouseButton,
+    setClickCount,
+    setCursorReturnDelayMs,
+    onGetMousePosition: handleGetMousePosition,
+  };
+
+  const mouseState: MouseState = {
+    x: mouseX,
+    y: mouseY,
+    button: mouseButton,
+    clickCount,
+    isCapturing,
+    countdown,
+    cursorReturnDelayMs,
+  };
+
+  const keyEditorState: KeyEditorUIState = {
+    showVkInput,
+    vkInputValue,
+  };
+
   return (
     <VStack className="px-6" gap={4}>
       {/* 現在のマッピング表示 */}
@@ -282,37 +362,13 @@ export function KeyEditorForm({
         {/* アクション設定セクション */}
         <ActionSettingsSection
           actionType={actionType}
-          keyEditorActions={{
-            addHoldKey,
-            removeKey,
-            resetState,
-            clearTargetKeys,
-          }}
-          keyEditorState={{ showVkInput, vkInputValue }}
-          keyEditorUIHandlers={{
-            setShowVkInput,
-            setVkInputValue,
-            setIsInputFocused,
-          }}
+          keyEditorActions={keyEditorActions}
+          keyEditorState={keyEditorState}
+          keyEditorUIHandlers={keyEditorUIHandlers}
           layers={layers}
           layout={layout}
-          mouseHandlers={{
-            setMouseX,
-            setMouseY,
-            setMouseButton,
-            setClickCount,
-            setCursorReturnDelayMs,
-            onGetMousePosition: handleGetMousePosition,
-          }}
-          mouseState={{
-            x: mouseX,
-            y: mouseY,
-            button: mouseButton,
-            clickCount,
-            isCapturing,
-            countdown,
-            cursorReturnDelayMs,
-          }}
+          mouseHandlers={mouseHandlers}
+          mouseState={mouseState}
           newTargetKeys={newTargetKeys}
           selectedLayerId={selectedLayerId}
           selectedTrigger={selectedTrigger}

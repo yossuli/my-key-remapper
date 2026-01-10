@@ -9,19 +9,19 @@ import { TimingInput } from "@/components/molecules/forms/TimingInput";
 import { RemapKeySection } from "@/components/organisms/editor/RemapKeySection";
 import { VStack } from "@/components/template/Flex";
 import type { LayoutType } from "@/types";
-import type {
-  KeyEditorUIActions,
-  KeyEditorUIHandlers,
-  KeyEditorUIState,
-  MouseHandlers,
-  MouseState,
-} from "@/types/tree/branches";
 import { getLayerDescription } from "@/utils/getLayerDescription";
 import type {
   ActionType,
   Layer,
   TriggerType,
 } from "../../../../../shared/types/remapConfig";
+import type {
+  KeyEditorUIActions,
+  KeyEditorUIHandlers,
+  KeyEditorUIState,
+  MouseHandlers,
+  MouseState,
+} from "./KeyEditorForm";
 
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 

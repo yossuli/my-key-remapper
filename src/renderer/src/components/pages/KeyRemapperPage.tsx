@@ -135,41 +135,42 @@ export function KeyRemapperPage() {
       <MainLayout>
         <Header>
           <AppHeader
-            isActive={isActive}
-            onOpenSettings={() => setSettingsModalOpen(true)}
-            onToggleActive={toggleActive}
-            onToggleSimpleMode={() => setSimpleMode((prev) => !prev)}
-            simpleMode={simpleMode}
+            isActive={isActive} // 🆕 → 🔥 (E. App Header Control)
+            onOpenSettings={() => setSettingsModalOpen(true)} // 🆕 → 🔥 (E. App Header Control)
+            onToggleActive={toggleActive} // 🆕 → 🔥 (E. App Header Control)
+            onToggleSimpleMode={() => setSimpleMode((prev) => !prev)} // 🆕 → 🔥 (E. App Header Control)
+            simpleMode={simpleMode} // 🆕 → 🔥 (E. App Header Control)
           />
         </Header>
         <Main>
           <Show condition={!simpleMode}>
             <KeyRemapSection
-              bindings={currentBindings}
-              keyboardLayout={keyboardLayout}
-              layerActions={layerActions}
-              layerState={layerState}
-              layout={layout}
-              mappingActions={mappingActions}
-              onLayoutToggle={toggleLayout}
-              onTriggerChange={setSelectedTrigger}
-              remapActions={remapActions}
-              selectedTrigger={selectedTrigger}
-              setEditingKey={setEditingKey}
+              bindings={currentBindings} // 🆕 → 🚌 (C. UI Configuration)
+              keyboardLayout={keyboardLayout} // 🆕 → 🚌 (C. UI Configuration)
+              layerActions={layerActions} // 📦 → 🎁 (A. Layer Management Flow)
+              layerState={layerState} // 📦 → 🎁 (A. Layer Management Flow)
+              layout={layout} // 🆕 → 🚌 (C. UI Configuration)
+              mappingActions={mappingActions} // 📦 → 🎁 (B. Mapping & Remap Actions)
+              onLayoutToggle={toggleLayout} // 🆕 → 🚌 (D. Event Handlers)
+              onTriggerChange={setSelectedTrigger} // 🆕 → 🚌 (D. Event Handlers)
+              remapActions={remapActions} // 📦 → 🎁 (B. Mapping & Remap Actions)
+              selectedTrigger={selectedTrigger} // 🆕 → 🚌🔥 (C. UI Configuration)
+              setEditingKey={setEditingKey} // 🆕 → 🚌 (D. Event Handlers)
             />
           </Show>
         </Main>
         <Side>
           <VStack gap={4}>
             <LayerStatusPanel
-              availableLayers={availableLayers}
-              onRefresh={refresh}
-              onResetToLayer={resetToLayer}
-              stack={stack}
+              availableLayers={availableLayers} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
+              onRefresh={refresh} // 🆕 → 🧩🔥 (LayerStackControl)
+              onResetToLayer={resetToLayer} // 🆕 → 🧩🔥 (LayerStackControl)
+              stack={stack} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
             />
             <PressedKeysPanel layout={layout} />
+            {/* 🆕 → 🔥 (F. Pressed Keys Panel) */}
             <Show condition={!simpleMode}>
-              <LogList logs={logs} />
+              <LogList logs={logs} /> {/* 🆕 → 🔥 (H. Log Management) */}
             </Show>
           </VStack>
         </Side>
@@ -178,18 +179,18 @@ export function KeyRemapperPage() {
       <ModalLayout onClose={handleCloseEditor} value={editingKey}>
         {(e) => (
           <KeyEditorForm
-            defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs}
-            defaultTapIntervalMs={globalSettings?.defaultTapIntervalMs}
-            layerId={layerId}
-            layers={layers}
-            layout={layout}
-            onClose={handleCloseEditor}
-            onRemove={(trigger) => removeMapping(e, trigger)}
+            defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs} // ➖ → 🧩🔥 (G. Global Settings)
+            defaultTapIntervalMs={globalSettings?.defaultTapIntervalMs} // ➖ → 🧩🔥 (G. Global Settings)
+            layerId={layerId} // ∈ → 🧩🔥 (A. Layer Management Flow)
+            layers={layers} // ∈ → 🧩🔥 (A. Layer Management Flow)
+            layout={layout} // 🆕 → 🧩🔥 (C. UI Configuration)
+            onClose={handleCloseEditor} // 🆕 → 🔥 (I. Key Editor Modal)
+            onRemove={(trigger) => removeMapping(e, trigger)} // 🆕 → 🔥 (I. Key Editor Modal)
             onSave={(trigger, action, timing) =>
               saveMapping(e, trigger, action, timing)
-            }
-            targetVk={e}
-            trigger={selectedTrigger}
+            } // 🆕 → 🔥 (I. Key Editor Modal)
+            targetVk={e} // 🆕 → 🔥 (I. Key Editor Modal)
+            trigger={selectedTrigger} // 🆕 → 🧩🔥 (C. UI Configuration)
           />
         )}
       </ModalLayout>
@@ -200,8 +201,8 @@ export function KeyRemapperPage() {
       >
         {(currentSettings) => (
           <GlobalSettingsForm
-            globalSettings={currentSettings}
-            onSave={updateGlobalSettings}
+            globalSettings={currentSettings} // 🆕 → 🔥 (G. Global Settings)
+            onSave={updateGlobalSettings} // 🆕 → 🔥 (G. Global Settings)
           />
         )}
       </ModalLayout>

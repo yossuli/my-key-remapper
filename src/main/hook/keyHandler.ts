@@ -119,6 +119,38 @@ function processPendingHoldKeys(): void {
 }
 
 /**
+ * 保留中のタップキーを処理（割り込み入力時）
+ * 異なるキーが押された場合、待機中のダブルタップ判定を即座に「タップ」として確定させる
+ */
+function processPendingTapKeys(currentVkCode: number): void {
+  const pendingKeys = keyStateManager.getPendingTapKeys();
+  if (pendingKeys.length > 0) {
+    debugLog("keyHandler.ts-130-processPendingTapKeys", {
+      pendingKeys,
+      currentVkCode,
+    });
+  }
+
+  for (const key of pendingKeys) {
+    // 自分自身（同じキー）の連打はダブルタップ判定の一部なので割り込まない
+    if (key === currentVkCode) {
+      continue;
+    }
+
+    debugLog("keyHandler.ts-138-interrupt-pending-tap", {
+      interruptedKey: key,
+      byKey: currentVkCode,
+    });
+
+    // 強制的に解決
+    const trigger = keyStateManager.forceResolveTap(key);
+    if (trigger === "tap") {
+      executeAction(key, "tap");
+    }
+  }
+}
+
+/**
  * キーアップイベントを処理
  */
 export function handleKeyUp(vkCode: number): number {
@@ -180,6 +212,10 @@ export function handleKeyDown(vkCode: number): number {
     return 0;
   }
 
+  // 1. 他のキーのダブルタップ待機を割り込み解決
+  processPendingTapKeys(vkCode);
+
+  // 2. 他のキーのホールド待機を処理
   processPendingHoldKeys();
 
   const bindings = remapRules.getBindings(vkCode);

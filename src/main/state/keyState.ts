@@ -27,6 +27,8 @@ type TriggerCallback = (code: number, trigger: TriggerType) => void;
  */
 export class KeyStateManager {
   private readonly states = new Map<number, KeyState>();
+  private readonly pendingHoldKeys = new Set<number>();
+  private readonly pendingTapKeys = new Set<number>();
 
   /** 長押し判定のしきい値（ミリ秒） */
   private holdThresholdMs = 200;
@@ -101,11 +103,13 @@ export class KeyStateManager {
     if (state.tapTimerId) {
       clearTimeout(state.tapTimerId);
       state.tapTimerId = null;
+      this.pendingTapKeys.delete(code);
     }
 
     // 長押しタイマーを開始
     if (state.holdTimerId) {
       clearTimeout(state.holdTimerId);
+      this.pendingHoldKeys.delete(code);
     }
 
     // キー別設定があればそれを使用、なければグローバル設定
@@ -114,10 +118,12 @@ export class KeyStateManager {
     state.holdTimerId = setTimeout(() => {
       if (state.isDown && !state.holdFired) {
         state.holdFired = true;
+        this.pendingHoldKeys.delete(code); // 発火したらペンディングから削除
         this.states.set(code, state);
         console.log(`[HOOK] Hold detected for key ${code}`);
       }
     }, holdMs);
+    this.pendingHoldKeys.add(code);
 
     return;
   }
@@ -142,6 +148,7 @@ export class KeyStateManager {
     if (state.holdTimerId) {
       clearTimeout(state.holdTimerId);
       state.holdTimerId = null;
+      this.pendingHoldKeys.delete(code);
     }
 
     state.isDown = false;
@@ -169,6 +176,7 @@ export class KeyStateManager {
       if (state.tapTimerId) {
         clearTimeout(state.tapTimerId);
         state.tapTimerId = null;
+        this.pendingTapKeys.delete(code);
       }
       state.lastTapTime = 0; // リセット
       return "doubleTap";
@@ -178,9 +186,11 @@ export class KeyStateManager {
     state.lastTapTime = now;
     state.tapTimerId = setTimeout(() => {
       state.tapTimerId = null;
+      this.pendingTapKeys.delete(code);
       state.lastTapTime = 0; // タイムアウト後リセット
       this.fireTrigger(code, "tap");
     }, tapMs);
+    this.pendingTapKeys.add(code);
 
     // 即時発火なし（コールバックで遅延発火）
     return null;
@@ -199,6 +209,8 @@ export class KeyStateManager {
       }
     }
     this.states.clear();
+    this.pendingHoldKeys.clear();
+    this.pendingTapKeys.clear();
   }
 
   /**
@@ -206,13 +218,31 @@ export class KeyStateManager {
    * 割り込みキー入力時にこれらのキーをtapとして送信するため
    */
   getPendingHoldKeys(): number[] {
-    const pending: number[] = [];
-    for (const [code, state] of this.states.entries()) {
-      // 押されていて、まだホールド発火していない場合
-      if (state.isDown && state.holdFired && state.holdTimerId !== null) {
-        pending.push(code);
-      }
+    return Array.from(this.pendingHoldKeys);
+  }
+
+  /**
+   * ダブルタップ判定待ち（タップ遅延待機中）のキーコードを取得
+   */
+  getPendingTapKeys(): number[] {
+    return Array.from(this.pendingTapKeys);
+  }
+
+  /**
+   * 指定されたキーのタップ遅延を強制的に解消して tap トリガーを発火させる
+   * @returns 発火した場合は "tap"、待機中でなければ null
+   */
+  forceResolveTap(code: number): TriggerType | null {
+    const state = this.getState(code);
+
+    if (state.tapTimerId) {
+      clearTimeout(state.tapTimerId);
+      state.tapTimerId = null;
+      this.pendingTapKeys.delete(code);
+      state.lastTapTime = 0; // タイムアウト後リセット
+
+      return "tap";
     }
-    return pending;
+    return null;
   }
 }

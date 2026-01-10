@@ -86,7 +86,10 @@
 | :-------------------------- | :--: | :----: | :-----: | :-----: | :-----: | :------: |
 | `isActive`                  |  🆕  |   🔥   |   ➖    |   ➖    |   ➖    |    ➖    |
 | `simpleMode`                |  🆕  |   🔥   |   ➖    |   🔥    |   ➖    |    ➖    |
-| **LayerStackControl**       |  🆕  |   ➖   |  🔥🔨   |   ➖    |   ➖    |    ➖    |
+| **LayerStackControl**       |  🆕  |   ➖   |   ➖    |   ➖    |   ➖    |    ➖    |
+| `stack`                     |  🆕  |   ➖   |   🔥    |   ➖    |   ➖    |    ➖    |
+| `refresh`                   |  🆕  |   ➖   |   🔥    |   ➖    |   ➖    |    ➖    |
+| `resetToLayer`              |  🆕  |   ➖   |   🔥    |   ➖    |   ➖    |    ➖    |
 | **LogState**                |  🆕  |   ➖   |   ➖    |  🔥🔨   |   ➖    |    ➖    |
 | **GlobalSettingsControl**   |  🆕  |   ➖   |   ➖    |   ➖    |   🎁    |    ➖    |
 | `globalSettings` (Value)    |  🆕  |   ➖   |   ➖    |   ➖    |   🔥    |    ➖    |
@@ -105,7 +108,7 @@
 | **`LayerActions`**      | `useLayerState` (Hook)     | `KeyRemapSection`                 | `LayerTabs`                               |
 | **`MappingActions`**    | `KeyRemapperPage` (Manual) | `KeyRemapSection`, `KeyboardGrid` | `KeyButton`, `KeyEditorForm`              |
 | **`RemapActions`**      | `useRemapControl` (Hook)   | `KeyRemapSection`                 | `KeyRemapSection` (enable/disable)        |
-| **`LayerStackControl`** | `useLayerStack` (Hook)     | (Direct)                          | `LayerStatusPanel`                        |
+| **`LayerStackControl`** | `useLayerStack` (Hook)     | (Direct-N/A)                      | (None - Page Uses Directly)               |
 | **`LogState`**          | `useKeyEventLog` (Hook)    | (Direct)                          | `LogList`                                 |
 
 ---
@@ -140,29 +143,5 @@
 
 この詳細な追跡に基づく、今後の改善アクションです。
 
-- **Fix-006: `LayerStatusPanel` への `LayerStackControl` 適用**
-  - 現状: `stack`, `onRefresh` 等を個別に渡している。
-  - 修正: `LayerStackControl` をそのまま渡して内部で解体（🔨）する。
 - **検討: UI Context の導入**
   - `layout`, `selectedTrigger` など、多くのパスに登場するプロップスを Context API へ移行し、Drill（🚌）を撲滅する。
-
----
-
-## 4. 改善提案 (Refactoring Plan)
-
-このマトリクスに基づく具体的な改善アクションです。
-
-### 優先度高: Grouping の適用
-
-- **Fix-005: `KeyEditorForm` への `LayerState` 適用 (Cancelled)**
-  - 理由: 末端コンポーネントでの使用であり、Grouping のメリットがないため取りやめ。
-- **Fix-006: `LayerStatusPanel` への `LayerStackControl` 適用**
-  - 現状: `stack`, `onRefresh`, `onResetToLayer` を個別に受け取っている (🧩)。
-  - 修正: `LayerStackControl` 型を Page で定義済みなので、これをそのまま渡す形にする。
-
-### 検討事項: Context の導入
-
-`KeyRemapSection` での `🚌` (Bus/Drill) が多いため、以下の状態は Context API での提供を検討する価値があります。
-
-- `LayoutContext`: `layout`, `keyboardLayout`, `onLayoutToggle`
-- `RemapContext`: `bindings`, `selectedTrigger`

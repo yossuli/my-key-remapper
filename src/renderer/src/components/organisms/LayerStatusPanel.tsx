@@ -9,14 +9,14 @@ import type { LayerStackControl } from "@/components/organisms/KeyRemapSection";
 import { HStack, VStack, Wrap } from "@/components/template/Flex";
 
 interface LayerStatusPanelProps {
-  /** 現在のレイヤースタック */
+  /** 現在のスタック */
   stack: LayerStackControl["stack"];
   /** 設定済みの全レイヤー */
   availableLayers: string[];
   /** 手動リフレッシュ */
-  onRefresh: LayerStackControl["refresh"];
+  refresh: LayerStackControl["refresh"];
   /** 指定レイヤーに強制リセット */
-  onResetToLayer: LayerStackControl["resetToLayer"];
+  resetToLayer: LayerStackControl["resetToLayer"];
 }
 
 /**
@@ -28,14 +28,14 @@ interface LayerStatusPanelProps {
 export function LayerStatusPanel({
   stack, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
   availableLayers, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
-  onRefresh, // 🆕 → 🧩🔥 (LayerStackControl)
-  onResetToLayer, // 🆕 → 🧩🔥 (LayerStackControl)
+  refresh, // 🆕 → 🧩🔥 (LayerStackControl)
+  resetToLayer, // 🆕 → 🧩🔥 (LayerStackControl)
 }: LayerStatusPanelProps) {
   const handleResetClick = useCallback(
     (layerId: string) => () => {
-      onResetToLayer(layerId);
+      resetToLayer(layerId);
     },
-    [onResetToLayer]
+    [resetToLayer]
   );
 
   return (
@@ -46,7 +46,7 @@ export function LayerStatusPanel({
           <Text size="lg" weight="semibold">
             レイヤーステータス
           </Text>
-          <Button onClick={onRefresh} size="icon" variant="ghost">
+          <Button onClick={refresh} size="icon" variant="ghost">
             <RefreshCw className="h-4 w-4" />
           </Button>
         </HStack>

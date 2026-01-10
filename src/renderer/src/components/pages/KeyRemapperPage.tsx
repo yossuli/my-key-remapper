@@ -110,8 +110,8 @@ export function KeyRemapperPage() {
           <VStack gap={4}>
             <LayerStatusPanel
               availableLayers={availableLayers} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
-              onRefresh={refresh} // 🆕 → 🧩🔥 (LayerStackControl)
-              onResetToLayer={resetToLayer} // 🆕 → 🧩🔥 (LayerStackControl)
+              refresh={refresh} // 🆕 → 🧩🔥 (LayerStackControl)
+              resetToLayer={resetToLayer} // 🆕 → 🧩🔥 (LayerStackControl)
               stack={stack} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
             />
             <PressedKeysPanel layout={layout} />

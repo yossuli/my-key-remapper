@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
-import { Center, VStack } from "@/components/template/Flex";
-import { useScreenSize } from "@/hooks/useScreenSize";
 import type {
   MouseCaptureState,
   MouseHandlers,
   MousePosition,
-} from "@/types/tree/branches";
+} from "@/components/organisms/editor/KeyEditorForm";
+import { Center, VStack } from "@/components/template/Flex";
+import { useScreenSize } from "@/hooks/useScreenSize";
 
 interface MousePositionInputProps {
   mousePosition: MousePosition; // { x, y }
@@ -25,7 +25,7 @@ interface MousePositionInputProps {
 export function MousePositionInput({
   mousePosition,
   captureState,
-  mouseHandlers,
+  mouseHandlers: { onGetMousePosition, setMouseX, setMouseY },
   setFocused,
   idPrefix = "mouse",
   children,
@@ -49,9 +49,7 @@ export function MousePositionInput({
             horizontal
             id={`${idPrefix}-x`}
             input-className="w-16 font-mono text-center p-1"
-            input-onChange={(e) =>
-              mouseHandlers.setMouseX(Number(e.target.value))
-            }
+            input-onChange={(e) => setMouseX(Number(e.target.value))}
             input-placeholder="0"
             input-type="number"
             input-value={mousePosition.x.toString()}
@@ -62,9 +60,7 @@ export function MousePositionInput({
             horizontal
             id={`${idPrefix}-y`}
             input-className="w-16 font-mono text-center p-1"
-            input-onChange={(e) =>
-              mouseHandlers.setMouseY(Number(e.target.value))
-            }
+            input-onChange={(e) => setMouseY(Number(e.target.value))}
             input-placeholder="0"
             input-type="number"
             input-value={mousePosition.y.toString()}
@@ -76,7 +72,7 @@ export function MousePositionInput({
         <Button
           className="relative flex h-24 flex-col items-center justify-center gap-1"
           disabled={captureState.isCapturing}
-          onClick={mouseHandlers.onGetMousePosition}
+          onClick={onGetMousePosition}
           size="lg"
           style={
             // biome-ignore lint/nursery/noLeakedRender: styleプロパティへのundefined渡しはReactで有効

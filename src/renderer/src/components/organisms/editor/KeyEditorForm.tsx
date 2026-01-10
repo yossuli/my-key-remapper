@@ -46,6 +46,18 @@ export interface KeyEditorUIState {
   vkInputValue: string;
 }
 
+// マウス座標の状態
+export interface MousePosition {
+  x: number;
+  y: number;
+}
+
+// マウスキャプチャの状態
+export interface MouseCaptureState {
+  isCapturing: boolean;
+  countdown: number;
+}
+
 // マウス操作関連
 export interface MouseHandlers {
   setMouseX: (x: number) => void;
@@ -57,13 +69,9 @@ export interface MouseHandlers {
 }
 
 // マウス状態関連
-export interface MouseState {
-  x: number;
-  y: number;
+export interface MouseState extends MousePosition, MouseCaptureState {
   button: "left" | "right" | "middle";
   clickCount: number;
-  isCapturing: boolean;
-  countdown: number;
   cursorReturnDelayMs: number;
 }
 

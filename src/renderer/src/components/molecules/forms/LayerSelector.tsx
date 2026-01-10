@@ -1,9 +1,9 @@
 import { Layers } from "lucide-react";
+import { Icon } from "@/components/atoms/Icon";
+import { Select } from "@/components/atoms/Select";
+import { Show } from "@/components/control/Show";
+import { VStack } from "@/components/template/Flex";
 import type { Layer } from "../../../../../shared/types/remapConfig";
-import { Icon } from "../../atoms/Icon";
-import { Select } from "../../atoms/Select";
-import { Show } from "../../control/Show";
-import { VStack } from "../../template/Flex";
 
 interface LayerSelectorProps {
   layers: Pick<Layer, "id">[];

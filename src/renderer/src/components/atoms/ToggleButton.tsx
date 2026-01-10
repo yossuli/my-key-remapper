@@ -1,5 +1,5 @@
-import { cn } from "../../utils/cn";
-import { Button } from "../atoms/Button";
+import { Button } from "@/components/atoms/Button";
+import { cn } from "@/utils/cn";
 
 interface ToggleButtonProps<T extends string | number> {
   value: T;

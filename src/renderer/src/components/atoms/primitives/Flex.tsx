@@ -1,6 +1,6 @@
 import type React from "react";
-import { cn } from "../../../utils/cn";
-import type { BaseProps } from "../../control";
+import type { BaseProps } from "@/components/control";
+import { cn } from "@/utils/cn";
 
 type FlexProps<T extends React.ElementType = "div"> = {
   children: React.ReactNode;

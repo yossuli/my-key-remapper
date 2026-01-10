@@ -5,26 +5,26 @@ import {
   useCallback,
   useState,
 } from "react";
+import { Button } from "@/components/atoms/Button";
+import { Icon } from "@/components/atoms/Icon";
+import { LayoutToggle } from "@/components/molecules/display/LayoutToggle";
+import { TriggerTabs } from "@/components/molecules/forms/TriggerTabs";
+import { KeyboardGrid } from "@/components/organisms/KeyboardGrid";
+import { LayerTabs } from "@/components/organisms/keyboard/LayerTabs";
 import type {
   LayerActions,
   LayerState,
   MappingActions,
   RemapActions,
 } from "@/components/pages/KeyRemapperPage";
+import { HStack, VStack } from "@/components/template/Flex";
+import { useQuickRemap } from "@/hooks/useQuickRemap";
+import type { KeyboardLayout, LayoutType } from "@/types";
+import { cn } from "@/utils/cn";
 import type {
   KeyBinding,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
-import { useQuickRemap } from "../../hooks/useQuickRemap";
-import type { KeyboardLayout, LayoutType } from "../../types";
-import { cn } from "../../utils/cn";
-import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
-import { LayoutToggle } from "../molecules/display/LayoutToggle";
-import { TriggerTabs } from "../molecules/forms/TriggerTabs";
-import { HStack, VStack } from "../template/Flex";
-import { KeyboardGrid } from "./KeyboardGrid";
-import { LayerTabs } from "./keyboard/LayerTabs";
 
 interface KeyRemapSectionProps {
   // Layer state & actions

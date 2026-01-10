@@ -1,26 +1,26 @@
 ﻿import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/atoms/Button";
+import { Icon } from "@/components/atoms/Icon";
+import { Mapped } from "@/components/control/Mapped";
+import { Show } from "@/components/control/Show";
+import { KeyDisplay } from "@/components/molecules/display/KeyDisplay";
+import { TriggerTabs } from "@/components/molecules/forms/TriggerTabs";
+import { ActionSettingsSection } from "@/components/organisms/editor/ActionSettingsSection";
+import { TimingSettingsSection } from "@/components/organisms/editor/TimingSettingsSection";
+import { HStack, VStack } from "@/components/template/Flex";
+import { useBindingConfig } from "@/hooks/useBindingConfig";
+import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
+import { useKeyEventInput } from "@/hooks/useKeyEventInput";
+import { useKeyHoldAction } from "@/hooks/useKeyHoldAction";
+import { useMousePosition } from "@/hooks/useMousePosition";
+import type { LayoutType } from "@/types";
 import { VK } from "../../../../../shared/constants/vk";
 import type {
   Action,
   Layer,
   TriggerType,
 } from "../../../../../shared/types/remapConfig";
-import { useBindingConfig } from "../../../hooks/useBindingConfig";
-import { useKeyEditorActions } from "../../../hooks/useKeyEditorAction";
-import { useKeyEventInput } from "../../../hooks/useKeyEventInput";
-import { useKeyHoldAction } from "../../../hooks/useKeyHoldAction";
-import { useMousePosition } from "../../../hooks/useMousePosition";
-import type { LayoutType } from "../../../types";
-import { Button } from "../../atoms/Button";
-import { Icon } from "../../atoms/Icon";
-import { Mapped } from "../../control/Mapped";
-import { Show } from "../../control/Show";
-import { KeyDisplay } from "../../molecules/display/KeyDisplay";
-import { TriggerTabs } from "../../molecules/forms/TriggerTabs";
-import { HStack, VStack } from "../../template/Flex";
-import { ActionSettingsSection } from "./ActionSettingsSection";
-import { TimingSettingsSection } from "./TimingSettingsSection";
 
 const MOUSE_CAPTURE_COUNTDOWN_START = 3;
 const COUNTDOWN_INTERVAL_MS = 1000;

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Badge as ShadcnBadge } from "@/components/ui/badge";
-import { cn } from "../../utils/cn";
+import { cn } from "@/utils/cn";
 
 interface BadgeProps {
   children: ReactNode;

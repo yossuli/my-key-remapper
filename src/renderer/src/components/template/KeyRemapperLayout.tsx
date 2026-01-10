@@ -1,7 +1,16 @@
 import type { ReactNode } from "react";
 import { VStack } from "@/components/atoms/primitives/Flex";
-import { Header, Main, MainLayout, Side } from "./MainLayout";
-import { Content, Header as SimpleHeader, SimpleLayout } from "./SimpleLayout";
+import {
+  Header,
+  Main,
+  MainLayout,
+  Side,
+} from "@/components/template/MainLayout";
+import {
+  Content,
+  Header as SimpleHeader,
+  SimpleLayout,
+} from "@/components/template/SimpleLayout";
 
 interface KeyRemapperLayoutProps {
   simpleMode: boolean;

@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { Button } from "@/components/atoms/Button";
+import { Input } from "@/components/atoms/Input";
+import { Text } from "@/components/atoms/Text";
 import type { GlobalSettingsControl } from "@/components/pages/KeyRemapperPage";
+import { HStack, VStack } from "@/components/template/Flex";
 import type { GlobalSettings } from "../../../../shared/types/remapConfig";
-import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
-import { Text } from "../atoms/Text";
-import { HStack, VStack } from "../template/Flex";
 
 interface GlobalSettingsFormProps {
   globalSettings: GlobalSettings;

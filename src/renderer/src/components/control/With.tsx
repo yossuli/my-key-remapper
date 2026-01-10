@@ -1,4 +1,4 @@
-import { define } from "../../utils/define";
+import { define } from "@/utils/define";
 
 interface WithProps<T> {
   value: T | undefined | null;

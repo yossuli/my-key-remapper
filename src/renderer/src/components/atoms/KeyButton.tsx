@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
+import { WithRemoveBadge } from "@/components/atoms/RemoveBadge";
+import type { KeyDefinition, LayoutType } from "@/types";
+import { cn } from "@/utils/cn";
+import { getKeyLabel } from "@/utils/getKeyLabel";
 import { KEY_SIZE_REM } from "../../../../shared/constants/index";
 import type {
   Action,
   KeyBinding,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
-import type { KeyDefinition, LayoutType } from "../../types";
-import { cn } from "../../utils/cn";
-import { getKeyLabel } from "../../utils/getKeyLabel";
-import { WithRemoveBadge } from "./RemoveBadge";
 
 interface KeyButtonProps {
   keyDef: KeyDefinition;

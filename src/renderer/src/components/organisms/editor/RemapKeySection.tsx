@@ -1,25 +1,25 @@
 import { ArrowRight, Plus } from "lucide-react";
+import { Button } from "@/components/atoms/Button";
+import { Icon } from "@/components/atoms/Icon";
+import { Input } from "@/components/atoms/Input";
+import { WithRemoveBadge } from "@/components/atoms/RemoveBadge";
+import { HandleEmpty } from "@/components/control/HandleEmpty";
+import { Show } from "@/components/control/Show";
+import { KeyDisplay } from "@/components/molecules/display/KeyDisplay";
+import { HStack } from "@/components/template/Flex";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MAX_VK_CODE, MIN_VK_CODE } from "../../../../../shared/constants/vk";
-import type { LayoutType } from "../../../types";
+import type { LayoutType } from "@/types";
 import type {
   KeyEditorUIActions,
   KeyEditorUIHandlers,
   KeyEditorUIState,
-} from "../../../types/tree/branches";
-import { Button } from "../../atoms/Button";
-import { Icon } from "../../atoms/Icon";
-import { Input } from "../../atoms/Input";
-import { WithRemoveBadge } from "../../atoms/RemoveBadge";
-import { HandleEmpty } from "../../control/HandleEmpty";
-import { Show } from "../../control/Show";
-import { KeyDisplay } from "../../molecules/display/KeyDisplay";
-import { HStack } from "../../template/Flex";
+} from "@/types/tree/branches";
+import { MAX_VK_CODE, MIN_VK_CODE } from "../../../../../shared/constants/vk";
 
 interface RemapKeySectionProps {
   targetVk: number;

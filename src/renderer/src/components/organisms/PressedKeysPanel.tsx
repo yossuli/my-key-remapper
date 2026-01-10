@@ -2,12 +2,12 @@
 
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useGetPressedKeys, useReleaseAllKeys } from "../../hooks/useInvoke";
-import type { LayoutType } from "../../types";
-import { getKeyLabel } from "../../utils/getKeyLabel";
-import { Button } from "../atoms/Button";
-import { Show } from "../control/Show";
-import { VStack } from "../template/Flex";
+import { Button } from "@/components/atoms/Button";
+import { Show } from "@/components/control/Show";
+import { VStack } from "@/components/template/Flex";
+import { useGetPressedKeys, useReleaseAllKeys } from "@/hooks/useInvoke";
+import type { LayoutType } from "@/types";
+import { getKeyLabel } from "@/utils/getKeyLabel";
 
 interface PressedKeysPanelProps {
   /** キーボードレイアウト */

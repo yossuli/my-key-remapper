@@ -1,9 +1,9 @@
 import { AlertCircle } from "lucide-react";
+import { Icon } from "@/components/atoms/Icon";
+import { HandleEmpty } from "@/components/control/HandleEmpty";
+import { LogEntry } from "@/components/molecules/display/LogEntry";
 import type { LogState } from "@/components/pages/KeyRemapperPage";
-import { Icon } from "../atoms/Icon";
-import { HandleEmpty } from "../control/HandleEmpty";
-import { LogEntry } from "../molecules/display/LogEntry";
-import { VStack } from "../template/Flex";
+import { VStack } from "@/components/template/Flex";
 
 interface LogListProps {
   logs: LogState["logs"];

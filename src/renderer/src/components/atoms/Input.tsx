@@ -1,10 +1,10 @@
 import type { InputHTMLAttributes, LabelHTMLAttributes } from "react";
+import { Show } from "@/components/control/Show";
+import { HStack, VStack } from "@/components/template/Flex";
 import { Input as ShadcnInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { AddPrefix } from "../../types";
-import { cn } from "../../utils/cn";
-import { Show } from "../control/Show";
-import { HStack, VStack } from "../template/Flex";
+import type { AddPrefix } from "@/types";
+import { cn } from "@/utils/cn";
 
 interface InputProps
   extends AddPrefix<InputHTMLAttributes<HTMLInputElement>, "input-">,

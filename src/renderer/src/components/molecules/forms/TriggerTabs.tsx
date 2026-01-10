@@ -3,12 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export { Tabs, TabsContent, TabsList, TabsTrigger };
 
 import type { ReactNode } from "react";
+import { Mapped } from "@/components/control/Mapped";
+import { Show } from "@/components/control/Show";
+import { Then } from "@/components/control/Ternary";
+import { VStack } from "@/components/template/Flex";
+import { cn } from "@/utils/cn";
 import type { TriggerType } from "../../../../../shared/types/remapConfig";
-import { cn } from "../../../utils/cn";
-import { Mapped } from "../../control/Mapped";
-import { Show } from "../../control/Show";
-import { Then } from "../../control/Ternary";
-import { VStack } from "../../template/Flex";
 
 interface TriggerOption {
   value: TriggerType;

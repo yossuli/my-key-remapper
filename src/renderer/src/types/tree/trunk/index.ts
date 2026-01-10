@@ -3,5 +3,5 @@
  */
 
 // biome-ignore lint/performance/noBarrelFile: 型定義のre-export用
-export * from "./editor";
-export * from "./quickRemap";
+export * from "@/types/tree/trunk/editor";
+export * from "@/types/tree/trunk/quickRemap";

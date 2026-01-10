@@ -9,8 +9,7 @@
 
 // branches
 // biome-ignore lint/performance/noBarrelFile: 型定義のre-export用
-export * from "./branches";
-// roots
-export * from "./roots";
+export * from "@/types/tree/branches";
+
 // trunk
-export * from "./trunk";
+export * from "@/types/tree/trunk";

@@ -1,7 +1,7 @@
 // IPC経由でキーイベントを受け取るフック
 
 import { useCallback, useEffect, useRef } from "react";
-import { useIpcEvent } from "./useIpc";
+import { useIpcEvent } from "@/hooks/useIpc";
 
 interface UseKeyEventInputOptions {
   /** フックが有効かどうか */

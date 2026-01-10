@@ -1,6 +1,6 @@
-import { handlePositiveNumberInput } from "../../../utils/handlePositiveNumberInput";
-import { Input } from "../../atoms/Input";
-import { VStack } from "../../template/Flex";
+import { Input } from "@/components/atoms/Input";
+import { VStack } from "@/components/template/Flex";
+import { handlePositiveNumberInput } from "@/utils/handlePositiveNumberInput";
 
 interface TimingInputProps {
   id: string;

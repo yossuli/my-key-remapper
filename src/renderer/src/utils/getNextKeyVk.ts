@@ -1,6 +1,6 @@
 // キーボードレイアウトから次のキーを取得するユーティリティ
 
-import type { KeyboardLayout, KeyDefinition } from "../types";
+import type { KeyboardLayout, KeyDefinition } from "@/types";
 
 /**
  * KeyDefinition から基本の vk を取得する

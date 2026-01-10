@@ -2,11 +2,11 @@
 // キーボードグリッドでキークリック→キー押下で即座にリマップを適用
 
 import { useCallback, useEffect, useState } from "react";
+import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
+import { useKeyEventInput } from "@/hooks/useKeyEventInput";
+import type { KeyboardLayout } from "@/types";
+import { getNextKeyVk } from "@/utils/getNextKeyVk";
 import type { Action, TriggerType } from "../../../shared/types/remapConfig";
-import type { KeyboardLayout } from "../types";
-import { getNextKeyVk } from "../utils/getNextKeyVk";
-import { useKeyEditorActions } from "./useKeyEditorAction";
-import { useKeyEventInput } from "./useKeyEventInput";
 
 export interface UseQuickRemapOptions {
   enabled: boolean;

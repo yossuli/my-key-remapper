@@ -1,27 +1,27 @@
-import { getLayerDescription } from "@/utils/getLayerDescription";
-import type {
-  ActionType,
-  Layer,
-  TriggerType,
-} from "../../../../../shared/types/remapConfig";
-import type { LayoutType } from "../../../types";
+import { ToggleButton } from "@/components/atoms/ToggleButton";
+import {
+  ActionSelector,
+  ActionSelectorContent,
+} from "@/components/molecules/forms/ActionSelector";
+import { LayerSelector } from "@/components/molecules/forms/LayerSelector";
+import { MousePositionInput } from "@/components/molecules/forms/MousePositionInput";
+import { TimingInput } from "@/components/molecules/forms/TimingInput";
+import { RemapKeySection } from "@/components/organisms/editor/RemapKeySection";
+import { VStack } from "@/components/template/Flex";
+import type { LayoutType } from "@/types";
 import type {
   KeyEditorUIActions,
   KeyEditorUIHandlers,
   KeyEditorUIState,
   MouseHandlers,
   MouseState,
-} from "../../../types/tree/branches";
-import { ToggleButton } from "../../atoms/ToggleButton";
-import {
-  ActionSelector,
-  ActionSelectorContent,
-} from "../../molecules/forms/ActionSelector";
-import { LayerSelector } from "../../molecules/forms/LayerSelector";
-import { MousePositionInput } from "../../molecules/forms/MousePositionInput";
-import { TimingInput } from "../../molecules/forms/TimingInput";
-import { VStack } from "../../template/Flex";
-import { RemapKeySection } from "./RemapKeySection";
+} from "@/types/tree/branches";
+import { getLayerDescription } from "@/utils/getLayerDescription";
+import type {
+  ActionType,
+  Layer,
+  TriggerType,
+} from "../../../../../shared/types/remapConfig";
 
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 

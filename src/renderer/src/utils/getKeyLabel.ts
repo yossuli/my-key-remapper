@@ -1,9 +1,9 @@
+import type { KeyboardLayout, LayoutType } from "@/types";
 import {
   KEYBOARD_LAYOUT_BASE,
   KEYBOARD_LAYOUT_SHIFT,
 } from "../../../shared/constants";
 import { CODE_TO_VK } from "../../../shared/constants/vk";
-import type { KeyboardLayout, LayoutType } from "../types";
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 諦め
 export const getKeyLabel = (vk: number[], layoutType: LayoutType): string => {

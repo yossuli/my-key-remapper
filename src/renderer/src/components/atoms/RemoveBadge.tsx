@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
-import { Show } from "../control/Show";
+import { Show } from "@/components/control/Show";
 
 interface WithRemoveBadgeProps {
   /** 削除時のコールバック */

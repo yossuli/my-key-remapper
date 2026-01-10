@@ -1,7 +1,7 @@
 ﻿// ActionからBindingStateへの変換ユーティリティ
 
+import { objectiveDiscriminantSwitch } from "@/utils/objectiveSwitch";
 import type { Action, ActionType } from "../../../shared/types/remapConfig";
-import { objectiveDiscriminantSwitch } from "./objectiveSwitch";
 
 export interface BindingState {
   actionType: ActionType;

@@ -1,13 +1,13 @@
 ﻿// 保存・削除アクションのフック
 
 import { useCallback, useMemo, useState } from "react";
+import type { BindingState } from "@/utils/bindingState";
+import { objectiveSwitch } from "@/utils/objectiveSwitch";
 import type {
   Action,
   ActionType,
   TriggerType,
 } from "../../../shared/types/remapConfig";
-import type { BindingState } from "../utils/bindingState";
-import { objectiveSwitch } from "../utils/objectiveSwitch";
 
 export interface UseKeyEditorActionsProps {
   state: BindingState;

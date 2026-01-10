@@ -1,16 +1,16 @@
 import { Reorder } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/atoms/Button";
+import { Icon } from "@/components/atoms/Icon";
+import { Input } from "@/components/atoms/Input";
+import { WithRemoveBadge } from "@/components/atoms/RemoveBadge";
+import { Else, Ternary, Then } from "@/components/control/Ternary";
 import type {
   LayerActions,
   LayerState,
 } from "@/components/pages/KeyRemapperPage";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "../../atoms/Button";
-import { Icon } from "../../atoms/Icon";
-import { Input } from "../../atoms/Input";
-import { WithRemoveBadge } from "../../atoms/RemoveBadge";
-import { Else, Ternary, Then } from "../../control/Ternary";
 
 // TODO - まとめる必要はなさそう
 interface LayerTabsProps {

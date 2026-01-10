@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Dialog } from "../../atoms/Dialog";
+import { Dialog } from "@/components/atoms/Dialog";
 
 interface ModalLayoutProps<T> {
   value: T | null;

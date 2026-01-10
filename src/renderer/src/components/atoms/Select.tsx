@@ -1,4 +1,6 @@
 import type { ReactNode, SelectHTMLAttributes } from "react";
+import { Mapped } from "@/components/control/Mapped";
+import { VStack } from "@/components/template/Flex";
 import { Label } from "@/components/ui/label";
 import {
   SelectContent,
@@ -7,10 +9,8 @@ import {
   SelectValue,
   Select as ShadcnSelect,
 } from "@/components/ui/select";
-import type { AddPrefix } from "../../types";
-import { cn } from "../../utils/cn";
-import { Mapped } from "../control/Mapped";
-import { VStack } from "../template/Flex";
+import type { AddPrefix } from "@/types";
+import { cn } from "@/utils/cn";
 
 interface SelectOption {
   value: string;

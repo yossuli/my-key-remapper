@@ -1,41 +1,40 @@
 import { useMemo, useState } from "react";
+import { Show } from "@/components/control/Show";
+import { AppHeader } from "@/components/organisms/AppHeader";
+import { KeyEditorForm } from "@/components/organisms/editor/KeyEditorForm";
+import { GlobalSettingsForm } from "@/components/organisms/GlobalSettingsForm";
+import { KeyRemapSection } from "@/components/organisms/KeyRemapSection";
+import { LayerStatusPanel } from "@/components/organisms/LayerStatusPanel";
+import { LogList } from "@/components/organisms/LogList";
+import { PressedKeysPanel } from "@/components/organisms/PressedKeysPanel";
+import { VStack } from "@/components/template/Flex";
+import {
+  Header,
+  Main,
+  MainLayout,
+  Side,
+} from "@/components/template/MainLayout";
+import { ModalLayout } from "@/components/template/ModalLayout";
+import {
+  type UseGlobalSettingsReturn,
+  useGlobalSettings,
+} from "@/hooks/useGlobalSettings";
+import {
+  type UseKeyEventLogReturn,
+  useKeyEventLog,
+} from "@/hooks/useKeyEventLog";
+import { type UseLayerStackReturn, useLayerStack } from "@/hooks/useLayerStack";
+import { type UseLayerStateReturn, useLayerState } from "@/hooks/useLayerState";
+import {
+  type UseRemapControlReturn,
+  useRemapControl,
+} from "@/hooks/useRemapControl";
+import type { LayoutType } from "@/types";
 import {
   KEYBOARD_LAYOUT,
   SWITCH_LAYOUT_RULE,
 } from "../../../../shared/constants";
 import type { Action, TriggerType } from "../../../../shared/types/remapConfig";
-import {
-  type UseGlobalSettingsReturn,
-  useGlobalSettings,
-} from "../../hooks/useGlobalSettings";
-import {
-  type UseKeyEventLogReturn,
-  useKeyEventLog,
-} from "../../hooks/useKeyEventLog";
-import {
-  type UseLayerStackReturn,
-  useLayerStack,
-} from "../../hooks/useLayerStack";
-import {
-  type UseLayerStateReturn,
-  useLayerState,
-} from "../../hooks/useLayerState";
-import {
-  type UseRemapControlReturn,
-  useRemapControl,
-} from "../../hooks/useRemapControl";
-import type { LayoutType } from "../../types";
-import { Show } from "../control/Show";
-import { AppHeader } from "../organisms/AppHeader";
-import { KeyEditorForm } from "../organisms/editor/KeyEditorForm";
-import { GlobalSettingsForm } from "../organisms/GlobalSettingsForm";
-import { KeyRemapSection } from "../organisms/KeyRemapSection";
-import { LayerStatusPanel } from "../organisms/LayerStatusPanel";
-import { LogList } from "../organisms/LogList";
-import { PressedKeysPanel } from "../organisms/PressedKeysPanel";
-import { VStack } from "../template/Flex";
-import { Header, Main, MainLayout, Side } from "../template/MainLayout";
-import { ModalLayout } from "../template/ModalLayout";
 
 // --- 型定義 ---
 

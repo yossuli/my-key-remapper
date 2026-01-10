@@ -1,8 +1,8 @@
 import { Eye, EyeOff, Keyboard, Power, Settings } from "lucide-react";
-import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
-import { Text } from "../atoms/Text";
-import { Box, HStack, VStack } from "../template/Flex";
+import { Button } from "@/components/atoms/Button";
+import { Icon } from "@/components/atoms/Icon";
+import { Text } from "@/components/atoms/Text";
+import { Box, HStack, VStack } from "@/components/template/Flex";
 
 interface AppHeaderProps {
   isActive: boolean;

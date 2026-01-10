@@ -1,9 +1,9 @@
+import { applyIf } from "@/utils/appryIf";
 import type {
   Action,
   Layer,
   TriggerType,
 } from "../../../shared/types/remapConfig";
-import { applyIf } from "./appryIf";
 
 export const upsert =
   (layerId: string, from: number, trigger: TriggerType, action: Action) =>

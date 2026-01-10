@@ -1,8 +1,8 @@
 import type React from "react";
 import type { JSX } from "react";
-import { define } from "../../utils/define";
+import { findWithComponentType } from "@/components/control/index";
+import { define } from "@/utils/define";
 import type { BaseProps } from ".";
-import { findWithComponentType } from "./index";
 
 interface CaseProps {
   when: boolean;

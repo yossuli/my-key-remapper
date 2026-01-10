@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import { useScreenSize } from "../../../hooks/useScreenSize";
+import { Button } from "@/components/atoms/Button";
+import { Input } from "@/components/atoms/Input";
+import { Center, VStack } from "@/components/template/Flex";
+import { useScreenSize } from "@/hooks/useScreenSize";
 import type {
   MouseCaptureState,
   MouseHandlers,
   MousePosition,
-} from "../../../types/tree/branches";
-import { Button } from "../../atoms/Button";
-import { Input } from "../../atoms/Input";
-import { Center, VStack } from "../../template/Flex";
+} from "@/types/tree/branches";
 
 interface MousePositionInputProps {
   mousePosition: MousePosition; // { x, y }

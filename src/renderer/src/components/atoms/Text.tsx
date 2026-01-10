@@ -1,6 +1,6 @@
 import type React from "react";
-import { cn } from "../../utils/cn";
-import type { BaseProps } from "../control";
+import type { BaseProps } from "@/components/control";
+import { cn } from "@/utils/cn";
 
 interface TextProps<T extends React.ElementType = "span"> extends BaseProps<T> {
   children: React.ReactNode;

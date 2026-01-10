@@ -1,6 +1,6 @@
 import type { JSX } from "react";
-import { Mapped } from "./Mapped";
-import { Else, Ternary, Then } from "./Ternary";
+import { Mapped } from "@/components/control/Mapped";
+import { Else, Ternary, Then } from "@/components/control/Ternary";
 
 interface HandleEmptyProps<T> {
   array: T[];

@@ -1,4 +1,4 @@
-import { Badge } from "../../atoms/Badge";
+import { Badge } from "@/components/atoms/Badge";
 
 interface LogEntryProps {
   vkCode: number;

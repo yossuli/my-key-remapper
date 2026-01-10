@@ -2,11 +2,11 @@
 
 import { RefreshCw } from "lucide-react";
 import { useCallback } from "react";
+import { Button } from "@/components/atoms/Button";
+import { Card } from "@/components/atoms/Card";
+import { Text } from "@/components/atoms/Text";
 import type { LayerStackControl } from "@/components/pages/KeyRemapperPage";
-import { Button } from "../atoms/Button";
-import { Card } from "../atoms/Card";
-import { Text } from "../atoms/Text";
-import { HStack, VStack, Wrap } from "../template/Flex";
+import { HStack, VStack, Wrap } from "@/components/template/Flex";
 
 interface LayerStatusPanelProps {
   /** 現在のレイヤースタック */

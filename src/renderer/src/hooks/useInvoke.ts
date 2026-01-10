@@ -1,8 +1,8 @@
 // IPC invokeの型安全ラッパー
 
 import { useCallback } from "react";
+import { useIpc } from "@/hooks/useIpc";
 import type { Layer } from "../../../shared/types/remapConfig";
-import { useIpc } from "./useIpc";
 /**
  * IPC invokeの型安全ラッパー
  * 特定のチャンネルに対する呼び出しを提供

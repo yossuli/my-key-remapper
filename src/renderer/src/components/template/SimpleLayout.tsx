@@ -1,6 +1,6 @@
 import type React from "react";
 import type { JSX } from "react";
-import { type BaseProps, findWithComponentType } from "../control";
+import { type BaseProps, findWithComponentType } from "@/components/control";
 
 interface SimpleLayoutProps {
   children: JSX.Element[];

@@ -121,6 +121,7 @@ export class KeyStateManager {
         this.pendingHoldKeys.delete(code); // 発火したらペンディングから削除
         this.states.set(code, state);
         console.log(`[HOOK] Hold detected for key ${code}`);
+        this.fireTrigger(code, "hold");
       }
     }, holdMs);
     this.pendingHoldKeys.add(code);

@@ -96,13 +96,9 @@ export function ActionSettingsSection({
           </p>
 
           <MousePositionInput
-            captureState={{
-              isCapturing: mouseState.isCapturing,
-              countdown: mouseState.countdown,
-            }}
             idPrefix="mouse"
             mouseHandlers={mouseHandlers}
-            mousePosition={{ x: mouseState.x, y: mouseState.y }}
+            mouseState={mouseState}
             setFocused={keyEditorUIHandlers.setIsInputFocused}
           />
         </VStack>
@@ -115,13 +111,9 @@ export function ActionSettingsSection({
           </p>
 
           <MousePositionInput
-            captureState={{
-              isCapturing: mouseState.isCapturing,
-              countdown: mouseState.countdown,
-            }}
             idPrefix="click"
             mouseHandlers={mouseHandlers}
-            mousePosition={{ x: mouseState.x, y: mouseState.y }}
+            mouseState={mouseState}
             setFocused={keyEditorUIHandlers.setIsInputFocused}
           >
             <VStack className="h-full justify-around" gap={2}>

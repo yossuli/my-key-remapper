@@ -2,17 +2,15 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
 import type {
-  MouseCaptureState,
   MouseHandlers,
-  MousePosition,
+  MouseState,
 } from "@/components/organisms/editor/KeyEditorForm";
 import { Center, VStack } from "@/components/template/Flex";
 import { useScreenSize } from "@/hooks/useScreenSize";
 
 interface MousePositionInputProps {
-  mousePosition: MousePosition; // { x, y }
-  captureState: MouseCaptureState; // { isCapturing, countdown }
-  mouseHandlers: MouseHandlers; // グループのまま受け取る
+  mouseState: MouseState;
+  mouseHandlers: MouseHandlers;
   setFocused: (focused: boolean) => void;
   idPrefix?: string;
   children?: ReactNode;
@@ -23,8 +21,7 @@ interface MousePositionInputProps {
  * X・Y座標の入力フィールドと位置取得ボタンを提供
  */
 export function MousePositionInput({
-  mousePosition,
-  captureState,
+  mouseState: { x, y, isCapturing, countdown },
   mouseHandlers: { onGetMousePosition, setMouseX, setMouseY },
   setFocused,
   idPrefix = "mouse",
@@ -36,10 +33,10 @@ export function MousePositionInput({
   const DEFAULT_POSITION_PERCENT = 50;
 
   const relativeX = screenSize
-    ? (mousePosition.x / screenSize.width) * PERCENTAGE_MULTIPLIER
+    ? (x / screenSize.width) * PERCENTAGE_MULTIPLIER
     : DEFAULT_POSITION_PERCENT;
   const relativeY = screenSize
-    ? (mousePosition.y / screenSize.height) * PERCENTAGE_MULTIPLIER
+    ? (y / screenSize.height) * PERCENTAGE_MULTIPLIER
     : DEFAULT_POSITION_PERCENT;
   return (
     <Center>
@@ -52,7 +49,7 @@ export function MousePositionInput({
             input-onChange={(e) => setMouseX(Number(e.target.value))}
             input-placeholder="0"
             input-type="number"
-            input-value={mousePosition.x.toString()}
+            input-value={x.toString()}
             label="X"
             setFocused={setFocused}
           />
@@ -63,7 +60,7 @@ export function MousePositionInput({
             input-onChange={(e) => setMouseY(Number(e.target.value))}
             input-placeholder="0"
             input-type="number"
-            input-value={mousePosition.y.toString()}
+            input-value={y.toString()}
             label="Y"
             setFocused={setFocused}
           />
@@ -71,7 +68,7 @@ export function MousePositionInput({
 
         <Button
           className="relative flex h-24 flex-col items-center justify-center gap-1"
-          disabled={captureState.isCapturing}
+          disabled={isCapturing}
           onClick={onGetMousePosition}
           size="lg"
           style={
@@ -94,9 +91,7 @@ export function MousePositionInput({
             </div>
           </div>
           <span className="relative z-10 font-medium">
-            {captureState.isCapturing
-              ? `${captureState.countdown}秒後`
-              : "位置を取得"}
+            {isCapturing ? `${countdown}秒後` : "位置を取得"}
           </span>
         </Button>
 

@@ -6,10 +6,8 @@ import { Icon } from "@/components/atoms/Icon";
 import { Input } from "@/components/atoms/Input";
 import { WithRemoveBadge } from "@/components/atoms/RemoveBadge";
 import { Else, Ternary, Then } from "@/components/control/Ternary";
-import type {
-  LayerActions,
-  LayerState,
-} from "@/components/organisms/KeyRemapSection";
+import type { LayerActions } from "@/components/organisms/KeyRemapSection";
+import type { LayerState } from "@/components/pages/KeyRemapperPage";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // TODO - まとめる必要はなさそう

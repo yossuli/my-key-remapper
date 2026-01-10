@@ -106,21 +106,28 @@ function sendKeyWithLayerModifiers(vkCode: number, isUp: boolean): void {
   const layerKeys = layerId ? getLayerActiveKeys(layerId) : [];
 
   if (layerKeys.length > 0) {
-    if (isUp) {
-      // keyUp: キーを離してから アクティブキー を離す
-      sendKey(vkCode, true);
-      for (const vk of layerKeys.toReversed()) {
-        sendKey(vk, true);
-      }
-    } else {
-      // keyDown: アクティブキー を押してからキーを押す
-      for (const vk of layerKeys) {
-        sendKey(vk, false);
-      }
-      sendKey(vkCode, false);
-    }
+    sendLayerKeys(vkCode, isUp, layerKeys);
   } else {
     sendKey(vkCode, isUp);
+  }
+}
+
+/**
+ * レイヤーキーと一緒にキーを送信するヘルパー
+ */
+function sendLayerKeys(vkCode: number, isUp: boolean, layerKeys: number[]) {
+  if (isUp) {
+    // keyUp: キーを離してから アクティブキー を離す
+    sendKey(vkCode, true);
+    for (const vk of layerKeys.toReversed()) {
+      sendKey(vk, true);
+    }
+  } else {
+    // keyDown: アクティブキー を押してから キーを押す
+    for (const vk of layerKeys) {
+      sendKey(vk, false);
+    }
+    sendKey(vkCode, false);
   }
 }
 

@@ -1,17 +1,12 @@
 import { AlertCircle } from "lucide-react";
+import type { LogState } from "@/components/pages/KeyRemapperPage";
 import { Icon } from "../atoms/Icon";
 import { HandleEmpty } from "../control/HandleEmpty";
 import { LogEntry } from "../molecules/display/LogEntry";
 import { VStack } from "../template/Flex";
 
-interface LogItem {
-  id: string;
-  vkCode: number;
-  time: string;
-}
-
 interface LogListProps {
-  logs: LogItem[];
+  logs: LogState["logs"];
 }
 
 export function LogList({ logs }: LogListProps) {

@@ -6,14 +6,17 @@ import {
   useState,
 } from "react";
 import type {
-  Action,
+  LayerActions,
+  LayerState,
+  MappingActions,
+  RemapActions,
+} from "@/components/pages/KeyRemapperPage";
+import type {
   KeyBinding,
   TriggerType,
 } from "../../../../shared/types/remapConfig";
 import { useQuickRemap } from "../../hooks/useQuickRemap";
 import type { KeyboardLayout, LayoutType } from "../../types";
-import type { LayerActions, LayerState } from "../../types/tree/roots/layer";
-import type { RemapActions } from "../../types/tree/roots/remap";
 import { cn } from "../../utils/cn";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
@@ -29,10 +32,7 @@ interface KeyRemapSectionProps {
   layerActions: LayerActions;
 
   // Mapping actions
-  mappingActions: {
-    saveMapping: (from: number, trigger: TriggerType, action: Action) => void;
-    removeMapping: (from: number) => void;
-  };
+  mappingActions: MappingActions;
 
   // Remap actions
   remapActions: RemapActions;

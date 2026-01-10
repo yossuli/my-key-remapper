@@ -2,6 +2,7 @@
 
 import { RefreshCw } from "lucide-react";
 import { useCallback } from "react";
+import type { LayerStackControl } from "@/components/pages/KeyRemapperPage";
 import { Button } from "../atoms/Button";
 import { Card } from "../atoms/Card";
 import { Text } from "../atoms/Text";
@@ -9,13 +10,13 @@ import { HStack, VStack, Wrap } from "../template/Flex";
 
 interface LayerStatusPanelProps {
   /** 現在のレイヤースタック */
-  stack: string[];
+  stack: LayerStackControl["stack"];
   /** 設定済みの全レイヤー */
   availableLayers: string[];
   /** 手動リフレッシュ */
-  onRefresh: () => void;
+  onRefresh: LayerStackControl["refresh"];
   /** 指定レイヤーに強制リセット */
-  onResetToLayer: (layerId: string) => void;
+  onResetToLayer: LayerStackControl["resetToLayer"];
 }
 
 /**

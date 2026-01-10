@@ -12,6 +12,18 @@ export interface UseRemapControlReturn {
   disableRemap: () => void;
 }
 
+// リマップ制御の基本状態
+export type RemapState = Pick<UseRemapControlReturn, "isActive">;
+
+// リマップ制御のアクション
+export type RemapActions = Pick<
+  UseRemapControlReturn,
+  "toggleActive" | "enableRemap" | "disableRemap"
+>;
+
+// リマップ制御の全体
+export type RemapControl = RemapState & RemapActions;
+
 /**
  * リマップ機能の有効/無効を制御するカスタムフック
  */

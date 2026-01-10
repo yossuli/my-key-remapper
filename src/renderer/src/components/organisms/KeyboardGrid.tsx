@@ -1,10 +1,13 @@
+import type { LayerState } from "@/components/pages/KeyRemapperPage";
 import {
   KEYBOARD_LAYOUT_BASE,
   KEYBOARD_LAYOUT_SHIFT,
 } from "../../../../shared/constants";
-import type { KeyBinding, TriggerType } from "../../../../shared/types/remapConfig";
+import type {
+  KeyBinding,
+  TriggerType,
+} from "../../../../shared/types/remapConfig";
 import type { KeyboardLayout, LayoutType } from "../../types";
-import type { LayerState } from "../../types/tree/roots/layer";
 import { KeyButton } from "../atoms/KeyButton";
 import { Mapped } from "../control/Mapped";
 

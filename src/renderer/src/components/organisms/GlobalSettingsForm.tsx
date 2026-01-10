@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { GlobalSettingsControl } from "@/components/pages/KeyRemapperPage";
 import type { GlobalSettings } from "../../../../shared/types/remapConfig";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
@@ -7,7 +8,7 @@ import { HStack, VStack } from "../template/Flex";
 
 interface GlobalSettingsFormProps {
   globalSettings: GlobalSettings;
-  onSave: (settings: Partial<GlobalSettings>) => void;
+  onSave: GlobalSettingsControl["updateGlobalSettings"];
 }
 
 /**

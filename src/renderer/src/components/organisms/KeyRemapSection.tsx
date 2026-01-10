@@ -33,7 +33,7 @@ import type {
 
 export type LayerActions = Pick<
   UseLayerStateReturn,
-  "setLayerId" | "addLayer" | "removeLayer" | "reorderLayers"
+  "setLayerId" | "addLayer" | "removeLayer" | "reorderLayers" | "updateLayer"
 >;
 
 export type RemapActions = Pick<
@@ -128,7 +128,11 @@ export function KeyRemapSection({
   return (
     <VStack as="section" gap={4}>
       <HStack className="justify-between gap-4">
-        <LayerTabs layerActions={layerActions} layerState={layerState} />{" "}
+        <LayerTabs
+          layerActions={layerActions}
+          layerState={layerState}
+          layout={layout}
+        />{" "}
         {/* 🎁 → 🔨🔥 (A. Layer Management Flow) */}
         <HStack className="gap-2">
           <TriggerTabs

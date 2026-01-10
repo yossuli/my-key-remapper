@@ -8,20 +8,36 @@ import { WithRemoveBadge } from "@/components/atoms/RemoveBadge";
 import { Else, Ternary, Then } from "@/components/control/Ternary";
 import type { LayerActions } from "@/components/organisms/KeyRemapSection";
 import type { LayerState } from "@/components/pages/KeyRemapperPage";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { LayoutType } from "@/types";
+import { LayerSettingsModal } from "./LayerSettingsModal";
 
 // TODO - まとめる必要はなさそう
 interface LayerTabsProps {
   layerState: LayerState;
   layerActions: LayerActions;
+  layout: LayoutType;
 }
 
-export function LayerTabs({ layerState, layerActions }: LayerTabsProps) {
+export function LayerTabs({
+  layerState,
+  layerActions,
+  layout,
+}: LayerTabsProps) {
   // 🎁 → 🔨🔥 (A. Layer Management Flow)
   // layerState から layers, layerId を使用
   // layerActions から setLayerId, addLayer, removeLayer, reorderLayers を使用
   const [isAdding, setIsAdding] = useState(false);
   const [newLayerName, setNewLayerName] = useState("");
+  const [contextMenuLayerId, setContextMenuLayerId] = useState<string | null>(
+    null
+  );
 
   const orderedLayerIds = useMemo(
     () => layerState.layers.map((l) => l.id),
@@ -65,12 +81,23 @@ export function LayerTabs({ layerState, layerActions }: LayerTabsProps) {
             {orderedLayerIds.map((id) => (
               <Reorder.Item as="div" key={id} value={id}>
                 <WithRemoveBadge onRemove={() => handleRemoveClick(id)}>
-                  <TabsTrigger
-                    className="data-[state=active]:bg-background"
-                    value={id}
-                  >
-                    {id.charAt(0).toUpperCase() + id.slice(1)}
-                  </TabsTrigger>
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <TabsTrigger
+                        className="data-[state=active]:bg-background"
+                        value={id}
+                      >
+                        {id.charAt(0).toUpperCase() + id.slice(1)}
+                      </TabsTrigger>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onSelect={() => setContextMenuLayerId(id)}
+                      >
+                        Layer Settings...
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 </WithRemoveBadge>
               </Reorder.Item>
             ))}
@@ -103,6 +130,13 @@ export function LayerTabs({ layerState, layerActions }: LayerTabsProps) {
           </Else>
         </Ternary>
       </div>
+      <LayerSettingsModal
+        layerId={contextMenuLayerId}
+        layers={layerState.layers}
+        layout={layout}
+        onClose={() => setContextMenuLayerId(null)}
+        onUpdate={layerActions.updateLayer}
+      />
     </Tabs>
   );
 }

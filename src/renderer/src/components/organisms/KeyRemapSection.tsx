@@ -11,7 +11,10 @@ import { LayoutToggle } from "@/components/molecules/display/LayoutToggle";
 import { TriggerTabs } from "@/components/molecules/forms/TriggerTabs";
 import { KeyboardGrid } from "@/components/organisms/KeyboardGrid";
 import { LayerTabs } from "@/components/organisms/keyboard/LayerTabs";
-import type { MappingActions } from "@/components/pages/KeyRemapperPage";
+import type {
+  LayerState,
+  MappingActions,
+} from "@/components/pages/KeyRemapperPage";
 import { HStack, VStack } from "@/components/template/Flex";
 import type { UseGlobalSettingsReturn } from "@/hooks/useGlobalSettings";
 import type { UseKeyEventLogReturn } from "@/hooks/useKeyEventLog";
@@ -32,8 +35,6 @@ export type LayerActions = Pick<
   UseLayerStateReturn,
   "setLayerId" | "addLayer" | "removeLayer" | "reorderLayers"
 >;
-
-export type LayerState = Pick<UseLayerStateReturn, "layers" | "layerId">;
 
 export type RemapActions = Pick<
   UseRemapControlReturn,

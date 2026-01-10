@@ -5,18 +5,12 @@ import { useCallback } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Card } from "@/components/atoms/Card";
 import { Text } from "@/components/atoms/Text";
-import type { LayerStackControl } from "@/components/organisms/KeyRemapSection";
 import { HStack, VStack, Wrap } from "@/components/template/Flex";
+import { useLayerStack } from "@/hooks/useLayerStack";
 
 interface LayerStatusPanelProps {
-  /** 現在のスタック */
-  stack: LayerStackControl["stack"];
   /** 設定済みの全レイヤー */
   availableLayers: string[];
-  /** 手動リフレッシュ */
-  refresh: LayerStackControl["refresh"];
-  /** 指定レイヤーに強制リセット */
-  resetToLayer: LayerStackControl["resetToLayer"];
 }
 
 /**
@@ -26,11 +20,9 @@ interface LayerStatusPanelProps {
  * - 各レイヤーへの強制リセットボタン
  */
 export function LayerStatusPanel({
-  stack, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
   availableLayers, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
-  refresh, // 🆕 → 🧩🔥 (LayerStackControl)
-  resetToLayer, // 🆕 → 🧩🔥 (LayerStackControl)
 }: LayerStatusPanelProps) {
+  const { stack, refresh, resetToLayer } = useLayerStack();
   const handleResetClick = useCallback(
     (layerId: string) => () => {
       resetToLayer(layerId);

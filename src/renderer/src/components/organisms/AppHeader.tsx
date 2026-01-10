@@ -13,7 +13,7 @@ interface AppHeaderProps {
   /** シンプルモード切り替えコールバック */
   onToggleSimpleMode?: () => void;
   /** グローバル設定を開くコールバック */
-  onOpenSettings?: () => void;
+  onOpenSettings: () => void;
 }
 
 export function AppHeader({

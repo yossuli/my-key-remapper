@@ -2,15 +2,11 @@ import { AlertCircle } from "lucide-react";
 import { Icon } from "@/components/atoms/Icon";
 import { HandleEmpty } from "@/components/control/HandleEmpty";
 import { LogEntry } from "@/components/molecules/display/LogEntry";
-import type { LogState } from "@/components/organisms/KeyRemapSection";
 import { VStack } from "@/components/template/Flex";
+import { useKeyEventLog } from "@/hooks/useKeyEventLog";
 
-interface LogListProps {
-  logs: LogState["logs"];
-}
-
-export function LogList({ logs }: LogListProps) {
-  // 🆕 → 🔥 (H. Log Management)
+export function LogList() {
+  const { logs } = useKeyEventLog();
   return (
     <section className="flex h-fit flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
       <div className="flex items-center gap-2 border-b bg-muted/30 p-4">

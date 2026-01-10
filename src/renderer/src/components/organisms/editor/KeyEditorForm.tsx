@@ -10,6 +10,7 @@ import { ActionSettingsSection } from "@/components/organisms/editor/ActionSetti
 import { TimingSettingsSection } from "@/components/organisms/editor/TimingSettingsSection";
 import { HStack, VStack } from "@/components/template/Flex";
 import { useBindingConfig } from "@/hooks/useBindingConfig";
+import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
 import { useKeyEventInput } from "@/hooks/useKeyEventInput";
 import { useKeyHoldAction } from "@/hooks/useKeyHoldAction";
@@ -25,6 +26,8 @@ import type {
 const MOUSE_CAPTURE_COUNTDOWN_START = 3;
 const COUNTDOWN_INTERVAL_MS = 1000;
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
+const DEFAULT_HOLD_THRESHOLD_MS = 200;
+const DEFAULT_TAP_INTERVAL_MS = 300;
 
 // キーエディタ操作関連
 export type KeyEditorUIActions = Pick<
@@ -81,8 +84,6 @@ interface KeyEditorFormProps {
   layout: LayoutType;
   layers: Layer[];
   trigger: TriggerType;
-  defaultHoldThresholdMs: number | undefined;
-  defaultTapIntervalMs: number | undefined;
   onSave: (
     trigger: TriggerType,
     action: Action,
@@ -97,12 +98,15 @@ export function KeyEditorForm({
   layerId, // ∈ → 🧩🔥 (A. Layer Management Flow)
   layout, // 🆕 → 🧩🔥 (C. UI Configuration)
   layers, // ∈ → 🧩🔥 (A. Layer Management Flow)
-  defaultHoldThresholdMs, // ➖ → 🧩🔥 (G. Global Settings)
-  defaultTapIntervalMs, // ➖ → 🧩🔥 (G. Global Settings)
   onSave, // 🆕 → 🔥 (I. Key Editor Modal)
   onRemove, // 🆕 → 🔥 (I. Key Editor Modal)
   onClose, // 🆕 → 🔥 (I. Key Editor Modal)
 }: KeyEditorFormProps) {
+  const { globalSettings } = useGlobalSettings();
+  const defaultHoldThresholdMs =
+    globalSettings?.defaultHoldThresholdMs ?? DEFAULT_HOLD_THRESHOLD_MS;
+  const defaultTapIntervalMs =
+    globalSettings?.defaultTapIntervalMs ?? DEFAULT_TAP_INTERVAL_MS;
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showVkInput, setShowVkInput] = useState(false);

@@ -1,29 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Input } from "@/components/atoms/Input";
 import { Text } from "@/components/atoms/Text";
-import type { GlobalSettingsControl } from "@/components/organisms/KeyRemapSection";
 import { HStack, VStack } from "@/components/template/Flex";
-import type { GlobalSettings } from "../../../../shared/types/remapConfig";
-
-interface GlobalSettingsFormProps {
-  globalSettings: GlobalSettings;
-  onSave: GlobalSettingsControl["updateGlobalSettings"];
-}
+import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 
 /**
  * グローバル設定を編集するフォーム
  */
-export function GlobalSettingsForm({
-  globalSettings, // 🆕 → 🔥 (G. Global Settings)
-  onSave, // 🆕 → 🔥 (G. Global Settings)
-}: GlobalSettingsFormProps) {
-  const [holdThresholdMs, setHoldThresholdMs] = useState(
-    globalSettings.defaultHoldThresholdMs
-  );
-  const [tapIntervalMs, setTapIntervalMs] = useState(
-    globalSettings.defaultTapIntervalMs
-  );
+export function GlobalSettingsForm() {
+  const { globalSettings, updateGlobalSettings } = useGlobalSettings();
+  const [holdThresholdMs, setHoldThresholdMs] = useState<number>(0);
+  const [tapIntervalMs, setTapIntervalMs] = useState<number>(0);
+
+  // 初期値の同期
+  useEffect(() => {
+    if (globalSettings) {
+      setHoldThresholdMs(globalSettings.defaultHoldThresholdMs);
+      setTapIntervalMs(globalSettings.defaultTapIntervalMs);
+    }
+  }, [globalSettings]);
+
+  if (!globalSettings) {
+    return <Text>Loading settings...</Text>;
+  }
+
+  const onSave = updateGlobalSettings;
 
   const handleSave = () => {
     onSave({

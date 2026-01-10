@@ -3,7 +3,6 @@ import { Show } from "@/components/control/Show";
 import { AppHeader } from "@/components/organisms/AppHeader";
 import { KeyEditorForm } from "@/components/organisms/editor/KeyEditorForm";
 import { GlobalSettingsForm } from "@/components/organisms/GlobalSettingsForm";
-import type { LayerState } from "@/components/organisms/KeyRemapSection";
 import { KeyRemapSection } from "@/components/organisms/KeyRemapSection";
 import { LayerStatusPanel } from "@/components/organisms/LayerStatusPanel";
 import { LogList } from "@/components/organisms/LogList";
@@ -16,9 +15,6 @@ import {
   Side,
 } from "@/components/template/MainLayout";
 import { ModalLayout } from "@/components/template/ModalLayout";
-import { useGlobalSettings } from "@/hooks/useGlobalSettings";
-import { useKeyEventLog } from "@/hooks/useKeyEventLog";
-import { useLayerStack } from "@/hooks/useLayerStack";
 import { type UseLayerStateReturn, useLayerState } from "@/hooks/useLayerState";
 import { useRemapControl } from "@/hooks/useRemapControl";
 import type { LayoutType } from "@/types";
@@ -30,6 +26,8 @@ import type { TriggerType } from "../../../../shared/types/remapConfig";
 
 // --- 型定義 ---
 
+export type LayerState = Pick<UseLayerStateReturn, "layers" | "layerId">;
+
 export interface MappingActions {
   saveMapping: UseLayerStateReturn["saveMapping"];
   removeMapping: (from: number) => void;
@@ -37,7 +35,6 @@ export interface MappingActions {
 
 export function KeyRemapperPage() {
   // カスタムフックでロジックを分離
-  const { logs } = useKeyEventLog();
   const {
     layers,
     layerId,
@@ -47,15 +44,13 @@ export function KeyRemapperPage() {
     ...layerActions
   } = useLayerState();
   const { isActive, ...remapActions } = useRemapControl();
-  const { stack, refresh, resetToLayer } = useLayerStack();
-  const { globalSettings, updateGlobalSettings } = useGlobalSettings();
 
   // UI状態
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [layout, setLayout] = useState<LayoutType>("JIS");
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
   const [simpleMode, setSimpleMode] = useState(false);
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // キーボードレイアウト
   const keyboardLayout = useMemo(() => KEYBOARD_LAYOUT.base[layout], [layout]);
@@ -83,7 +78,7 @@ export function KeyRemapperPage() {
         <Header>
           <AppHeader
             isActive={isActive} // 🆕 → 🔥 (E. App Header Control)
-            onOpenSettings={() => setSettingsModalOpen(true)} // 🆕 → 🔥 (E. App Header Control)
+            onOpenSettings={() => setIsSettingsOpen(true)} // 🆕 → 🔥 (E. App Header Control)
             onToggleActive={remapActions.toggleActive} // 🆕 → 🔥 (E. App Header Control)
             onToggleSimpleMode={() => setSimpleMode((prev) => !prev)} // 🆕 → 🔥 (E. App Header Control)
             simpleMode={simpleMode} // 🆕 → 🔥 (E. App Header Control)
@@ -110,14 +105,11 @@ export function KeyRemapperPage() {
           <VStack gap={4}>
             <LayerStatusPanel
               availableLayers={availableLayers} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
-              refresh={refresh} // 🆕 → 🧩🔥 (LayerStackControl)
-              resetToLayer={resetToLayer} // 🆕 → 🧩🔥 (LayerStackControl)
-              stack={stack} // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
             />
             <PressedKeysPanel layout={layout} />
             {/* 🆕 → 🔥 (F. Pressed Keys Panel) */}
             <Show condition={!simpleMode}>
-              <LogList logs={logs} /> {/* 🆕 → 🔥 (H. Log Management) */}
+              <LogList />
             </Show>
           </VStack>
         </Side>
@@ -126,8 +118,6 @@ export function KeyRemapperPage() {
       <ModalLayout onClose={handleCloseEditor} value={editingKey}>
         {(e) => (
           <KeyEditorForm
-            defaultHoldThresholdMs={globalSettings?.defaultHoldThresholdMs} // ➖ → 🧩🔥 (G. Global Settings)
-            defaultTapIntervalMs={globalSettings?.defaultTapIntervalMs} // ➖ → 🧩🔥 (G. Global Settings)
             layerId={layerId} // ∈ → 🧩🔥 (A. Layer Management Flow)
             layers={layers} // ∈ → 🧩🔥 (A. Layer Management Flow)
             layout={layout} // 🆕 → 🧩🔥 (C. UI Configuration)
@@ -141,15 +131,10 @@ export function KeyRemapperPage() {
       </ModalLayout>
 
       <ModalLayout
-        onClose={() => setSettingsModalOpen(false)}
-        value={settingsModalOpen ? globalSettings : null}
+        onClose={() => setIsSettingsOpen(false)}
+        value={isSettingsOpen ? true : null}
       >
-        {(currentSettings) => (
-          <GlobalSettingsForm
-            globalSettings={currentSettings} // 🆕 → 🔥 (G. Global Settings)
-            onSave={updateGlobalSettings} // 🆕 → 🔥 (G. Global Settings)
-          />
-        )}
+        {() => <GlobalSettingsForm />}
       </ModalLayout>
     </>
   );

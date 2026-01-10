@@ -47,20 +47,20 @@ interface ActionSettingsSectionProps {
 }
 
 export function ActionSettingsSection({
-  actionType,
-  selectedTrigger,
-  selectedLayerId,
-  layers,
-  layout,
-  targetVk,
-  newTargetKeys,
-  mouseState,
-  mouseHandlers,
-  keyEditorState,
-  keyEditorActions,
-  keyEditorUIHandlers,
-  setActionType,
-  setSelectedLayerId,
+  actionType, // KeyEditorForm から受け取り
+  selectedTrigger, // KeyEditorForm から受け取り
+  selectedLayerId, // KeyEditorForm から受け取り
+  layers, // KeyEditorForm から受け取り
+  layout, // KeyEditorForm から受け取り
+  targetVk, // KeyEditorForm から受け取り
+  newTargetKeys, // KeyEditorForm から受け取り
+  mouseState, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ MousePositionInput で使用
+  mouseHandlers, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ MousePositionInput で使用
+  keyEditorState, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection で使用
+  keyEditorActions, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection で使用
+  keyEditorUIHandlers, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection/MousePositionInput で使用
+  setActionType, // KeyEditorForm から受け取り
+  setSelectedLayerId, // KeyEditorForm から受け取り
 }: ActionSettingsSectionProps) {
   return (
     <ActionSelector

@@ -15,14 +15,14 @@ interface TimingSettingsSectionProps {
 
 // SelectTriggerは構造上必要だが関数内では未使用
 export function TimingSettingsSection({
-  selectedTrigger: _selectedTrigger,
-  holdThresholdMs,
-  tapIntervalMs,
-  defaultHoldThresholdMs,
-  defaultTapIntervalMs,
-  setHoldThresholdMs,
-  setTapIntervalMs,
-  setIsInputFocused,
+  selectedTrigger: _selectedTrigger, // KeyEditorForm から受け取り（構造上必要だが未使用）
+  holdThresholdMs, // KeyEditorForm から受け取り
+  tapIntervalMs, // KeyEditorForm から受け取り
+  defaultHoldThresholdMs, // KeyEditorForm から受け取り
+  defaultTapIntervalMs, // KeyEditorForm から受け取り
+  setHoldThresholdMs, // KeyEditorForm から受け取り
+  setTapIntervalMs, // KeyEditorForm から受け取り
+  setIsInputFocused, // KeyEditorForm から受け取り
 }: TimingSettingsSectionProps) {
   return (
     <>

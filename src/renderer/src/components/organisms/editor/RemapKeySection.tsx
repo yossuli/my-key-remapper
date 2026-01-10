@@ -32,12 +32,12 @@ interface RemapKeySectionProps {
 }
 
 export function RemapKeySection({
-  targetVk,
-  layout,
-  newTargetKeys,
-  keyEditorState,
-  keyEditorActions,
-  keyEditorUIHandlers,
+  targetVk, // ActionSettingsSection から受け取り
+  layout, // ActionSettingsSection から受け取り
+  newTargetKeys, // ActionSettingsSection から受け取り
+  keyEditorState, // 🎁 ActionSettingsSection から受け取り → ∈ 使用
+  keyEditorActions, // 🎁 ActionSettingsSection から受け取り → ∈ 使用
+  keyEditorUIHandlers, // 🎁 ActionSettingsSection から受け取り → ∈ 使用
 }: RemapKeySectionProps) {
   const handleVkInputConfirm = () => {
     const vk = Number.parseInt(keyEditorState.vkInputValue, 10);

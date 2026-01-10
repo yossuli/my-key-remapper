@@ -1,208 +1,169 @@
-# プロップス伝播フロー詳細図
+# Props Flow Reference
 
-このドキュメントは、アプリケーション内でのデータフローとプロップスの伝播状況を詳細に可視化したものです。
-親コンポーネントから子コンポーネントへ渡されるプロップスについて、**そのまま渡しているもの（Pass-through）**、**一部を使用して渡しているもの（Partial Use）**、**消費して終了するもの（Consumed）** を明確に区別しています。
+このドキュメントは、アプリケーション全体のプロップス伝播フローを可視化した設計図です。
+「どこで型が定義され」「どのように渡され」「どこで使用されているか」を一目で把握できます。
 
-## 記号の定義
+## 1. 凡例 (Legend)
 
-- 🟢 **[PASS]**: 親から受け取った値をそのまま子へ渡す（Pass-through）
-- 🟡 **[PART]**: 親から受け取ったオブジェクトの一部を使用し、オブジェクト自体または残りを子へ渡す
-- 🔴 **[USE]**: コンポーネント内で使用・消費され、子へは渡されない
-- 🆕 **[NEW]**: そのコンポーネントで新しく生成・定義されて子へ渡される
-- 🔄 **[PROC]**: 受け取った値を加工して子へ渡す
+### フロー記号 (Symbols)
 
-## フロー詳細
+| 記号 | 英語 (English) | 日本語 (Japanese) | 説明                                                                     |
+| :--: | :------------- | :---------------- | :----------------------------------------------------------------------- |
+|  🆕  | **Define**     | **定義・生成**    | このコンポーネントで新しい値やインスタンスが生成されています。           |
+|  📦  | **Pack**       | **グループ化**    | 個別の値をオブジェクトにまとめています。                                 |
+|  🎁  | **Pass Group** | **グループ渡し**  | Group オブジェクトのまま、変更せず子コンポーネントへ渡しています。       |
+|  ∈   | **In Group**   | **グループ内包**  | 親の Group オブジェクトに含まれて渡されています。                        |
+|  🔨  | **Unpack**     | **解体・展開**    | Group オブジェクトから値を分割代入 (Destructure) しています。            |
+|  🚌  | **Drill**      | **通過 (Drill)**  | コンポーネント自身は使用せず、そのまま子へ渡しています (Prop Drilling)。 |
+|  🔥  | **Use**        | **使用**          | ロジックやレンダリングで実際に値を使用しています。                       |
+|  🧩  | **Individual** | **個別扱い**      | グループ化されず、個別のプロップスとして扱われています。                 |
+|  🛑  | **Stop**       | **停止**          | 子コンポーネントへは渡されず、ここでフローが終了します。                 |
+|  ➖  | **None**       | **関与なし**      | このコンポーネントには渡されていません。                                 |
 
-### 1. Root -> KeyRemapperPage
+---
 
-`KeyRemapperPage` は状態管理のルートであり、Hooks からデータを取得して分配します。
+## 2. 定義参照 (Definition Reference)
 
-### 2. KeyRemapperPage -> KeyRemapSection
+`KeyRemapperPage.tsx` で定義されているすべての Prop Groups です。
 
-`KeyRemapperPage` で生成された状態や関数が `KeyRemapSection` に渡されます。
+| Type Name                   | Source | Included Props                                           | Status |
+| :-------------------------- | :----- | :------------------------------------------------------- | :----: |
+| **`LayerState`**            | Page   | `layers`, `layerId`                                      |   ✅   |
+| **`LayerActions`**          | Page   | `setLayerId`, `addLayer`, `removeLayer`, `reorderLayers` |   ✅   |
+| **`RemapActions`**          | Page   | `toggleActive`, `enableRemap`, `disableRemap`            |   ✅   |
+| **`MappingActions`**        | Page   | `saveMapping`, `removeMapping`                           |   ✅   |
+| **`GlobalSettingsControl`** | Page   | `updateGlobalSettings`                                   |   ✅   |
+| **`LayerStackControl`**     | Page   | `stack`, `refresh`, `resetToLayer`                       |   ✅   |
+| **`LogState`**              | Page   | `logs`                                                   |   ✅   |
 
-| Props 名          | 状態          | 説明                                                    |
-| :---------------- | :------------ | :------------------------------------------------------ |
-| `bindings`        | 🟢 **[PASS]** | `useLayerState` から取得し、そのまま渡す                |
-| `keyboardLayout`  | 🟢 **[PASS]** | state から計算し、そのまま渡す                          |
-| `layerActions`    | 🟢 **[PASS]** | `useLayerState` の関数群をオブジェクト化して渡す        |
-| `layerState`      | 🟢 **[PASS]** | `useLayerState` の状態をオブジェクト化して渡す          |
-| `layout`          | 🟢 **[PASS]** | state をそのまま渡す                                    |
-| `mappingActions`  | 🟢 **[PASS]** | `saveMapping`, `removeMapping` をオブジェクト化して渡す |
-| `remapActions`    | 🟢 **[PASS]** | `useRemapControl` の関数群をオブジェクト化して渡す      |
-| `selectedTrigger` | 🟢 **[PASS]** | state をそのまま渡す                                    |
-| `onLayoutToggle`  | 🟢 **[PASS]** | ハンドラ関数を渡す                                      |
-| `onTriggerChange` | 🟢 **[PASS]** | state setter を渡す                                     |
-| `setEditingKey`   | 🟢 **[PASS]** | state setter を渡す                                     |
+---
 
-### 3. KeyRemapSection -> Children
+## 3. 統合フロー特定 (Master Prop Flow Matrix)
 
-`KeyRemapSection` は受け取ったプロップスを振り分けます。
+### A. Layer Management Flow
 
-**To KeyboardGrid:**
-| Props 名 | 状態 | 説明 |
-| :--- | :--- | :--- |
-| `bindings` | 🟢 **[PASS]** | そのまま渡す |
-| `keyboardLayout` | 🟡 **[PART]** | QuickRemap で使用しつつ、子へ渡す |
-| `layout` | 🟡 **[PART]** | 表示に使用しつつ、子へ渡す |
-| `layerState` | 🟡 **[PART]** | `layerId` を QuickRemap で使用しつつ、子へ渡す |
-| `mappingActions` | 🟡 **[PART]** | `saveMapping` を QuickRemap で使用しつつ、子へ渡す |
-| `selectedTrigger` | 🟡 **[PART]** | QuickRemap で使用しつつ、子へ渡す |
-| `quickEditingKey` | 🆕 **[NEW]** | QuickRemap の状態として生成して渡す |
-| `onKeyClick` | 🆕 **[NEW]** | `setEditingKey` (🔴) 等を使ってラップした関数を渡す |
+`LayerState` と `LayerActions` の伝播状況です。
+`Editor` (KeyEditorForm) でグループが活用されていない(🧩)点が目立ちます。
 
-**To LayerTabs:**
-| Props 名 | 状態 | 説明 |
-| :--- | :--- | :--- |
-| `layerState` | 🟢 **[PASS]** | そのまま渡す |
-| `layerActions` | 🟢 **[PASS]** | そのまま渡す |
+| Prop / Object            | KeyRemapperPage | KeyRemapSection | LayerTabs | KeyboardGrid | KeyEditorForm | LayerStatusPanel |
+| :----------------------- | :-------------: | :-------------: | :-------: | :----------: | :-----------: | :--------------: |
+| **[Group] LayerState**   |      🆕📦       |       🎁        |   🔨🔥    |      🎁      |      ➖       |        ➖        |
+| `layerId`                |        ∈        |        ∈        |    🔥     |      ∈       |     🧩🔥      |        ➖        |
+| `layers`                 |        ∈        |        ∈        |    🔥     |      ∈       |     🧩🔥      |        ➖        |
+| **[Group] LayerActions** |      🆕📦       |       🎁        |   🔨🔥    |      ➖      |      ➖       |        ➖        |
+| `setLayerId`             |        ∈        |        ∈        |    🔥     |      ➖      |      ➖       |        ➖        |
+| `addLayer`               |        ∈        |        ∈        |    🔥     |      ➖      |      ➖       |        ➖        |
+| `removeLayer`            |        ∈        |        ∈        |    🔥     |      ➖      |      ➖       |        ➖        |
+| `reorderLayers`          |        ∈        |        ∈        |    🔥     |      ➖      |      ➖       |        ➖        |
+| **[Derived] Layer Data** |                 |                 |           |              |               |                  |
+| `availableLayers`        |       🆕        |       ➖        |    ➖     |      ➖      |      ➖       |       🧩🔥       |
+| `stack`                  |       🆕        |       ➖        |    ➖     |      ➖      |      ➖       |       🧩🔥       |
 
-**To Other Children (TriggerTabs, LayoutToggle, etc):**
-| Props 名 | 状態 | 説明 |
-| :--- | :--- | :--- |
-| `remapActions` | 🔴 **[USE]** | クイックモード切替時に使用。子には渡さない |
-| `onTriggerChange` | 🟢 **[PASS]** | TriggerTabs へそのまま渡す |
-| `onLayoutToggle` | 🟢 **[PASS]** | LayoutToggle へそのまま渡す |
+### B. Mapping & Remap Actions
 
-### 4. KeyboardGrid -> KeyButton (Inside Mapped)
+リマップ操作 (`MappingActions`) と リマップ機能制御 (`RemapActions`) です。
 
-`KeyboardGrid` は `Mapped` コンポーネント内でリストレンダリングを行います。
+| Prop / Object              | KeyRemapperPage | KeyRemapSection | LayerTabs | KeyboardGrid | KeyEditorForm | LayerStatusPanel |
+| :------------------------- | :-------------: | :-------------: | :-------: | :----------: | :-----------: | :--------------: |
+| **[Group] MappingActions** |      🆕📦       |       🎁        |    ➖     |      🎁      |      ➖       |        ➖        |
+| `saveMapping`              |        ∈        |        ∈        |    ➖     |      ∈       |     🧩🔥      |        ➖        |
+| `removeMapping`            |        ∈        |        ∈        |    ➖     |      ∈       |     🧩🔥      |        ➖        |
+| **[Group] RemapActions**   |      🆕📦       |       🎁        |    ➖     |      ➖      |      ➖       |        ➖        |
+| `disableRemap`             |        ∈        |       🔥        |    ➖     |      ➖      |      ➖       |        ➖        |
+| `enableRemap`              |        ∈        |       🔥        |    ➖     |      ➖      |      ➖       |        ➖        |
+| `toggleActive`             |        ∈        |       ➖        |    ➖     |      ➖      |      ➖       |        ➖        |
 
-| Props 名          | 状態          | 説明                                                            |
-| :---------------- | :------------ | :-------------------------------------------------------------- |
-| `bindings`        | 🔄 **[PROC]** | キー ID（`baseVk`）に対応する配列のみを抽出して渡す             |
-| `layout`          | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `layerId`         | 🔄 **[PROC]** | `layerState` (🔴) から `layerId` を取り出して渡す               |
-| `selectedTrigger` | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `isQuickEditing`  | 🔄 **[PROC]** | `quickEditingKey` と `baseVk` を比較して boolean に変換して渡す |
-| `keyDef`          | 🆕 **[NEW]**  | `Mapped` からの算出値を渡す                                     |
-| `onClick`         | 🟢 **[PASS]** | `onKeyClick` を名前を変えて渡す                                 |
-| `onRemove`        | 🆕 **[NEW]**  | `mappingActions` (🔴) を使ったラップ関数を渡す                  |
+### C. UI Configuration (Individual)
 
-### 5. KeyRemapperPage -> KeyEditorForm
+グループ化されず、バケツリレー(🚌)されている UI 状態です。
+コンテキスト化(`Context`)の有力な候補です。
 
-モーダルとして表示される設定フォームです。
+| Prop Name           | KeyRemapperPage | KeyRemapSection | TriggerTabs | KeyboardGrid | KeyButton | KeyEditorForm |
+| :------------------ | :-------------: | :-------------: | :---------: | :----------: | :-------: | :-----------: |
+| `layout`            |       🆕        |       🚌        |     ➖      |     🚌🔥     |    🔥     |     🧩🔥      |
+| `keyboardLayout`    |       🆕        |       🚌        |     ➖      |     🚌🔥     |    ➖     |     🧩🔥      |
+| `bindings`          |       🆕        |       🚌        |     ➖      |     🚌🔥     |    🔥     |      ➖       |
+| `selectedTrigger`   |       🆕        |      🚌🔥       |     🔥      |     🚌🔥     |    🔥     |     🧩🔥      |
+| `settingsModalOpen` |      🆕🔥       |       ➖        |     ➖      |      ➖      |    ➖     |      ➖       |
+| `editingKey`        |      🆕🔥       |       🚌        |     ➖      |      ➖      |    ➖     |      🔥       |
 
-| Props 名                 | 状態          | 説明                                                            |
-| :----------------------- | :------------ | :-------------------------------------------------------------- |
-| `targetVk`               | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `layerId`                | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `layout`                 | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `layers`                 | 🟢 **[PASS]** | そのまま渡す                                                    |
-| `defaultHoldThresholdMs` | 🟢 **[PASS]** | GlobalSettings から取得しそのまま渡す                           |
-| `defaultTapIntervalMs`   | 🟢 **[PASS]** | GlobalSettings から取得しそのまま渡す                           |
-| `trigger`                | 🔴 **[USE]**  | 初期状態としてのみ使用（内部で `selectedTrigger` state を持つ） |
+### D. Event Handlers (Individual)
 
-### 6. KeyEditorForm -> ActionSettingsSection
+個別に渡されているイベントハンドラです。
 
-`KeyEditorForm` は多くのステートを生成し、それを `ActionSettingsSection` に委譲します。
+| Prop Name         | KeyRemapperPage | KeyRemapSection | TriggerTabs | KeyboardGrid | LayoutToggle |
+| :---------------- | :-------------: | :-------------: | :---------: | :----------: | :----------: |
+| `onLayoutToggle`  |       🆕        |       🚌        |     ➖      |      ➖      |      🔥      |
+| `onTriggerChange` |       🆕        |       🚌        |     🔥      |      ➖      |      ➖      |
+| `setEditingKey`   |       🆕        |       🚌        |     ➖      |      🔥      |      ➖      |
 
-| Props 名              | 状態          | 説明                                                              |
-| :-------------------- | :------------ | :---------------------------------------------------------------- |
-| `layers`              | 🟢 **[PASS]** | そのまま渡す                                                      |
-| `layout`              | 🟢 **[PASS]** | そのまま渡す                                                      |
-| `targetVk`            | 🟢 **[PASS]** | そのまま渡す                                                      |
-| `actionType`          | 🆕 **[NEW]**  | `useBindingConfig` の state                                       |
-| `selectedTrigger`     | 🆕 **[NEW]**  | `useState` の state                                               |
-| `selectedLayerId`     | 🆕 **[NEW]**  | `useBindingConfig` の state                                       |
-| `newTargetKeys`       | 🆕 **[NEW]**  | `useKeyEditorActions` の state                                    |
-| `mouseState`          | 🆕 **[NEW]**  | マウス関連 state (`x`, `y`, `button` 等) をオブジェクト化して渡す |
-| `mouseHandlers`       | 🆕 **[NEW]**  | マウス操作ハンドラをオブジェクト化して渡す                        |
-| `keyEditorState`      | 🆕 **[NEW]**  | キー入力関連 state (`showVkInput` 等) をオブジェクト化して渡す    |
-| `keyEditorActions`    | 🆕 **[NEW]**  | キー編集アクション (`addHoldKey` 等) をオブジェクト化して渡す     |
-| `keyEditorUIHandlers` | 🆕 **[NEW]**  | キー UI 操作ハンドラをオブジェクト化して渡す                      |
+### E. App Header Control
 
-### 7. ActionSettingsSection -> Children
+アプリケーションヘッダーに渡される状態と操作です。
 
-`ActionSettingsSection` はさらに役割ごとのコンポーネントへ委譲します。
+| Prop Name            | KeyRemapperPage | AppHeader |
+| :------------------- | :-------------: | :-------: |
+| `isActive`           |       🆕        |    🔥     |
+| `simpleMode`         |       🆕        |    🔥     |
+| `onOpenSettings`     |       🆕        |    🔥     |
+| `onToggleActive`     |       🆕        |    🔥     |
+| `onToggleSimpleMode` |       🆕        |    🔥     |
 
-**To RemapKeySection:**
-Pass-through されるプロップス群です。
+### F. Pressed Keys Panel
 
-- `keyEditorActions`: 🟢 **[PASS]**
-- `keyEditorState`: 🟢 **[PASS]**
-- `keyEditorUIHandlers`: 🟢 **[PASS]**
-- `layout`: 🟢 **[PASS]**
-- `newTargetKeys`: 🟢 **[PASS]**
-- `targetVk`: 🟢 **[PASS]**
+押下中のキーを表示するパネルです。
 
-**To LayerSelector:**
+| Prop Name | KeyRemapperPage | PressedKeysPanel |
+| :-------- | :-------------: | :--------------: |
+| `layout`  |       🆕        |        🔥        |
 
-- `layers`: 🟢 **[PASS]**
-- `selectedLayerId`: 🟢 **[PASS]**
-- `onLayerChange`: 🟢 **[PASS]** (`setSelectedLayerId` をリネーム)
+### G. Global Settings
 
-**To MousePositionInput:**
+グローバル設定の管理です。
 
-- `mouseHandlers`: 🟢 **[PASS]**
-- `mousePosition`: 🔄 **[PROC]** `mouseState` から抽出
-- `captureState`: 🔄 **[PROC]** `mouseState` から抽出
-- `setFocused`: 🔄 **[PROC]** `keyEditorUIHandlers` から抽出
+| Prop Name                | KeyRemapperPage | GlobalSettingsForm | KeyEditorForm |
+| :----------------------- | :-------------: | :----------------: | :-----------: |
+| `globalSettings`         |       🆕        |         🔥         |      ➖       |
+| `updateGlobalSettings`   |       🆕        |         🔥         |      ➖       |
+| `defaultHoldThresholdMs` |       ➖        |         ➖         |     🧩🔥      |
+| `defaultTapIntervalMs`   |       ➖        |         ➖         |     🧩🔥      |
 
-### 8. KeyEditorForm -> TimingSettingsSection
+### H. Log Management
 
-タイミング設定に関する部分です。
+キーイベントログの管理です。
 
-| Props 名                 | 状態          | 説明             |
-| :----------------------- | :------------ | :--------------- |
-| `defaultHoldThresholdMs` | 🟢 **[PASS]** | そのまま渡す     |
-| `defaultTapIntervalMs`   | 🟢 **[PASS]** | そのまま渡す     |
-| `holdThresholdMs`        | 🆕 **[NEW]**  | Form 内の state  |
-| `tapIntervalMs`          | 🆕 **[NEW]**  | Form 内の state  |
-| `setHoldThresholdMs`     | 🆕 **[NEW]**  | Form 内の setter |
-| `setTapIntervalMs`       | 🆕 **[NEW]**  | Form 内の setter |
-| `setIsInputFocused`      | 🆕 **[NEW]**  | Form 内の setter |
+| Prop Name | KeyRemapperPage | LogList |
+| :-------- | :-------------: | :-----: |
+| `logs`    |       🆕        |   🔥    |
 
-## Mermaid Diagram (詳細版)
+### I. Key Editor Modal
 
-```mermaid
-graph TD
-    classDef pass fill:#d4edda,stroke:#28a745,color:black
-    classDef part fill:#fff3cd,stroke:#ffc107,color:black
-    classDef use fill:#f8d7da,stroke:#dc3545,color:black
-    classDef new fill:#cce5ff,stroke:#004085,color:black
+キーエディターモーダルに渡される props です。
 
-    Page[KeyRemapperPage]
-    Section[KeyRemapSection]
-    Grid[KeyboardGrid]
-    KeyBtn[KeyButton]
+| Prop Name  | KeyRemapperPage | KeyEditorForm |
+| :--------- | :-------------: | :-----------: |
+| `onClose`  |       🆕        |      🔥       |
+| `onRemove` |       🆕        |      🔥       |
+| `onSave`   |       🆕        |      🔥       |
+| `targetVk` |       🆕        |      🔥       |
 
-    Form[KeyEditorForm]
-    ActSet[ActionSettingsSection]
-    TimeSet[TimingSettingsSection]
+---
 
-    %% Root to Section
-    Page -- "bindings [PASS]<br>layout [PASS]<br>layerState [PASS]" --> Section
+## 4. 改善提案 (Refactoring Plan)
 
-    %% Section Process
-    Section -. "layerState [PART]<br>layout [PART]<br>remapActions [USE]" .- Section
+このマトリクスに基づく具体的な改善アクションです。
 
-    %% Section to Grid
-    Section -- "bindings [PASS]<br>layerState [PART]<br>mappingActions [PART]<br>quickEditingKey [NEW]" --> Grid
+### 優先度高: Grouping の適用
 
-    %% Grid Process
-    Grid -. "bindings [PROC]<br>isQuickEditing [PROC]<br>layerId [PROC]" .- Grid
+- **Fix-005: `KeyEditorForm` への `LayerState` 適用 (Cancelled)**
+  - 理由: 末端コンポーネントでの使用であり、Grouping のメリットがないため取りやめ。
+- **Fix-006: `LayerStatusPanel` への `LayerStackControl` 適用**
+  - 現状: `stack`, `onRefresh`, `onResetToLayer` を個別に受け取っている (🧩)。
+  - 修正: `LayerStackControl` 型を Page で定義済みなので、これをそのまま渡す形にする。
 
-    %% Grid to Button
-    Grid -- "mappedBinding [NEW]<br>onClick [PASS]<br>onRemove [NEW]" --> KeyBtn
+### 検討事項: Context の導入
 
-    %% Root to Form
-    Page -- "layers [PASS]<br>defaultTiming [PASS]<br>trigger [USE]" --> Form
+`KeyRemapSection` での `🚌` (Bus/Drill) が多いため、以下の状態は Context API での提供を検討する価値があります。
 
-    %% Form to ActionSettings
-    Form -- "mouseState [NEW]<br>keyEditorState [NEW]<br>layers [PASS]" --> ActSet
-
-    %% ActionSettings to RemapKeySection
-    ActSet -- "keyEditorState [PASS]<br>layout [PASS]" --> RemapKeySection
-
-    %% Form to TimingSettings
-    Form -- "defaultTiming [PASS]<br>holdThresholdMs [NEW]" --> TimeSet
-
-    %% Legend
-    subgraph Legend
-        L1(🟢 Pass-through):::pass
-        L2(🟡 Partial Use):::part
-        L3(🔴 Consumed):::use
-        L4(🆕 New/Processed):::new
-    end
-```
+- `LayoutContext`: `layout`, `keyboardLayout`, `onLayoutToggle`
+- `RemapContext`: `bindings`, `selectedTrigger`

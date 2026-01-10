@@ -48,17 +48,17 @@ interface KeyRemapSectionProps {
 }
 
 export function KeyRemapSection({
-  layerState,
-  layerActions,
-  mappingActions,
-  remapActions,
-  layout,
-  keyboardLayout,
-  bindings,
-  selectedTrigger,
-  onLayoutToggle,
-  onTriggerChange,
-  setEditingKey,
+  layerState, // 🎁 → 🎁/🔨🔥 (A. Layer Management Flow)
+  layerActions, // 🎁 → 🎁/🔨🔥 (A. Layer Management Flow)
+  mappingActions, // 🎁 → 🎁/🔥 (B. Mapping & Remap Actions)
+  remapActions, // 🎁 → 🔥 (B. Mapping & Remap Actions)
+  layout, // 🚌 → 🚌 (C. UI Configuration)
+  keyboardLayout, // 🚌 → 🚌 (C. UI Configuration)
+  bindings, // 🚌 → 🚌 (C. UI Configuration)
+  selectedTrigger, // 🚌🔥 → 🚌🔥 (C. UI Configuration)
+  onLayoutToggle, // 🚌 → 🔥 (D. Event Handlers)
+  onTriggerChange, // 🚌 → 🔥 (D. Event Handlers)
+  setEditingKey, // 🚌 → 🔥 (D. Event Handlers)
 }: KeyRemapSectionProps) {
   const [isQuickEditMode, setIsQuickEditMode] = useState(false);
 
@@ -101,11 +101,12 @@ export function KeyRemapSection({
   return (
     <VStack as="section" gap={4}>
       <HStack className="justify-between gap-4">
-        <LayerTabs layerActions={layerActions} layerState={layerState} />
+        <LayerTabs layerActions={layerActions} layerState={layerState} />{" "}
+        {/* 🎁 → 🔨🔥 (A. Layer Management Flow) */}
         <HStack className="gap-2">
           <TriggerTabs
-            onTriggerChange={onTriggerChange}
-            selectedTrigger={selectedTrigger}
+            onTriggerChange={onTriggerChange} // 🚌 → 🔥 (D. Event Handlers)
+            selectedTrigger={selectedTrigger} // 🚌🔥 → 🔥 (C. UI Configuration)
             size="compact"
           />
           <Button
@@ -124,14 +125,14 @@ export function KeyRemapSection({
 
       <div className="overflow-x-auto">
         <KeyboardGrid
-          bindings={bindings}
-          keyboardLayout={keyboardLayout}
-          layerState={layerState}
-          layout={layout}
-          mappingActions={mappingActions}
+          bindings={bindings} // 🚌 → 🚌🔥 (C. UI Configuration)
+          keyboardLayout={keyboardLayout} // 🚌 → 🚌🔥 (C. UI Configuration)
+          layerState={layerState} // 🎁 → 🎁 (A. Layer Management Flow)
+          layout={layout} // 🚌 → 🚌🔥 (C. UI Configuration)
+          mappingActions={mappingActions} // 🎁 → 🎁 (B. Mapping & Remap Actions)
           onKeyClick={onKeyClick}
           quickEditingKey={quickEditingKey}
-          selectedTrigger={selectedTrigger}
+          selectedTrigger={selectedTrigger} // 🚌🔥 → 🚌🔥 (C. UI Configuration)
         />
       </div>
       <div className="flex items-center justify-between">
@@ -139,7 +140,8 @@ export function KeyRemapSection({
           <Icon className="opacity-70" icon={Settings} size="md" />
           Keyboard Layout: {layout}
         </h2>
-        <LayoutToggle currentLayout={layout} onToggle={onLayoutToggle} />
+        <LayoutToggle currentLayout={layout} onToggle={onLayoutToggle} />{" "}
+        {/* 🚌 → 🔥 (D. Event Handlers) */}
       </div>
     </VStack>
   );

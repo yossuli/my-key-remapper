@@ -26,10 +26,10 @@ interface LayerStatusPanelProps {
  * - 各レイヤーへの強制リセットボタン
  */
 export function LayerStatusPanel({
-  stack,
-  availableLayers,
-  onRefresh,
-  onResetToLayer,
+  stack, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
+  availableLayers, // 🆕 → 🧩🔥 (A. Layer Management Flow - Derived)
+  onRefresh, // 🆕 → 🧩🔥 (LayerStackControl)
+  onResetToLayer, // 🆕 → 🧩🔥 (LayerStackControl)
 }: LayerStatusPanelProps) {
   const handleResetClick = useCallback(
     (layerId: string) => () => {

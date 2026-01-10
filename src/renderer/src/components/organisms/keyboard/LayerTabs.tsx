@@ -19,6 +19,9 @@ interface LayerTabsProps {
 }
 
 export function LayerTabs({ layerState, layerActions }: LayerTabsProps) {
+  // 🎁 → 🔨🔥 (A. Layer Management Flow)
+  // layerState から layers, layerId を使用
+  // layerActions から setLayerId, addLayer, removeLayer, reorderLayers を使用
   const [isAdding, setIsAdding] = useState(false);
   const [newLayerName, setNewLayerName] = useState("");
 

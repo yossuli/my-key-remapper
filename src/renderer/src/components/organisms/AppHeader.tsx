@@ -16,11 +16,11 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  isActive,
-  onToggleActive,
-  simpleMode,
-  onToggleSimpleMode,
-  onOpenSettings,
+  isActive, // 🆕 → 🔥 (E. App Header Control)
+  onToggleActive, // 🆕 → 🔥 (E. App Header Control)
+  simpleMode, // 🆕 → 🔥 (E. App Header Control)
+  onToggleSimpleMode, // 🆕 → 🔥 (E. App Header Control)
+  onOpenSettings, // 🆕 → 🔥 (E. App Header Control)
 }: AppHeaderProps) {
   const icon = simpleMode ? Eye : EyeOff;
   return (

@@ -26,12 +26,12 @@ interface KeyboardGridProps {
 }
 
 export function KeyboardGrid({
-  bindings,
-  keyboardLayout,
-  layout,
-  layerState,
-  mappingActions,
-  selectedTrigger,
+  bindings, // 🚌 → 🚌🔥 (C. UI Configuration)
+  keyboardLayout, // 🚌 → 🚌🔥 (C. UI Configuration)
+  layout, // 🚌 → 🚌🔥 (C. UI Configuration)
+  layerState, // 🎁 → 🔥 (A. Layer Management Flow)
+  mappingActions, // 🎁 → 🔥 (B. Mapping & Remap Actions)
+  selectedTrigger, // 🚌🔥 → 🚌🔥 (C. UI Configuration)
   quickEditingKey,
   onKeyClick,
 }: KeyboardGridProps) {
@@ -52,14 +52,14 @@ export function KeyboardGrid({
             const baseVk = Array.isArray(keyDef.vk) ? keyDef.vk[0] : keyDef.vk;
             return (
               <KeyButton
-                bindings={bindings[baseVk]}
+                bindings={bindings[baseVk]} // 🚌🔥 → 🔥 (C. UI Configuration)
                 isQuickEditing={quickEditingKey === baseVk}
                 keyDef={keyDef}
-                layerId={layerState.layerId}
-                layout={layout}
+                layerId={layerState.layerId} // ∈ → 🔥 (A. Layer Management Flow)
+                layout={layout} // 🚌🔥 → 🔥 (C. UI Configuration)
                 onClick={onKeyClick}
-                onRemove={() => mappingActions.removeMapping(baseVk)}
-                selectedTrigger={selectedTrigger}
+                onRemove={() => mappingActions.removeMapping(baseVk)} // ∈ → 🔥 (B. Mapping & Remap Actions)
+                selectedTrigger={selectedTrigger} // 🚌🔥 → 🔥 (C. UI Configuration)
               />
             );
           }}

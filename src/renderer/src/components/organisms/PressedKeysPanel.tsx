@@ -22,7 +22,7 @@ interface PressedKeysPanelProps {
  * - 一括リリースボタン
  */
 export function PressedKeysPanel({
-  layout,
+  layout, // 🆕 → 🔥 (F. Pressed Keys Panel)
   autoRefreshMs = 1000,
 }: PressedKeysPanelProps) {
   const getPressedKeys = useGetPressedKeys();

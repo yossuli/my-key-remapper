@@ -93,15 +93,15 @@ interface KeyEditorFormProps {
 }
 
 export function KeyEditorForm({
-  targetVk,
-  layerId,
-  layout,
-  layers,
-  defaultHoldThresholdMs,
-  defaultTapIntervalMs,
-  onSave,
-  onRemove,
-  onClose,
+  targetVk, // 🆕 → 🔥 (I. Key Editor Modal)
+  layerId, // ∈ → 🧩🔥 (A. Layer Management Flow)
+  layout, // 🆕 → 🧩🔥 (C. UI Configuration)
+  layers, // ∈ → 🧩🔥 (A. Layer Management Flow)
+  defaultHoldThresholdMs, // ➖ → 🧩🔥 (G. Global Settings)
+  defaultTapIntervalMs, // ➖ → 🧩🔥 (G. Global Settings)
+  onSave, // 🆕 → 🔥 (I. Key Editor Modal)
+  onRemove, // 🆕 → 🔥 (I. Key Editor Modal)
+  onClose, // 🆕 → 🔥 (I. Key Editor Modal)
 }: KeyEditorFormProps) {
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
   const [isInputFocused, setIsInputFocused] = useState(false);

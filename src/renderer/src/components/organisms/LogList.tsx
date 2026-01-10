@@ -10,6 +10,7 @@ interface LogListProps {
 }
 
 export function LogList({ logs }: LogListProps) {
+  // 🆕 → 🔥 (H. Log Management)
   return (
     <section className="flex h-fit flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
       <div className="flex items-center gap-2 border-b bg-muted/30 p-4">

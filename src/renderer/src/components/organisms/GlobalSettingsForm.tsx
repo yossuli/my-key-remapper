@@ -15,8 +15,8 @@ interface GlobalSettingsFormProps {
  * グローバル設定を編集するフォーム
  */
 export function GlobalSettingsForm({
-  globalSettings,
-  onSave,
+  globalSettings, // 🆕 → 🔥 (G. Global Settings)
+  onSave, // 🆕 → 🔥 (G. Global Settings)
 }: GlobalSettingsFormProps) {
   const [holdThresholdMs, setHoldThresholdMs] = useState(
     globalSettings.defaultHoldThresholdMs

@@ -81,6 +81,7 @@ src/
 - **[Workflow-004] Leaf コンポーネントでの Props 分割代入 (Late Destructuring)**: Props Grouping ルールに基づき、末端コンポーネントで Props を分割代入し、可読性と依存関係の明示性を向上させる手順。 (`.agent/workflows/004.md`)
 - **[Workflow-005] Props Grouping の適用判断**: Props をグループ化すべきか個別に渡すべきかの判断基準と、適切な適用方法。 (`.agent/workflows/005.md`)
 - **[Workflow-006] スプレッド分割代入後の型定義の再配置**: スプレッド演算子によるグループ化を適用した後、親で不要になった型定義を共有ディレクトリへ移動する手順。 (`.agent/workflows/006.md`)
+- **[Workflow-007] カリー化による Prop 渡しの簡略化**: 特定の引数を固定した関数を返す（カリー化）ことで、Props に渡す際の記述を簡潔にする手順。 (`.agent/workflows/007.md`)
 
 ## ドメイン知識・注意点 (Domain Knowledge)
 

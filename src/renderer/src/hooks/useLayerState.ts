@@ -24,6 +24,7 @@ export interface UseLayerStateReturn {
     from: number
   ) => (trigger: TriggerType, action: Action, timing?: number | null) => void;
   removeMapping: (from: number, trigger: TriggerType) => void;
+  updateLayer: (layerId: string, updates: Partial<Layer>) => void; // 追加
   reloadLayers: () => Promise<void>; // 追加
 }
 
@@ -140,6 +141,18 @@ export function useLayerState(): UseLayerStateReturn {
   const currentBindings =
     sortedLayers.find((l) => l.id === layerId)?.bindings ?? {};
 
+  // レイヤー更新
+  const updateLayer = useCallback(
+    (targetLayerId: string, updates: Partial<Layer>) => {
+      send("update-layer", { layerId: targetLayerId, updates });
+      // 楽観的更新
+      setLayers((prev) =>
+        prev.map((l) => (l.id === targetLayerId ? { ...l, ...updates } : l))
+      );
+    },
+    [send]
+  );
+
   return {
     layers: sortedLayers,
     layerOrder,
@@ -148,6 +161,7 @@ export function useLayerState(): UseLayerStateReturn {
     currentBindings,
     addLayer,
     removeLayer,
+    updateLayer,
     reorderLayers,
     saveMapping,
     removeMapping,

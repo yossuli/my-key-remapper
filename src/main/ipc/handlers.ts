@@ -41,6 +41,11 @@ export function setupIPCHandlers(): void {
     remapRules.removeLayer(layerId);
   });
 
+  // レイヤー更新
+  ipcMain.on("update-layer", (_event, { layerId, updates }) => {
+    remapRules.updateLayer(layerId, updates);
+  });
+
   // リマップ有効/無効設定
   ipcMain.on("set-remap-enabled", (_event, { enabled }) => {
     setRemapEnabled(enabled);

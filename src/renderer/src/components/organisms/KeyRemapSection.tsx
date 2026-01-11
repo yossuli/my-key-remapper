@@ -132,7 +132,7 @@ export function KeyRemapSection({
           layerActions={layerActions}
           layerState={layerState}
           layout={layout}
-        />{" "}
+        />
         {/* 🎁 → 🔨🔥 (A. Layer Management Flow) */}
         <HStack className="gap-2">
           <TriggerTabs

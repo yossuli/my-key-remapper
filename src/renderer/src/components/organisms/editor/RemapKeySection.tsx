@@ -44,9 +44,9 @@ export function RemapKeySection({
         <KeyDisplay layout={layout} vkCode={targetVk} />
         <Icon icon={ArrowRight} size="md" />
         <KeyRemapList
+          initialKeys={keys}
           isCaptureEnabled={true}
           isRemoveDisabled={() => keys.length === 1}
-          keys={keys}
           layout={layout}
           onClear={reset}
           onInputFocusChange={keyEditorUIHandlers.setIsInputFocused}

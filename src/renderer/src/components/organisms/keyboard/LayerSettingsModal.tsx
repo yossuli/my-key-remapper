@@ -113,11 +113,12 @@ export function LayerSettingsModal({
               </AccordionTrigger>
               <AccordionContent>
                 <KeyRemapList
-                  emptyLabel="キーを長押して追加"
+                  initialKeys={layer.activeKeys ?? []}
                   isCaptureEnabled={isActiveKeysOpen}
-                  keys={layer.activeKeys || []}
                   layout={layout}
+                  onClear={() => handleUpdateActiveKeys([])}
                   onKeysChange={handleUpdateActiveKeys}
+                  requireExplicitAdd
                 />
               </AccordionContent>
             </AccordionItem>

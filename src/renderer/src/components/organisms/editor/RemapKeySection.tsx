@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
 import type { LayoutType } from "@/types";
+import { VK } from "../../../../../shared/constants/vk";
 import type { TriggerType } from "../../../../../shared/types/remapConfig";
 import type { KeyEditorUIHandlers, RepeatSettings } from "./KeyEditorForm";
 
@@ -44,6 +45,7 @@ export function RemapKeySection({
         <KeyDisplay layout={layout} vkCode={targetVk} />
         <Icon icon={ArrowRight} size="md" />
         <KeyRemapList
+          ignoredKeys={[VK.ENTER, VK.ESCAPE, VK.TAB]}
           initialKeys={keys}
           isCaptureEnabled={true}
           isRemoveDisabled={() => keys.length === 1}

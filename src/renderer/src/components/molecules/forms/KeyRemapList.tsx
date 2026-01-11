@@ -19,6 +19,7 @@ export interface KeyRemapListProps {
   isRemoveDisabled?: (vkCode: number) => boolean;
   className?: string;
   requireExplicitAdd?: boolean;
+  ignoredKeys?: number[];
 }
 
 /**
@@ -34,6 +35,7 @@ export function KeyRemapList({
   isRemoveDisabled,
   className,
   requireExplicitAdd = false,
+  ignoredKeys = [],
 }: KeyRemapListProps) {
   const [showVkInput, setShowVkInput] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -51,7 +53,12 @@ export function KeyRemapList({
   // グローバルイベントの監視も内包（数値入力中は停止する）
   useKeyEventInput({
     enabled: isCaptureActive && !isInputFocused,
-    onKeyDown,
+    onKeyDown: (vkCode) => {
+      if (ignoredKeys.includes(vkCode)) {
+        return;
+      }
+      onKeyDown(vkCode);
+    },
     onKeyUp,
   });
 

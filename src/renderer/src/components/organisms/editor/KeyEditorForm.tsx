@@ -10,10 +10,13 @@ import { ActionSettingsSection } from "@/components/organisms/editor/ActionSetti
 import { TimingSettingsSection } from "@/components/organisms/editor/TimingSettingsSection";
 import { HStack, VStack } from "@/components/template/Flex";
 import { useBindingConfig } from "@/hooks/useBindingConfig";
+import { useEventHandler } from "@/hooks/useEventHandler";
 import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
+import { useKeyHoldAction } from "@/hooks/useKeyHoldAction";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import type { LayoutType } from "@/types";
+import { VK } from "../../../../../shared/constants/vk";
 import type {
   Action,
   Layer,
@@ -26,6 +29,8 @@ const COUNTDOWN_INTERVAL_MS = 1000;
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 const DEFAULT_HOLD_THRESHOLD_MS = 200;
 const DEFAULT_TAP_INTERVAL_MS = 300;
+const DEFAULT_REPEAT_DELAY_MS = 500;
+const DEFAULT_REPEAT_INTERVAL_MS = 100;
 
 // キーエディタUI制御関連
 export interface KeyEditorUIHandlers {
@@ -148,9 +153,11 @@ export function KeyEditorForm({
 
   // リピート設定
   const [repeat, setRepeat] = useState(false);
-  const [repeatDelayMs, setRepeatDelayMs] = useState<number | undefined>(500);
+  const [repeatDelayMs, setRepeatDelayMs] = useState<number | undefined>(
+    DEFAULT_REPEAT_DELAY_MS
+  );
   const [repeatIntervalMs, setRepeatIntervalMs] = useState<number | undefined>(
-    100
+    DEFAULT_REPEAT_INTERVAL_MS
   );
 
   // 読み込んだタイミング設定で初期化
@@ -229,6 +236,35 @@ export function KeyEditorForm({
 
   const { handleSave, handleRemove, canSave } = keyEditorActions;
 
+  // --- Enter長押し保存の復元 ---
+  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
+    targetKey: VK.ENTER,
+    holdMs: 800,
+  });
+
+  useEventHandler(
+    [
+      {
+        type: "keydown",
+        handler: (e) => {
+          handleHoldKeyDown(e.keyCode, {
+            onHold: handleSave,
+          });
+        },
+      },
+      {
+        type: "keyup",
+        handler: (e) => {
+          handleHoldKeyUp(e.keyCode, {
+            onHold: handleSave,
+          });
+        },
+      },
+    ],
+    [handleHoldKeyDown, handleHoldKeyUp, handleSave],
+    { enabled: !_isInputFocused }
+  );
+
   const handleTriggerChange = (newTrigger: TriggerType) => {
     setSelectedTrigger(newTrigger);
     loadBindingForTrigger(newTrigger);
@@ -286,10 +322,19 @@ export function KeyEditorForm({
     if (loadedCursorReturnDelayMs !== undefined) {
       setCursorReturnDelayMs(loadedCursorReturnDelayMs);
     }
+  }, [
+    loadedMouseX,
+    loadedMouseY,
+    loadedMouseButton,
+    loadedClickCount,
+    loadedCursorReturnDelayMs,
+  ]);
+
+  useEffect(() => {
     if (loadedRepeat !== undefined) {
       setRepeat(loadedRepeat);
     } else {
-      setRepeat(false); // Default logic if needed, but creating initial state handles this
+      setRepeat(false);
     }
     if (loadedRepeatDelayMs !== undefined) {
       setRepeatDelayMs(loadedRepeatDelayMs);
@@ -297,16 +342,7 @@ export function KeyEditorForm({
     if (loadedRepeatIntervalMs !== undefined) {
       setRepeatIntervalMs(loadedRepeatIntervalMs);
     }
-  }, [
-    loadedMouseX,
-    loadedMouseY,
-    loadedMouseButton,
-    loadedClickCount,
-    loadedCursorReturnDelayMs,
-    loadedRepeat,
-    loadedRepeatDelayMs,
-    loadedRepeatIntervalMs,
-  ]);
+  }, [loadedRepeat, loadedRepeatDelayMs, loadedRepeatIntervalMs]);
 
   const keyEditorUIHandlers: KeyEditorUIHandlers = {
     setIsInputFocused,

@@ -13,6 +13,9 @@ export interface BindingState {
   mouseButton?: "left" | "right" | "middle";
   clickCount?: number;
   cursorReturnDelayMs?: number;
+  repeat?: boolean;
+  repeatDelayMs?: number;
+  repeatIntervalMs?: number;
 }
 
 /**
@@ -21,7 +24,13 @@ export interface BindingState {
 export function actionToBindingState(action: Action): Partial<BindingState> {
   return objectiveDiscriminantSwitch(
     {
-      remap: (act) => ({ actionType: "remap", targetKeys: act.keys }),
+      remap: (act) => ({
+        actionType: "remap",
+        targetKeys: act.keys,
+        repeat: act.repeat,
+        repeatDelayMs: act.repeatDelayMs,
+        repeatIntervalMs: act.repeatIntervalMs,
+      }),
       layerToggle: (act) => ({
         actionType: "layerToggle",
         selectedLayerId: act.layerId,
@@ -64,5 +73,8 @@ export function createInitialBindingState(
     targetKeys: [],
     selectedLayerId: defaultLayerId,
     hasExistingBinding: false,
+    repeat: false,
+    repeatDelayMs: 500,
+    repeatIntervalMs: 100,
   };
 }

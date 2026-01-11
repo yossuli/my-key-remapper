@@ -15,10 +15,22 @@ const momentaryLayerKeys = new Map<number, string>();
 /** 現在押しっぱなし（Hold）状態のリマップキー（物理vkCode -> 送信中vkCode配列） */
 const activeRemapKeys = new Map<number, number[]>();
 
+/** リピート実行中のタイマー（物理vkCode -> Timeout/Interval ID） */
+const repeatingTimers = new Map<number, NodeJS.Timeout>();
+
 /**
  * リマップアクション（ホールド）を停止
  */
 export function stopRemapAction(vkCode: number): void {
+  // リピートタイマーがあれば停止
+  if (repeatingTimers.has(vkCode)) {
+    debugLog("actionExecutor.ts-stopRemapAction-clear-repeat", { vkCode });
+    const timerId = repeatingTimers.get(vkCode);
+    clearTimeout(timerId); // IntervalでもclearTimeoutで止まるが、厳密にはclearInterval推奨の場合もある
+    clearInterval(timerId); // Node.js等ではどちらでも動くことが多いが念のため
+    repeatingTimers.delete(vkCode);
+  }
+
   const activeKeys = activeRemapKeys.get(vkCode);
   if (activeKeys) {
     debugLog("actionExecutor.ts-stopRemapAction-releasing", {
@@ -304,9 +316,44 @@ export function executeAction(vkCode: number, trigger: TriggerType) {
     };
 
     if (trigger === "hold") {
-      // 押しっぱなしにする
-      pressKeys();
-      activeRemapKeys.set(vkCode, [...action.keys]);
+      if (action.repeat) {
+        debugLog("actionExecutor.ts-executeAction-remap-repeat-start", {
+          vkCode,
+          delay: action.repeatDelayMs,
+          interval: action.repeatIntervalMs,
+        });
+
+        // 初回実行 (Tap)
+        pressKeys();
+        releaseKeys();
+
+        const delay = action.repeatDelayMs ?? 500;
+        const interval = action.repeatIntervalMs ?? 100;
+
+        // 遅延後にリピート開始
+        const timeoutId = setTimeout(() => {
+          // 最初のinterval待ちを防ぐために即実行してもいいが、
+          // 標準的なrepeatは delay -> (interval -> action) ...
+          // ここでは delay -> action -> interval -> action ... としてみる
+          debugLog("actionExecutor.ts-executeAction-remap-repeat-tick-initial");
+          pressKeys();
+          releaseKeys();
+
+          const intervalId = setInterval(() => {
+            debugLog("actionExecutor.ts-executeAction-remap-repeat-tick");
+            pressKeys();
+            releaseKeys();
+          }, interval);
+
+          repeatingTimers.set(vkCode, intervalId);
+        }, delay);
+
+        repeatingTimers.set(vkCode, timeoutId);
+      } else {
+        // 押しっぱなしにする (デフォルト)
+        pressKeys();
+        activeRemapKeys.set(vkCode, [...action.keys]);
+      }
     } else {
       // tap / doubleTap は1回だけ叩く
       pressKeys();

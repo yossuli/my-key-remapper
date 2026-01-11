@@ -17,11 +17,10 @@ import type {
   TriggerType,
 } from "../../../../../shared/types/remapConfig";
 import type {
-  KeyEditorUIActions,
   KeyEditorUIHandlers,
-  KeyEditorUIState,
   MouseHandlers,
   MouseState,
+  RepeatSettings,
 } from "./KeyEditorForm";
 
 const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
@@ -33,13 +32,15 @@ interface ActionSettingsSectionProps {
   layers: Layer[];
   layout: LayoutType;
   targetVk: number;
-  newTargetKeys: number[];
 
   // Grouped state & handlers
   mouseState: MouseState;
   mouseHandlers: MouseHandlers;
   keyEditorActions: UseKeyEditorActionsReturn;
   keyEditorUIHandlers: KeyEditorUIHandlers;
+
+  // Repeat Settings
+  repeatSettings: RepeatSettings;
 
   // Additional handlers
   setActionType: (type: ActionType) => void;
@@ -71,9 +72,9 @@ export function ActionSettingsSection({
       <ActionSelectorContent value="remap">
         <RemapKeySection
           keyEditorActions={keyEditorActions}
-          keyEditorState={keyEditorState}
           keyEditorUIHandlers={keyEditorUIHandlers}
           layout={layout}
+          repeatSettings={repeatSettings}
           selectedTrigger={selectedTrigger}
           setIsInputFocused={keyEditorUIHandlers.setIsInputFocused}
           targetVk={targetVk}

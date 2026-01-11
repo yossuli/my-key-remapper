@@ -46,6 +46,12 @@ export interface MacroStep {
 export interface RemapAction {
   type: "remap";
   keys: number[];
+  /** 長押し中のリピート有効化 */
+  repeat?: boolean;
+  /** リピート開始までの遅延(ms) */
+  repeatDelayMs?: number;
+  /** リピート間隔(ms) */
+  repeatIntervalMs?: number;
 }
 
 /**

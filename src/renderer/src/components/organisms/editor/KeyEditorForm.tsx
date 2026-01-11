@@ -1,8 +1,8 @@
-﻿import { ArrowRight } from "lucide-react";
+﻿// TODO - 一旦コミットしてる節がある
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
-import { Mapped } from "@/components/control/Mapped";
 import { Show } from "@/components/control/Show";
 import { KeyDisplay } from "@/components/molecules/display/KeyDisplay";
 import { TriggerTabs } from "@/components/molecules/forms/TriggerTabs";
@@ -12,14 +12,12 @@ import { HStack, VStack } from "@/components/template/Flex";
 import { useBindingConfig } from "@/hooks/useBindingConfig";
 import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
-import { useKeyEventInput } from "@/hooks/useKeyEventInput";
-import { useKeyHoldAction } from "@/hooks/useKeyHoldAction";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import type { LayoutType } from "@/types";
-import { VK } from "../../../../../shared/constants/vk";
 import type {
   Action,
   Layer,
+  RemapAction,
   TriggerType,
 } from "../../../../../shared/types/remapConfig";
 
@@ -29,25 +27,12 @@ const DEFAULT_CURSOR_RETURN_DELAY_MS = 1000;
 const DEFAULT_HOLD_THRESHOLD_MS = 200;
 const DEFAULT_TAP_INTERVAL_MS = 300;
 
-// キーエディタ操作関連
-export type KeyEditorUIActions = Pick<
-  ReturnType<typeof useKeyEditorActions>,
-  "addHoldKey" | "removeKey" | "resetState" | "handleSave" | "handleRemove"
-> &
-  Pick<ReturnType<typeof useBindingConfig>, "clearTargetKeys">;
-
 // キーエディタUI制御関連
 export interface KeyEditorUIHandlers {
-  setShowVkInput: (show: boolean) => void;
-  setVkInputValue: (value: string) => void;
   setIsInputFocused: (focused: boolean) => void;
 }
 
-// キーエディタUI状態関連
-export interface KeyEditorUIState {
-  showVkInput: boolean;
-  vkInputValue: string;
-}
+// キーエディタUI状態 (現在は空)
 
 // マウス座標の状態
 export interface MousePosition {
@@ -76,6 +61,12 @@ export interface MouseState extends MousePosition, MouseCaptureState {
   button: "left" | "right" | "middle";
   clickCount: number;
   cursorReturnDelayMs: number;
+}
+
+// リピート設定のグループ
+export interface RepeatSettings
+  extends Pick<RemapAction, "repeat" | "repeatDelayMs" | "repeatIntervalMs"> {
+  onRepeatChange: (repeat: boolean, delay?: number, interval?: number) => void;
 }
 
 interface KeyEditorFormProps {
@@ -133,6 +124,9 @@ export function KeyEditorForm({
       mouseButton: loadedMouseButton,
       clickCount: loadedClickCount,
       cursorReturnDelayMs: loadedCursorReturnDelayMs,
+      repeat: loadedRepeat,
+      repeatDelayMs: loadedRepeatDelayMs,
+      repeatIntervalMs: loadedRepeatIntervalMs,
     },
     existingTiming,
     setSelectedLayerId,
@@ -150,6 +144,13 @@ export function KeyEditorForm({
   );
   const [tapIntervalMs, setTapIntervalMs] = useState<number | undefined>(
     existingTiming?.tapIntervalMs
+  );
+
+  // リピート設定
+  const [repeat, setRepeat] = useState(false);
+  const [repeatDelayMs, setRepeatDelayMs] = useState<number | undefined>(500);
+  const [repeatIntervalMs, setRepeatIntervalMs] = useState<number | undefined>(
+    100
   );
 
   // 読み込んだタイミング設定で初期化
@@ -191,8 +192,15 @@ export function KeyEditorForm({
           ...action,
           delayMs: cursorReturnDelayMs,
         });
+      } else if (action.type === "remap") {
+        handleSaveWithTiming(t, {
+          ...action,
+          repeat,
+          repeatDelayMs,
+          repeatIntervalMs,
+        });
       } else {
-        handleSaveWithTiming(trigger, action);
+        handleSaveWithTiming(t, action);
       }
     },
     [
@@ -202,6 +210,9 @@ export function KeyEditorForm({
       mouseButton,
       clickCount,
       cursorReturnDelayMs,
+      repeat,
+      repeatDelayMs,
+      repeatIntervalMs,
     ]
   );
 
@@ -221,6 +232,20 @@ export function KeyEditorForm({
   const handleTriggerChange = (newTrigger: TriggerType) => {
     setSelectedTrigger(newTrigger);
     loadBindingForTrigger(newTrigger);
+  };
+
+  const handleRepeatChange = (
+    newRepeat: boolean,
+    newDelay?: number,
+    newInterval?: number
+  ) => {
+    setRepeat(newRepeat);
+    if (newDelay !== undefined) {
+      setRepeatDelayMs(newDelay);
+    }
+    if (newInterval !== undefined) {
+      setRepeatIntervalMs(newInterval);
+    }
   };
 
   const { getCursorPosition } = useMousePosition();
@@ -245,7 +270,6 @@ export function KeyEditorForm({
     }, COUNTDOWN_INTERVAL_MS);
   };
 
-  // 読み込んだ設定で初期化
   useEffect(() => {
     if (loadedMouseX !== undefined) {
       setMouseX(loadedMouseX);
@@ -262,26 +286,29 @@ export function KeyEditorForm({
     if (loadedCursorReturnDelayMs !== undefined) {
       setCursorReturnDelayMs(loadedCursorReturnDelayMs);
     }
+    if (loadedRepeat !== undefined) {
+      setRepeat(loadedRepeat);
+    } else {
+      setRepeat(false); // Default logic if needed, but creating initial state handles this
+    }
+    if (loadedRepeatDelayMs !== undefined) {
+      setRepeatDelayMs(loadedRepeatDelayMs);
+    }
+    if (loadedRepeatIntervalMs !== undefined) {
+      setRepeatIntervalMs(loadedRepeatIntervalMs);
+    }
   }, [
     loadedMouseX,
     loadedMouseY,
     loadedMouseButton,
     loadedClickCount,
     loadedCursorReturnDelayMs,
+    loadedRepeat,
+    loadedRepeatDelayMs,
+    loadedRepeatIntervalMs,
   ]);
 
-  const keyEditorActions: KeyEditorUIActions = {
-    addHoldKey,
-    removeKey,
-    resetState,
-    clearTargetKeys,
-    handleSave,
-    handleRemove,
-  };
-
   const keyEditorUIHandlers: KeyEditorUIHandlers = {
-    setShowVkInput,
-    setVkInputValue,
     setIsInputFocused,
   };
 
@@ -304,14 +331,15 @@ export function KeyEditorForm({
     cursorReturnDelayMs,
   };
 
-  const keyEditorState: KeyEditorUIState = {
-    showVkInput,
-    vkInputValue,
+  const repeatSettings: RepeatSettings = {
+    repeat,
+    repeatDelayMs,
+    repeatIntervalMs,
+    onRepeatChange: handleRepeatChange,
   };
 
   return (
     <VStack className="px-6" gap={4}>
-      {/* 現在のマッピング表示 */}
       <div className="flex items-center justify-center gap-4 font-bold text-2xl">
         <KeyDisplay layout={layout} vkCode={targetVk} />
         <Show condition={targetKeys.length > 0}>
@@ -341,7 +369,7 @@ export function KeyEditorForm({
           layout={layout}
           mouseHandlers={mouseHandlers}
           mouseState={mouseState}
-          newTargetKeys={newTargetKeys}
+          repeatSettings={repeatSettings}
           selectedLayerId={selectedLayerId}
           selectedTrigger={selectedTrigger}
           setActionType={setActionType}

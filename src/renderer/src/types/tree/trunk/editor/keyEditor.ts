@@ -7,15 +7,7 @@ import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
 /** キーエディタのアクション */
 export type KeyEditorActions = Pick<
   UseKeyEditorActionsReturn,
-  | "canSave"
-  | "holds"
-  | "newTargetKeys"
-  | "addHoldKey"
-  | "removeHoldKey"
-  | "removeKey"
-  | "resetState"
-  | "handleSave"
-  | "handleRemove"
+  "canSave" | "handleSave" | "handleRemove" | "keys" | "setKeys" | "reset"
 >;
 
 /** キーの追加/削除のみ */

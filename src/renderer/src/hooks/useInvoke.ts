@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useIpc } from "@/hooks/useIpc";
 import type { Layer } from "../../../shared/types/remapConfig";
+
 /**
  * IPC invokeの型安全ラッパー
  * 特定のチャンネルに対する呼び出しを提供
@@ -12,13 +13,11 @@ export function useInvoke<TResult, TArgs extends unknown[] = []>(
 ): (...args: TArgs) => Promise<TResult | undefined> {
   const { invoke } = useIpc();
 
-  const invokeChannel = useCallback(
+  return useCallback(
     async (...args: TArgs): Promise<TResult | undefined> =>
       invoke<TResult>(channel, ...args),
     [invoke, channel]
   );
-
-  return invokeChannel;
 }
 
 /**

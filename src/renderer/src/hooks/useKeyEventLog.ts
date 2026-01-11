@@ -14,6 +14,8 @@ const MAX_LOG_ENTRIES = 19;
 export interface UseKeyEventLogReturn {
   logs: LogEntry[];
   clearLogs: () => void;
+  isPaused: boolean;
+  setIsPaused: (paused: boolean) => void;
 }
 
 /**
@@ -21,18 +23,26 @@ export interface UseKeyEventLogReturn {
  */
 export function useKeyEventLog(): UseKeyEventLogReturn {
   const [logs, setLogs] = useState<UseKeyEventLogReturn["logs"]>([]);
+  const [isPaused, setIsPaused] = useState(false);
 
-  const handleKeyEvent = useCallback((...args: unknown[]) => {
-    const data = args[1] as { vkCode: number };
-    setLogs((prev) => [
-      {
-        id: crypto.randomUUID(),
-        vkCode: data.vkCode,
-        time: new Date().toLocaleTimeString(),
-      },
-      ...prev.slice(0, MAX_LOG_ENTRIES),
-    ]);
-  }, []);
+  const handleKeyEvent = useCallback(
+    (...args: unknown[]) => {
+      if (isPaused) {
+        return; // 一時停止中はスキップ
+      }
+
+      const data = args[1] as { vkCode: number };
+      setLogs((prev) => [
+        {
+          id: crypto.randomUUID(),
+          vkCode: data.vkCode,
+          time: new Date().toLocaleTimeString(),
+        },
+        ...prev.slice(0, MAX_LOG_ENTRIES),
+      ]);
+    },
+    [isPaused]
+  );
 
   useIpcEvent("key-event", handleKeyEvent);
 
@@ -40,7 +50,7 @@ export function useKeyEventLog(): UseKeyEventLogReturn {
     setLogs([]);
   }, []);
 
-  return { logs, clearLogs };
+  return { logs, clearLogs, isPaused, setIsPaused };
 }
 
 export type { LogEntry };

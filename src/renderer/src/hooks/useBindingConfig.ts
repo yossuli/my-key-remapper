@@ -57,12 +57,9 @@ export function useBindingConfig({
       return;
     }
     const layer = allLayers.layers.find((l) => l.id === layerId);
-    const bindings = layer?.bindings[targetVk];
-
-    return bindings;
+    return layer?.bindings[targetVk];
   }, [getMappings, layerId, targetVk]);
 
-  // トリガー変更時にバインディングとタイミングを読み込み
   // トリガー変更時にバインディングとタイミングを読み込み
   const loadBindingForTrigger = useCallback<
     UseBindingConfigReturn["loadBindingForTrigger"]
@@ -72,7 +69,6 @@ export function useBindingConfig({
       setState(createInitialBindingState(defaultLayerId));
 
       const bindings = await fetchBindings();
-
       const binding = bindings?.find((b) => b.trigger === trigger);
 
       if (binding) {
@@ -83,22 +79,26 @@ export function useBindingConfig({
           hasExistingBinding: true,
         }));
       }
+
       // タイミング設定を更新
+      const holdTiming = bindings?.find((b) => b.trigger === "hold")?.timingMs;
+      const doubleTapTiming = bindings?.find(
+        (b) => b.trigger === "doubleTap"
+      )?.timingMs;
+
       setExistingTiming({
-        holdThresholdMs: bindings?.find((b) => b.trigger === "hold")?.timingMs,
-        tapIntervalMs: bindings?.find((b) => b.trigger === "doubleTap")
-          ?.timingMs,
+        holdThresholdMs: holdTiming,
+        tapIntervalMs: doubleTapTiming,
       });
     },
     [fetchBindings, defaultLayerId]
   );
 
-  // 初期読み込み
+  // 初期読み込み（マウント時に一度だけ実行）
   useEffect(() => {
     loadBindingForTrigger("tap");
   }, [loadBindingForTrigger]);
 
-  // 状態セッター
   // 状態セッター
   const setActionType = useCallback<UseBindingConfigReturn["setActionType"]>(
     (actionType) => {

@@ -94,23 +94,22 @@ interface KeyEditorFormProps {
 }
 
 export function KeyEditorForm({
-  targetVk, // 🆕 → 🔥 (I. Key Editor Modal)
-  layerId, // ∈ → 🧩🔥 (A. Layer Management Flow)
-  layout, // 🆕 → 🧩🔥 (C. UI Configuration)
-  layers, // ∈ → 🧩🔥 (A. Layer Management Flow)
-  onSave, // 🆕 → 🔥 (I. Key Editor Modal)
-  onRemove, // 🆕 → 🔥 (I. Key Editor Modal)
-  onClose, // 🆕 → 🔥 (I. Key Editor Modal)
+  targetVk,
+  layerId,
+  layout,
+  layers,
+  trigger,
+  onSave,
+  onRemove,
+  onClose,
 }: KeyEditorFormProps) {
   const { globalSettings } = useGlobalSettings();
   const defaultHoldThresholdMs =
     globalSettings?.defaultHoldThresholdMs ?? DEFAULT_HOLD_THRESHOLD_MS;
   const defaultTapIntervalMs =
     globalSettings?.defaultTapIntervalMs ?? DEFAULT_TAP_INTERVAL_MS;
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>("tap");
-  const [isInputFocused, setIsInputFocused] = useState(false);
-  const [showVkInput, setShowVkInput] = useState(false);
-  const [vkInputValue, setVkInputValue] = useState("");
+  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(trigger);
+  const [_isInputFocused, setIsInputFocused] = useState(false);
   const [mouseX, setMouseX] = useState<number>(0);
   const [mouseY, setMouseY] = useState<number>(0);
   const [mouseButton, setMouseButton] = useState<"left" | "right" | "middle">(
@@ -164,23 +163,23 @@ export function KeyEditorForm({
   }, [existingTiming]);
 
   const handleSaveWithTiming = useCallback(
-    (trigger: TriggerType, action: Action) => {
+    (t: TriggerType, action: Action) => {
       const timingObj: Record<string, number | undefined> = {
         hold: holdThresholdMs,
         doubleTap: tapIntervalMs,
       };
-      const timing = timingObj[trigger];
-      onSave(trigger, action, timing);
+      const timing = timingObj[t];
+      onSave(t, action, timing);
     },
     [holdThresholdMs, tapIntervalMs, onSave]
   );
 
   const handleSaveAction = useCallback(
-    (trigger: TriggerType, action: Action) => {
+    (t: TriggerType, action: Action) => {
       if (action.type === "mouseMove") {
-        handleSaveWithTiming(trigger, { ...action, x: mouseX, y: mouseY });
+        handleSaveWithTiming(t, { ...action, x: mouseX, y: mouseY });
       } else if (action.type === "mouseClick") {
-        handleSaveWithTiming(trigger, {
+        handleSaveWithTiming(t, {
           ...action,
           x: mouseX,
           y: mouseY,
@@ -188,7 +187,7 @@ export function KeyEditorForm({
           clickCount,
         });
       } else if (action.type === "cursorReturn") {
-        handleSaveWithTiming(trigger, {
+        handleSaveWithTiming(t, {
           ...action,
           delayMs: cursorReturnDelayMs,
         });
@@ -206,16 +205,7 @@ export function KeyEditorForm({
     ]
   );
 
-  const {
-    newTargetKeys,
-    canSave,
-    addHoldKey,
-    removeHoldKey,
-    removeKey,
-    resetState,
-    handleSave,
-    handleRemove,
-  } = useKeyEditorActions({
+  const keyEditorActions = useKeyEditorActions({
     state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
     layerId,
     targetVk,
@@ -223,51 +213,10 @@ export function KeyEditorForm({
     onSave: handleSaveAction,
     onRemove,
     onClose,
+    onClearTargetKeys: clearTargetKeys,
   });
 
-  const { handleHoldKeyDown, handleHoldKeyUp } = useKeyHoldAction({
-    targetKey: VK.ENTER,
-  });
-
-  const onKeyDown = useCallback(
-    (e: number) => {
-      if (actionType !== "remap") {
-        return;
-      }
-
-      handleHoldKeyDown(e, {
-        onOtherKeyDown() {
-          addHoldKey(e);
-        },
-        onHold() {
-          handleSave();
-        },
-      });
-    },
-    [actionType, handleHoldKeyDown, handleSave, addHoldKey]
-  );
-
-  const onKeyUp = useCallback(
-    (e: number) => {
-      handleHoldKeyUp(e, {
-        onTap() {
-          if (!targetKeys.includes(VK.ENTER)) {
-            addHoldKey(e);
-          }
-        },
-        onOtherKeyUp() {
-          removeHoldKey(e);
-        },
-      });
-    },
-    [handleHoldKeyUp, targetKeys, addHoldKey, removeHoldKey]
-  );
-
-  useKeyEventInput({
-    enabled: !isInputFocused,
-    onKeyDown,
-    onKeyUp,
-  });
+  const { handleSave, handleRemove, canSave } = keyEditorActions;
 
   const handleTriggerChange = (newTrigger: TriggerType) => {
     setSelectedTrigger(newTrigger);
@@ -367,15 +316,17 @@ export function KeyEditorForm({
         <KeyDisplay layout={layout} vkCode={targetVk} />
         <Show condition={targetKeys.length > 0}>
           <Icon icon={ArrowRight} size="md" />
-          <Mapped value={targetKeys.map((vk) => ({ id: vk }))}>
-            {({ id: vk }) => (
-              <KeyDisplay layout={layout} variant="primary" vkCode={vk} />
-            )}
-          </Mapped>
+          {targetKeys.map((vk) => (
+            <KeyDisplay
+              key={vk}
+              layout={layout}
+              variant="primary"
+              vkCode={vk}
+            />
+          ))}
         </Show>
       </div>
 
-      {/* トリガーとアクション設定 */}
       <TriggerTabs
         gap={4}
         onTriggerChange={handleTriggerChange}
@@ -385,7 +336,6 @@ export function KeyEditorForm({
         <ActionSettingsSection
           actionType={actionType}
           keyEditorActions={keyEditorActions}
-          keyEditorState={keyEditorState}
           keyEditorUIHandlers={keyEditorUIHandlers}
           layers={layers}
           layout={layout}

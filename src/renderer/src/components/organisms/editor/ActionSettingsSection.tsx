@@ -8,6 +8,7 @@ import { MousePositionInput } from "@/components/molecules/forms/MousePositionIn
 import { TimingInput } from "@/components/molecules/forms/TimingInput";
 import { RemapKeySection } from "@/components/organisms/editor/RemapKeySection";
 import { VStack } from "@/components/template/Flex";
+import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
 import type { LayoutType } from "@/types";
 import { getLayerDescription } from "@/utils/getLayerDescription";
 import type {
@@ -37,8 +38,7 @@ interface ActionSettingsSectionProps {
   // Grouped state & handlers
   mouseState: MouseState;
   mouseHandlers: MouseHandlers;
-  keyEditorState: KeyEditorUIState;
-  keyEditorActions: KeyEditorUIActions;
+  keyEditorActions: UseKeyEditorActionsReturn;
   keyEditorUIHandlers: KeyEditorUIHandlers;
 
   // Additional handlers
@@ -47,20 +47,19 @@ interface ActionSettingsSectionProps {
 }
 
 export function ActionSettingsSection({
-  actionType, // KeyEditorForm から受け取り
-  selectedTrigger, // KeyEditorForm から受け取り
-  selectedLayerId, // KeyEditorForm から受け取り
-  layers, // KeyEditorForm から受け取り
-  layout, // KeyEditorForm から受け取り
-  targetVk, // KeyEditorForm から受け取り
-  newTargetKeys, // KeyEditorForm から受け取り
-  mouseState, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ MousePositionInput で使用
-  mouseHandlers, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ MousePositionInput で使用
-  keyEditorState, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection で使用
-  keyEditorActions, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection で使用
-  keyEditorUIHandlers, // 📦 KeyEditorForm でグループ化 → 🎁 → ∈ RemapKeySection/MousePositionInput で使用
-  setActionType, // KeyEditorForm から受け取り
-  setSelectedLayerId, // KeyEditorForm から受け取り
+  actionType,
+  selectedTrigger,
+  selectedLayerId,
+  layers,
+  layout,
+  targetVk,
+  mouseState,
+  mouseHandlers,
+  keyEditorActions,
+  keyEditorUIHandlers,
+  setActionType,
+  setSelectedLayerId,
+  repeatSettings,
 }: ActionSettingsSectionProps) {
   return (
     <ActionSelector
@@ -75,7 +74,8 @@ export function ActionSettingsSection({
           keyEditorState={keyEditorState}
           keyEditorUIHandlers={keyEditorUIHandlers}
           layout={layout}
-          newTargetKeys={newTargetKeys}
+          selectedTrigger={selectedTrigger}
+          setIsInputFocused={keyEditorUIHandlers.setIsInputFocused}
           targetVk={targetVk}
         />
       </ActionSelectorContent>

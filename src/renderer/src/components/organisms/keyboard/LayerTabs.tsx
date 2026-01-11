@@ -82,7 +82,7 @@ export function LayerTabs({
               <Reorder.Item as="div" key={id} value={id}>
                 <WithRemoveBadge onRemove={() => handleRemoveClick(id)}>
                   <ContextMenu>
-                    <ContextMenuTrigger asChild>
+                    <ContextMenuTrigger>
                       <TabsTrigger
                         className="data-[state=active]:bg-background"
                         value={id}

@@ -16,7 +16,8 @@
 
 1. `[RULE.md](.agent/RULE.md)`
 2. `[log_management.md](.agent/workflows/log_management.md)`
-3. `.agent/workflows/` ディレクトリ内の全ワークフロー
+3. `[seed_management.md](.agent/workflows/seed_management.md)`
+4. `.agent/workflows/` ディレクトリ内の全ワークフロー
 
 ## 2. 「行動」の定義
 
@@ -92,6 +93,7 @@
 
 - 本ドキュメントやワークフローのあり方、協業プロセスについての議論を、大きなタスクの完了時や定期的（例：週次）に行う。
 - 運用上の違和感や更なる効率化の余地を発見した場合、AI 側から積極的に改善提案を行う。
+- **知見の抽出**: 思考・判断・実行過程で「普遍的な知見」を発見した場合は、**ログではなく直ちにワーキングディレクトリの `seeds.md` へ記録してください。**
 
 ## まとめ（判断フロー）
 

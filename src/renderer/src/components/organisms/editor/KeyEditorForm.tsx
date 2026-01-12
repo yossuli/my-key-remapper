@@ -256,12 +256,17 @@ export function KeyEditorForm({
         type: "keyup",
         handler: (e) => {
           handleHoldKeyUp(e.keyCode, {
+            onTap: () => {
+              if (actionType === "remap") {
+                addTargetKey(VK.ENTER);
+              }
+            },
             onHold: handleSave,
           });
         },
       },
     ],
-    [handleHoldKeyDown, handleHoldKeyUp, handleSave],
+    [handleHoldKeyDown, handleHoldKeyUp, handleSave, actionType, addTargetKey],
     { enabled: !_isInputFocused }
   );
 

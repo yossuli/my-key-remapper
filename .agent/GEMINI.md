@@ -97,7 +97,9 @@ src/
 - **[Workflow-015] 設定項目の追加**: 設定追加時の変更漏れ（型、初期値、マイグレーション等）を防ぐ手順。 (`.agent/workflows/015.md`)
 - **[Workflow-018] Strict Linter/Type Fix**: 型エラーや Lint エラー修正時の厳格なルール（biome-ignore 禁止など）。 (`.agent/workflows/018.md`)
 - **[Workflow-020] 議論から計画への昇格**: 複雑な提案をチャットから構造化された計画書作成へ切り替える手順。 (`.agent/workflows/020.md`)
-- **[Workflow-023] レビュー用ドラフト作成**: 特殊ディレクトリへのファイル作成時にドラフトを経由する手順。 (`.agent/workflows/023.md`)
+- **[Workflow-023] レビュー用ドラフト作成・編集**: 特殊ディレクトリへのファイル作成・編集時にドラフトを経由する手順。 (`.agent/workflows/023.md`)
+- **[Workflow-024] 意図の補完と具体化**: ユーザーの断片的な指示（0->1）から完全な手順（1->10）を構築・確認するフロー。 (`.agent/workflows/024.md`)
+- **[Workflow-025] 編集反映失敗時の強制リカバリ**: 変更が見当たらない場合に、ユーザー指示で全文上書きを行う手順。 (`.agent/workflows/025.md`)
 
 ## ドメイン知識・注意点 (Domain Knowledge)
 

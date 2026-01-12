@@ -1,8 +1,8 @@
+import { SWITCH_LAYOUT_RULE } from "@shared/constants";
 import { Keyboard } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import type { LayoutType } from "@/types";
-import { SWITCH_LAYOUT_RULE } from "../../../../../shared/constants";
 
 interface LayoutToggleProps {
   currentLayout: LayoutType;

@@ -6,7 +6,7 @@ import type {
   MacroDef,
   RemapConfig,
   TriggerType,
-} from "../../shared/types/remapConfig";
+} from "@shared/types/remapConfig";
 import { configStorage } from "../storage/configStorage";
 import { layerState } from "./layerState";
 

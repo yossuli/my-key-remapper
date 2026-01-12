@@ -1,5 +1,6 @@
 // バインディング設定読み込みフック
 
+import type { ActionType, TriggerType } from "@shared/types/remapConfig";
 import { useCallback, useEffect, useState } from "react";
 import { useGetMappings } from "@/hooks/useInvoke";
 import {
@@ -7,10 +8,6 @@ import {
   type BindingState,
   createInitialBindingState,
 } from "@/utils/bindingState";
-import type {
-  ActionType,
-  TriggerType,
-} from "../../../shared/types/remapConfig";
 
 export interface UseBindingConfigProps {
   targetVk: number;

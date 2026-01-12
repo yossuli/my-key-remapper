@@ -1,12 +1,12 @@
 // クイック設定モード用カスタムフック
 // キーボードグリッドでキークリック→キー押下で即座にリマップを適用
 
+import type { Action, TriggerType } from "@shared/types/remapConfig";
 import { useCallback, useEffect, useState } from "react";
 import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
 import { useKeyEventInput } from "@/hooks/useKeyEventInput";
 import type { KeyboardLayout } from "@/types";
 import { getNextKeyVk } from "@/utils/getNextKeyVk";
-import type { Action, TriggerType } from "../../../shared/types/remapConfig";
 import type { UseLayerStateReturn } from "./useLayerState";
 
 export interface UseQuickRemapOptions {

@@ -1,4 +1,4 @@
-import type { TriggerType } from "../../shared/types/remapConfig";
+import type { TriggerType } from "@shared/types/remapConfig";
 import { debugLog } from "../utils/debugLogger";
 
 /**

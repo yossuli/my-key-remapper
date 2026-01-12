@@ -1,3 +1,4 @@
+import type { ActionType, Layer, TriggerType } from "@shared/types/remapConfig";
 import { ToggleButton } from "@/components/atoms/ToggleButton";
 import {
   ActionSelector,
@@ -11,11 +12,6 @@ import { VStack } from "@/components/template/Flex";
 import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
 import type { LayoutType } from "@/types";
 import { getLayerDescription } from "@/utils/getLayerDescription";
-import type {
-  ActionType,
-  Layer,
-  TriggerType,
-} from "../../../../../shared/types/remapConfig";
 import type {
   KeyEditorUIHandlers,
   MouseHandlers,

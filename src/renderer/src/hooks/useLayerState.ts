@@ -1,13 +1,9 @@
 // レイヤー状態とマッピング管理のカスタムフック
 
+import type { Action, Layer, TriggerType } from "@shared/types/remapConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useIpc } from "@/hooks/useIpc";
 import { remove, upsert } from "@/utils/handleMapping";
-import type {
-  Action,
-  Layer,
-  TriggerType,
-} from "../../../shared/types/remapConfig";
 
 const REFRESH_DELAY_MS = 100;
 

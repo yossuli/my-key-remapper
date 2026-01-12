@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
 import {
   DEFAULT_REMAP_CONFIG,
   type GlobalSettings,
-} from "../../../shared/types/remapConfig";
+} from "@shared/types/remapConfig";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * グローバル設定を管理するカスタムフック

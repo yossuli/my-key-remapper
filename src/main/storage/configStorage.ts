@@ -1,10 +1,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { app } from "electron";
 import {
   DEFAULT_REMAP_CONFIG,
   type RemapConfig,
-} from "../../shared/types/remapConfig";
+} from "@shared/types/remapConfig";
+import { app } from "electron";
 
 /**
  * 設定の読み書きを担当するクラス

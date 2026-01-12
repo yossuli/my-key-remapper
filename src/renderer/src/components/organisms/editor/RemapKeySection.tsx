@@ -1,3 +1,5 @@
+import { VK } from "@shared/constants/vk";
+import type { TriggerType } from "@shared/types/remapConfig";
 import { ArrowRight } from "lucide-react";
 import { Icon } from "@/components/atoms/Icon";
 import { Show } from "@/components/control/Show";
@@ -9,8 +11,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
 import type { LayoutType } from "@/types";
-import { VK } from "../../../../../shared/constants/vk";
-import type { TriggerType } from "../../../../../shared/types/remapConfig";
 import type { KeyEditorUIHandlers, RepeatSettings } from "./KeyEditorForm";
 
 interface RemapKeySectionProps {

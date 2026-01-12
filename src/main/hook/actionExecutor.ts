@@ -1,4 +1,8 @@
-﻿import type { KeyBinding, TriggerType } from "../../shared/types/remapConfig";
+import type {
+  Action,
+  KeyBinding,
+  TriggerType,
+} from "@shared/types/remapConfig";
 import { clickAt, getCursorPosition, moveMouse } from "../native/mouseSender";
 import { sendKey } from "../native/sender";
 import { remapRules } from "../state/rules";

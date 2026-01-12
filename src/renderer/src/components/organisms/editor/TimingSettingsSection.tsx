@@ -1,6 +1,6 @@
+import type { TriggerType } from "@shared/types/remapConfig";
 import { TimingInput } from "@/components/molecules/forms/TimingInput";
 import { TabsContent } from "@/components/ui/tabs";
-import type { TriggerType } from "../../../../../shared/types/remapConfig";
 
 interface TimingSettingsSectionProps {
   selectedTrigger: TriggerType;

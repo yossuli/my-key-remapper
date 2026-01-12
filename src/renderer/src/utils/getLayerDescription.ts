@@ -1,4 +1,4 @@
-import type { ActionType } from "../../../shared/types/remapConfig";
+import type { ActionType } from "@shared/types/remapConfig";
 
 export const getLayerDescription = (actionType: ActionType) => {
   if (actionType === "layerToggle") {

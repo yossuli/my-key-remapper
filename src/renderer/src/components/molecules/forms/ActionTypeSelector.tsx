@@ -1,9 +1,6 @@
+import type { ActionType, TriggerType } from "@shared/types/remapConfig";
 import { useMemo } from "react";
 import { Select } from "@/components/atoms/Select";
-import type {
-  ActionType,
-  TriggerType,
-} from "../../../../../shared/types/remapConfig";
 
 const ACTION_TYPE_OPTIONS = [
   { id: "remap", value: "remap", label: "キーリマップ" },

@@ -1,3 +1,4 @@
+import { MAX_VK_CODE, MIN_VK_CODE } from "@shared/constants/vk";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
@@ -9,7 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MAX_VK_CODE, MIN_VK_CODE } from "../../../../../shared/constants/vk";
 
 interface VkDirectInputProps {
   onAddKey: (vk: number) => void;

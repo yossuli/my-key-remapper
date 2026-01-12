@@ -1,11 +1,8 @@
+import type { ActionType, TriggerType } from "@shared/types/remapConfig";
 import type { JSX, ReactNode } from "react";
 import { createContext, useContext } from "react";
 import { ActionTypeSelector } from "@/components/molecules/forms/ActionTypeSelector";
 import { VStack } from "@/components/template/Flex";
-import type {
-  ActionType,
-  TriggerType,
-} from "../../../../../shared/types/remapConfig";
 
 interface ActionSelectorContextValue {
   actionType: ActionType;

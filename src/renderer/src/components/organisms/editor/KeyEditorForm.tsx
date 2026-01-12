@@ -1,4 +1,10 @@
-﻿// TODO - 一旦コミットしてる節がある
+﻿import { VK } from "@shared/constants/vk";
+import type {
+  Action,
+  Layer,
+  RemapAction,
+  TriggerType,
+} from "@shared/types/remapConfig";
 import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/atoms/Button";
@@ -16,13 +22,6 @@ import { useKeyEditorActions } from "@/hooks/useKeyEditorAction";
 import { useKeyHoldAction } from "@/hooks/useKeyHoldAction";
 import { useMousePosition } from "@/hooks/useMousePosition";
 import type { LayoutType } from "@/types";
-import { VK } from "../../../../../shared/constants/vk";
-import type {
-  Action,
-  Layer,
-  RemapAction,
-  TriggerType,
-} from "../../../../../shared/types/remapConfig";
 
 const MOUSE_CAPTURE_COUNTDOWN_START = 3;
 const COUNTDOWN_INTERVAL_MS = 1000;
@@ -36,8 +35,6 @@ const DEFAULT_REPEAT_INTERVAL_MS = 100;
 export interface KeyEditorUIHandlers {
   setIsInputFocused: (focused: boolean) => void;
 }
-
-// キーエディタUI状態 (現在は空)
 
 // マウス座標の状態
 export interface MousePosition {

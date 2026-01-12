@@ -1,3 +1,4 @@
+import type { Layer } from "@shared/types/remapConfig";
 import { useEffect, useState } from "react";
 import { KeyRemapList } from "@/components/molecules/forms/KeyRemapList";
 import { VStack } from "@/components/template/Flex";
@@ -9,7 +10,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { LayoutType } from "@/types";
-import type { Layer } from "../../../../../shared/types/remapConfig";
 
 interface LayerSettingsModalProps {
   layerId: string | null;

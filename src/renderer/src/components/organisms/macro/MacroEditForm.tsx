@@ -7,6 +7,7 @@ import { SequenceEditor } from "@/components/organisms/editor/SequenceEditor";
 import { HStack, VStack } from "@/components/template/Flex";
 import { ModalLayout } from "@/components/template/ModalLayout";
 import { useLayerState } from "@/hooks/useLayerState";
+import { useRemapControl } from "@/hooks/useRemapControl";
 import { ActionStepEditor } from "./ActionStepEditor";
 import type { IdentifiedAction } from "./types";
 import { toAction, toIdentifiedAction } from "./utils";
@@ -29,16 +30,19 @@ export function MacroEditForm({
   );
   const [macroId] = useState(initialMacro?.id ?? crypto.randomUUID());
   const { layers } = useLayerState();
+  const { disableRemap, enableRemap } = useRemapControl();
 
   // アクション編集用のステート
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddStart = () => {
+    disableRemap();
     setIsAdding(true);
   };
 
   const handleEditStart = (index: number) => {
+    disableRemap();
     setEditingIndex(index);
   };
 
@@ -63,6 +67,7 @@ export function MacroEditForm({
   };
 
   const handleCloseModal = () => {
+    enableRemap();
     setIsAdding(false);
     setEditingIndex(null);
   };

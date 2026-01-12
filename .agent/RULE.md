@@ -104,6 +104,7 @@ src/
 - **[Workflow-025] 編集反映失敗時の強制リカバリ**: 変更が見当たらない場合に、ユーザー指示で全文上書きを行う手順。 (`.agent/workflows/025.md`)
 - **[Workflow-026] データと設定の分離 (Data/Config Split)**: 設定（Config）とユーザーデータ（Data）の保存先と管理戦略を明確に分離するアーキテクチャルール。 (`.agent/workflows/026.md`)
 - **[Workflow-027] ディスクリミネーテッド・ユニオンの分岐処理 (Objective Switch)**: タグ付き共用体の分岐に、網羅性チェックを保証する専用ユーティリティを使用する手順。 (`.agent/workflows/027.md`)
+- **[Fix-029] Table 廃止・Grid 推奨**: テーブルタグを廃止し、Subgrid を活用した CSS Grid レイアウトを使用する (.agent/workflows/029.md)
 
 ## ドメイン知識・注意点 (Domain Knowledge)
 

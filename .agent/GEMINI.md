@@ -94,6 +94,8 @@ src/
 - **[Workflow-011] 回帰バグ（Regression）の調査と修正計画策定**: 以前動作していた機能が破損した際、Git ログから原因コミットと Diff を特定し、実装計画に反映させる手順。 (`.agent/workflows/011.md`)
 - **[Workflow-012] アーキテクチャ図解（Mermaid）のベストプラクティスガイド**: アーキテクチャ図を Mermaid で記述する際のベストプラクティスとガイドライン。 (`.agent/workflows/012.md`)
 - **[Workflow-013] AI 応答の日本語化徹底チェックリスト**: AI 応答の日本語化を徹底するためのチェックリスト。 (`.agent/workflows/013.md`)
+- **[Workflow-015] 設定項目の追加**: 設定追加時の変更漏れ（型、初期値、マイグレーション等）を防ぐ手順。 (`.agent/workflows/015.md`)
+- **[Workflow-018] Strict Linter/Type Fix**: 型エラーや Lint エラー修正時の厳格なルール（biome-ignore 禁止など）。 (`.agent/workflows/018.md`)
 - **[Workflow-020] 議論から計画への昇格**: 複雑な提案をチャットから構造化された計画書作成へ切り替える手順。 (`.agent/workflows/020.md`)
 - **[Workflow-023] レビュー用ドラフト作成**: 特殊ディレクトリへのファイル作成時にドラフトを経由する手順。 (`.agent/workflows/023.md`)
 

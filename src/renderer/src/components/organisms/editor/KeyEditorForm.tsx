@@ -5,6 +5,7 @@ import type {
   RemapAction,
   TriggerType,
 } from "@shared/types/remapConfig";
+import { objectiveDiscriminantPartialSwitch } from "@shared/utils/objectiveSwitch";
 import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/atoms/Button";
@@ -30,6 +31,7 @@ const DEFAULT_HOLD_THRESHOLD_MS = 200;
 const DEFAULT_TAP_INTERVAL_MS = 300;
 const DEFAULT_REPEAT_DELAY_MS = 500;
 const DEFAULT_REPEAT_INTERVAL_MS = 100;
+const DEFAULT_DELAY_MS = 500;
 
 // キーエディタUI制御関連
 export interface KeyEditorUIHandlers {
@@ -84,6 +86,7 @@ interface KeyEditorFormProps {
   ) => void;
   onRemove: (trigger: TriggerType) => void;
   onClose: () => void;
+  onOpenMacros: () => void;
 }
 
 export function KeyEditorForm({
@@ -95,6 +98,7 @@ export function KeyEditorForm({
   onSave,
   onRemove,
   onClose,
+  onOpenMacros,
 }: KeyEditorFormProps) {
   const { globalSettings } = useGlobalSettings();
   const defaultHoldThresholdMs =
@@ -114,32 +118,24 @@ export function KeyEditorForm({
   const [cursorReturnDelayMs, setCursorReturnDelayMs] = useState<number>(
     DEFAULT_CURSOR_RETURN_DELAY_MS
   );
+  const [macroId, setMacroId] = useState<string>("");
+  const [delayActionMs, setDelayActionMs] = useState<number>(DEFAULT_DELAY_MS);
 
   const {
-    state: {
-      actionType,
-      selectedLayerId,
-      targetKeys,
-      hasExistingBinding,
-      mouseX: loadedMouseX,
-      mouseY: loadedMouseY,
-      mouseButton: loadedMouseButton,
-      clickCount: loadedClickCount,
-      cursorReturnDelayMs: loadedCursorReturnDelayMs,
-      repeat: loadedRepeat,
-      repeatDelayMs: loadedRepeatDelayMs,
-      repeatIntervalMs: loadedRepeatIntervalMs,
-    },
+    state,
     existingTiming,
     setSelectedLayerId,
     loadBindingForTrigger,
     clearTargetKeys,
     setActionType,
+    addTargetKey,
   } = useBindingConfig({
     targetVk,
     layerId,
     defaultLayerId: layers[0]?.id || "",
   });
+
+  const { actionType, selectedLayerId, targetKeys, hasExistingBinding } = state;
 
   const [holdThresholdMs, setHoldThresholdMs] = useState<number | undefined>(
     existingTiming?.holdThresholdMs
@@ -181,31 +177,41 @@ export function KeyEditorForm({
 
   const handleSaveAction = useCallback(
     (t: TriggerType, action: Action) => {
-      if (action.type === "mouseMove") {
-        handleSaveWithTiming(t, { ...action, x: mouseX, y: mouseY });
-      } else if (action.type === "mouseClick") {
-        handleSaveWithTiming(t, {
-          ...action,
-          x: mouseX,
-          y: mouseY,
-          button: mouseButton,
-          clickCount,
-        });
-      } else if (action.type === "cursorReturn") {
-        handleSaveWithTiming(t, {
-          ...action,
-          delayMs: cursorReturnDelayMs,
-        });
-      } else if (action.type === "remap") {
-        handleSaveWithTiming(t, {
-          ...action,
-          repeat,
-          repeatDelayMs,
-          repeatIntervalMs,
-        });
-      } else {
-        handleSaveWithTiming(t, action);
-      }
+      // アクション固有のプロパティを追加・上書きするためのマッパー
+      const mergedAction = objectiveDiscriminantPartialSwitch(
+        {
+          mouseMove: (a) => ({ ...a, x: mouseX, y: mouseY }),
+          mouseClick: (a) => ({
+            ...a,
+            x: mouseX,
+            y: mouseY,
+            button: mouseButton,
+            clickCount,
+          }),
+          cursorReturn: (a) => ({
+            ...a,
+            delayMs: cursorReturnDelayMs,
+          }),
+          remap: (a) => ({
+            ...a,
+            repeat,
+            repeatDelayMs,
+            repeatIntervalMs,
+          }),
+          macro: (a) => ({
+            ...a,
+            macroId,
+          }),
+          delay: (a) => ({
+            ...a,
+            delayMs: delayActionMs,
+          }),
+        },
+        action,
+        "type"
+      );
+
+      handleSaveWithTiming(t, { ...action, ...(mergedAction ?? {}) });
     },
     [
       handleSaveWithTiming,
@@ -217,11 +223,13 @@ export function KeyEditorForm({
       repeat,
       repeatDelayMs,
       repeatIntervalMs,
+      macroId,
+      delayActionMs,
     ]
   );
 
   const keyEditorActions = useKeyEditorActions({
-    state: { actionType, selectedLayerId, targetKeys, hasExistingBinding },
+    state,
     layerId,
     targetVk,
     selectedTrigger,
@@ -309,42 +317,37 @@ export function KeyEditorForm({
   };
 
   useEffect(() => {
-    if (loadedMouseX !== undefined) {
-      setMouseX(loadedMouseX);
-    }
-    if (loadedMouseY !== undefined) {
-      setMouseY(loadedMouseY);
-    }
-    if (loadedMouseButton !== undefined) {
-      setMouseButton(loadedMouseButton);
-    }
-    if (loadedClickCount !== undefined) {
-      setClickCount(loadedClickCount);
-    }
-    if (loadedCursorReturnDelayMs !== undefined) {
-      setCursorReturnDelayMs(loadedCursorReturnDelayMs);
-    }
-  }, [
-    loadedMouseX,
-    loadedMouseY,
-    loadedMouseButton,
-    loadedClickCount,
-    loadedCursorReturnDelayMs,
-  ]);
-
-  useEffect(() => {
-    if (loadedRepeat !== undefined) {
-      setRepeat(loadedRepeat);
-    } else {
-      setRepeat(false);
-    }
-    if (loadedRepeatDelayMs !== undefined) {
-      setRepeatDelayMs(loadedRepeatDelayMs);
-    }
-    if (loadedRepeatIntervalMs !== undefined) {
-      setRepeatIntervalMs(loadedRepeatIntervalMs);
-    }
-  }, [loadedRepeat, loadedRepeatDelayMs, loadedRepeatIntervalMs]);
+    objectiveDiscriminantPartialSwitch(
+      {
+        mouseMove: (s) => {
+          setMouseX(s.mouseX);
+          setMouseY(s.mouseY);
+        },
+        mouseClick: (s) => {
+          setMouseX(s.mouseX);
+          setMouseY(s.mouseY);
+          setMouseButton(s.mouseButton);
+          setClickCount(s.clickCount);
+        },
+        remap: (s) => {
+          setRepeat(s.repeat ?? false);
+          setRepeatDelayMs(s.repeatDelayMs);
+          setRepeatIntervalMs(s.repeatIntervalMs);
+        },
+        cursorReturn: (s) => {
+          setCursorReturnDelayMs(s.cursorReturnDelayMs);
+        },
+        macro: (s) => {
+          setMacroId(s.macroId);
+        },
+        delay: (s) => {
+          setDelayActionMs(s.delayActionMs);
+        },
+      },
+      state,
+      "actionType"
+    );
+  }, [state]);
 
   const keyEditorUIHandlers: KeyEditorUIHandlers = {
     setIsInputFocused,
@@ -401,16 +404,21 @@ export function KeyEditorForm({
         {/* アクション設定セクション */}
         <ActionSettingsSection
           actionType={actionType}
+          delayActionMs={delayActionMs}
           keyEditorActions={keyEditorActions}
           keyEditorUIHandlers={keyEditorUIHandlers}
           layers={layers}
           layout={layout}
+          macroId={macroId}
           mouseHandlers={mouseHandlers}
           mouseState={mouseState}
+          onOpenMacros={onOpenMacros}
           repeatSettings={repeatSettings}
           selectedLayerId={selectedLayerId}
           selectedTrigger={selectedTrigger}
           setActionType={setActionType}
+          setDelayActionMs={setDelayActionMs}
+          setMacroId={setMacroId}
           setSelectedLayerId={setSelectedLayerId}
           targetVk={targetVk}
         />

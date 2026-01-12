@@ -2,14 +2,14 @@ import { sendKey } from "../native/sender";
 import { KeyStateManager } from "../state/keyState";
 import { remapRules } from "../state/rules";
 import { debugLog } from "../utils/debugLogger";
+import { executeAction, handleTapOnlyBindings } from "./actionExecutor";
+
 import {
   addMomentaryLayer,
-  executeAction,
-  handleTapOnlyBindings,
   isLayerMomentaryKey,
   releaseMomentaryLayer,
   stopRemapAction,
-} from "./actionExecutor";
+} from "./actions/remapExecutor";
 
 /**
  * キーイベント処理

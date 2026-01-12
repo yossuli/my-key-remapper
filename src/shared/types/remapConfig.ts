@@ -29,20 +29,19 @@ export interface ModifierOutput {
 // アクション
 // =====================================
 
-/**
- * マクロの1ステップ
- */
-export interface MacroStep {
-  action: "tap" | "down" | "up" | "delay" | "text";
-  key?: number;
-  modifiers?: ModifierOutput;
-  delayMs?: number;
-  text?: string;
+/** 待機アクション */
+export interface DelayAction {
+  type: "delay";
+  delayMs: number;
 }
 
-/**
- * キーリマップアクション
- */
+/** マクロ参照アクション（キー割り当て用） */
+export interface MacroAction {
+  type: "macro";
+  macroId: string;
+}
+
+/** キーリマップアクション */
 export interface RemapAction {
   type: "remap";
   keys: number[];
@@ -54,47 +53,29 @@ export interface RemapAction {
   repeatIntervalMs?: number;
 }
 
-/**
- * マクロアクション
- */
-export interface MacroAction {
-  type: "macro";
-  steps: MacroStep[];
-}
-
-/**
- * レイヤー切り替えアクション（トグル）
- */
+/** レイヤー切り替えアクション（トグル） */
 export interface LayerToggleAction {
   type: "layerToggle";
   layerId: string;
 }
 
-/**
- * レイヤー一時切り替えアクション（モーメンタリ）
- */
+/** レイヤー一時切り替えアクション（モーメンタリ） */
 export interface LayerMomentaryAction {
   type: "layerMomentary";
   layerId: string;
 }
 
-/**
- * 無効化アクション
- */
+/** 無効化アクション */
 export interface NoneAction {
   type: "none";
 }
 
-/**
- * パススルーアクション（そのまま通す）
- */
+/** パススルーアクション（そのまま通す） */
 export interface PassthroughAction {
   type: "passthrough";
 }
 
-/**
- * マウスカーソル移動アクション
- */
+/** マウスカーソル移動アクション */
 export interface MouseMoveAction {
   type: "mouseMove";
   /** 移動先X座標 (絶対ピクセル座標) */
@@ -103,9 +84,7 @@ export interface MouseMoveAction {
   y: number;
 }
 
-/**
- * マウスクリックアクション
- */
+/** マウスクリックアクション */
 export interface MouseClickAction {
   type: "mouseClick";
   /** クリック座標X (絶対ピクセル座標) */
@@ -118,39 +97,41 @@ export interface MouseClickAction {
   clickCount?: number;
 }
 
-/**
- * カーソル位置復帰アクション
- * キー押下時のカーソル位置を記録し、一定時間後に戻る
- */
+/** カーソル位置復帰アクション */
 export interface CursorReturnAction {
   type: "cursorReturn";
   /** 復帰までの遅延時間（ミリ秒） */
   delayMs: number;
 }
 
-/**
- * すべてのアクション種別
- */
+/** すべてのアクション種別 */
 export type Action =
   | RemapAction
-  // | MacroAction
   | LayerToggleAction
   | LayerMomentaryAction
   | NoneAction
   | MouseMoveAction
   | MouseClickAction
-  | CursorReturnAction;
+  | CursorReturnAction
+  | DelayAction
+  | MacroAction;
 // | PassthroughAction;
 
 export type ActionType = Action["type"];
+
+/** マクロ定義（データストア用） */
+export interface MacroDef {
+  id: string;
+  name: string;
+  /** マクロの手順。ネスト（マクロ内のマクロ呼び出し）は仕様上避けることが推奨される */
+  actions: Action[];
+}
 
 // =====================================
 // キーバインディング
 // =====================================
 
-/**
- * キーバインディング：１つのトリガーに対する1つのアクション
- */
+/** キーバインディング：１つのトリガーに対する1つのアクション */
 export interface KeyBinding {
   trigger: TriggerType;
   action: Action;
@@ -161,9 +142,7 @@ export interface KeyBinding {
 // =====================================
 // レイヤー
 // =====================================
-/**
- * レイヤー定義
- */
+/** レイヤー定義 */
 export interface Layer {
   id: string;
   /** キーコード → バインディング配列 */
@@ -180,9 +159,7 @@ export interface Layer {
 // 設定全体
 // =====================================
 
-/**
- * グローバル設定
- */
+/** グローバル設定 */
 export interface GlobalSettings {
   /** 長押し判定のしきい値（ミリ秒）*/
   defaultHoldThresholdMs: number;
@@ -190,20 +167,21 @@ export interface GlobalSettings {
   defaultTapIntervalMs: number;
 }
 
-/**
- * リマップ設定全体
- */
+/** リマップ設定全体 */
 export interface RemapConfig {
   version: number;
   layers: Layer[];
+  /** マクロ定義のプール */
+  macros: MacroDef[];
   /** レイヤーの表示順（レイヤーIDの配列）*/
   layerOrder: string[];
   globalSettings: GlobalSettings;
 }
 
-/**
- * デフォルト設定
- */
+// =====================================
+// デフォルト設定
+// =====================================
+
 const VK_LSHIFT = 160;
 const VK_RSHIFT = 161;
 
@@ -234,6 +212,7 @@ export const DEFAULT_REMAP_CONFIG: RemapConfig = {
       defaultModifiers: { shift: true },
     },
   ],
+  macros: [],
   layerOrder: ["base", "shift"],
   globalSettings: {
     defaultHoldThresholdMs: 200,

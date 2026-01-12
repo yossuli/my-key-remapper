@@ -1,4 +1,7 @@
 import type { ActionType, Layer, TriggerType } from "@shared/types/remapConfig";
+import { isCircularMacro } from "@shared/utils/macroUtils";
+import { Button } from "@/components/atoms/Button";
+import { Select } from "@/components/atoms/Select";
 import { ToggleButton } from "@/components/atoms/ToggleButton";
 import {
   ActionSelector,
@@ -8,8 +11,9 @@ import { LayerSelector } from "@/components/molecules/forms/LayerSelector";
 import { MousePositionInput } from "@/components/molecules/forms/MousePositionInput";
 import { TimingInput } from "@/components/molecules/forms/TimingInput";
 import { RemapKeySection } from "@/components/organisms/editor/RemapKeySection";
-import { VStack } from "@/components/template/Flex";
+import { HStack, VStack } from "@/components/template/Flex";
 import type { UseKeyEditorActionsReturn } from "@/hooks/useKeyEditorAction";
+import { useMacros } from "@/hooks/useMacros";
 import type { LayoutType } from "@/types";
 import { getLayerDescription } from "@/utils/getLayerDescription";
 import type {
@@ -41,6 +45,16 @@ interface ActionSettingsSectionProps {
   // Additional handlers
   setActionType: (type: ActionType) => void;
   setSelectedLayerId: (id: string) => void;
+
+  // Macro State
+  macroId: string;
+  setMacroId: (id: string) => void;
+  onOpenMacros: () => void;
+  currentMacroId?: string;
+
+  // Delay State
+  delayActionMs: number;
+  setDelayActionMs: (ms: number) => void;
 }
 
 export function ActionSettingsSection({
@@ -57,7 +71,25 @@ export function ActionSettingsSection({
   setActionType,
   setSelectedLayerId,
   repeatSettings,
+  macroId,
+  setMacroId,
+  onOpenMacros,
+  currentMacroId,
+  delayActionMs,
+  setDelayActionMs,
 }: ActionSettingsSectionProps) {
+  const { macros } = useMacros();
+
+  // マクロ選択肢の作成
+  const macroOptions = macros
+    // TODO - 簡略化
+    .filter((m) => !isCircularMacro(currentMacroId, m.id, macros))
+    .map((m) => ({
+      id: m.id,
+      value: m.id,
+      label: m.name,
+    }));
+
   return (
     <ActionSelector
       actionType={actionType}
@@ -87,6 +119,7 @@ export function ActionSettingsSection({
       </ActionSelectorContent>
 
       <ActionSelectorContent value="mouseMove">
+        {/* TODO - ActionSelectorContentの改良によってこれをプロパティ化 */}
         <VStack gap={4}>
           <p className="text-muted-foreground text-sm">
             マウスカーソルを指定座標に移動します
@@ -156,6 +189,44 @@ export function ActionSettingsSection({
             }
             setFocused={keyEditorUIHandlers.setIsInputFocused}
             value={mouseState.cursorReturnDelayMs}
+          />
+        </VStack>
+      </ActionSelectorContent>
+
+      <ActionSelectorContent value="macro">
+        <VStack gap={4}>
+          <p className="text-muted-foreground text-sm">
+            事前に定義したマクロ（一連の操作）を実行します
+          </p>
+          <HStack className="items-end" gap={2}>
+            <div className="flex-1">
+              <Select
+                id="macroSelect"
+                label="マクロを選択"
+                onValueChange={setMacroId}
+                options={macroOptions}
+                select-value={macroId}
+              />
+            </div>
+            <Button onClick={onOpenMacros} variant="secondary">
+              マクロを管理
+            </Button>
+          </HStack>
+        </VStack>
+      </ActionSelectorContent>
+
+      <ActionSelectorContent value="delay">
+        <VStack gap={4}>
+          <p className="text-muted-foreground text-sm">
+            指定した時間（ミリ秒）待機します
+          </p>
+          <TimingInput
+            defaultValue={500}
+            id="delayActionInput"
+            label="待機時間 (ms)"
+            onValueChange={(val) => val !== undefined && setDelayActionMs(val)}
+            setFocused={keyEditorUIHandlers.setIsInputFocused}
+            value={delayActionMs}
           />
         </VStack>
       </ActionSelectorContent>

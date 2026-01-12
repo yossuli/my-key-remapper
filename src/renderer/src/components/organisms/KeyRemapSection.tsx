@@ -1,3 +1,4 @@
+import type { KeyBinding, TriggerType } from "@shared/types/remapConfig";
 import { Settings, Zap } from "lucide-react";
 import {
   type Dispatch,
@@ -24,10 +25,6 @@ import { useQuickRemap } from "@/hooks/useQuickRemap";
 import type { UseRemapControlReturn } from "@/hooks/useRemapControl";
 import type { KeyboardLayout, LayoutType } from "@/types";
 import { cn } from "@/utils/cn";
-import type {
-  KeyBinding,
-  TriggerType,
-} from "../../../../shared/types/remapConfig";
 
 // --- 型定義 ---
 

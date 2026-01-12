@@ -1,3 +1,5 @@
+import { KEYBOARD_LAYOUT, SWITCH_LAYOUT_RULE } from "@shared/constants";
+import type { TriggerType } from "@shared/types/remapConfig";
 import { useMemo, useState } from "react";
 import { Show } from "@/components/control/Show";
 import { AppHeader } from "@/components/organisms/AppHeader";
@@ -18,11 +20,6 @@ import { ModalLayout } from "@/components/template/ModalLayout";
 import { type UseLayerStateReturn, useLayerState } from "@/hooks/useLayerState";
 import { useRemapControl } from "@/hooks/useRemapControl";
 import type { LayoutType } from "@/types";
-import {
-  KEYBOARD_LAYOUT,
-  SWITCH_LAYOUT_RULE,
-} from "../../../../shared/constants";
-import type { TriggerType } from "../../../../shared/types/remapConfig";
 
 // --- 型定義 ---
 
@@ -33,7 +30,11 @@ export interface MappingActions {
   removeMapping: (from: number) => void;
 }
 
-export function KeyRemapperPage() {
+interface KeyRemapperPageProps {
+  onNavigateMacros: () => void;
+}
+
+export function KeyRemapperPage({ onNavigateMacros }: KeyRemapperPageProps) {
   // カスタムフックでロジックを分離
   const {
     layers,
@@ -78,6 +79,7 @@ export function KeyRemapperPage() {
         <Header>
           <AppHeader
             isActive={isActive} // 🆕 → 🔥 (E. App Header Control)
+            onOpenMacros={onNavigateMacros}
             onOpenSettings={() => setIsSettingsOpen(true)} // 🆕 → 🔥 (E. App Header Control)
             onToggleActive={remapActions.toggleActive} // 🆕 → 🔥 (E. App Header Control)
             onToggleSimpleMode={() => setSimpleMode((prev) => !prev)} // 🆕 → 🔥 (E. App Header Control)
@@ -122,6 +124,7 @@ export function KeyRemapperPage() {
             layers={layers} // ∈ → 🧩🔥 (A. Layer Management Flow)
             layout={layout} // 🆕 → 🧩🔥 (C. UI Configuration)
             onClose={handleCloseEditor} // 🆕 → 🔥 (I. Key Editor Modal)
+            onOpenMacros={onNavigateMacros}
             onRemove={(trigger) => removeMapping(e, trigger)} // 🆕 → 🔥 (I. Key Editor Modal)
             onSave={saveMapping(e)} // 🆕 → 🔥 (I. Key Editor Modal)
             targetVk={e} // 🆕 → 🔥 (I. Key Editor Modal)

@@ -1,4 +1,4 @@
-import { VK } from "../../shared/constants/vk";
+import { VK } from "@shared/constants/vk";
 
 /**
  * 修飾キーかどうかを判定

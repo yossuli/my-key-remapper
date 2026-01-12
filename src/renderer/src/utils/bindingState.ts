@@ -1,28 +1,78 @@
 ﻿// ActionからBindingStateへの変換ユーティリティ
 
-import { objectiveDiscriminantSwitch } from "@/utils/objectiveSwitch";
-import type { Action, ActionType } from "../../../shared/types/remapConfig";
+import type { Action } from "@shared/types/remapConfig";
+import { objectiveDiscriminantSwitch } from "@shared/utils/objectiveSwitch";
 
-export interface BindingState {
-  actionType: ActionType;
+interface BindingStateBase {
   targetKeys: number[];
   selectedLayerId: string;
   hasExistingBinding: boolean;
-  mouseX?: number;
-  mouseY?: number;
-  mouseButton?: "left" | "right" | "middle";
-  clickCount?: number;
-  cursorReturnDelayMs?: number;
+}
+
+export interface RemapBindingState extends BindingStateBase {
+  actionType: "remap";
   repeat?: boolean;
   repeatDelayMs?: number;
   repeatIntervalMs?: number;
 }
 
+export interface LayerToggleBindingState extends BindingStateBase {
+  actionType: "layerToggle";
+}
+
+export interface LayerMomentaryBindingState extends BindingStateBase {
+  actionType: "layerMomentary";
+}
+
+export interface MouseMoveBindingState extends BindingStateBase {
+  actionType: "mouseMove";
+  mouseX: number;
+  mouseY: number;
+}
+
+export interface MouseClickBindingState extends BindingStateBase {
+  actionType: "mouseClick";
+  mouseX: number;
+  mouseY: number;
+  mouseButton: "left" | "right" | "middle";
+  clickCount: number;
+}
+
+export interface NoneBindingState extends BindingStateBase {
+  actionType: "none";
+}
+
+export interface CursorReturnBindingState extends BindingStateBase {
+  actionType: "cursorReturn";
+  cursorReturnDelayMs: number;
+}
+
+export interface DelayBindingState extends BindingStateBase {
+  actionType: "delay";
+  delayActionMs: number;
+}
+
+export interface MacroBindingState extends BindingStateBase {
+  actionType: "macro";
+  macroId: string;
+}
+
+export type BindingState =
+  | RemapBindingState
+  | LayerToggleBindingState
+  | LayerMomentaryBindingState
+  | MouseMoveBindingState
+  | MouseClickBindingState
+  | NoneBindingState
+  | CursorReturnBindingState
+  | DelayBindingState
+  | MacroBindingState;
+
 /**
  * ActionからBindingStateへ変換
  */
 export function actionToBindingState(action: Action): Partial<BindingState> {
-  return objectiveDiscriminantSwitch(
+  return objectiveDiscriminantSwitch<Action, "type", Partial<BindingState>>(
     {
       remap: (act) => ({
         actionType: "remap",
@@ -55,6 +105,14 @@ export function actionToBindingState(action: Action): Partial<BindingState> {
       cursorReturn: (act) => ({
         actionType: "cursorReturn",
         cursorReturnDelayMs: act.delayMs,
+      }),
+      delay: (act) => ({
+        actionType: "delay",
+        delayActionMs: act.delayMs,
+      }),
+      macro: (act) => ({
+        actionType: "macro",
+        macroId: act.macroId,
       }),
     },
     action,

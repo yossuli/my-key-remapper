@@ -85,4 +85,12 @@ export function setupIPCHandlers(): void {
   ipcMain.on("set-debug-log-enabled", (_event, { enabled }) => {
     setDebugLogEnabled(enabled);
   });
+
+  // マクロ一覧取得
+  ipcMain.handle("get-macros", () => remapRules.getMacros());
+
+  // マクロ一括保存
+  ipcMain.on("save-macros", (_event, { macros }) => {
+    remapRules.setMacros(macros);
+  });
 }

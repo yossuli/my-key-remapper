@@ -1,13 +1,9 @@
 ﻿// 保存・削除アクションのフック
 
+import type { Action, TriggerType } from "@shared/types/remapConfig";
+import { objectiveDiscriminantSwitch } from "@shared/utils/objectiveSwitch";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BindingState } from "@/utils/bindingState";
-import { objectiveSwitch } from "@/utils/objectiveSwitch";
-import type {
-  Action,
-  ActionType,
-  TriggerType,
-} from "../../../shared/types/remapConfig";
 
 export interface UseKeyEditorActionsProps {
   state: BindingState;
@@ -41,7 +37,7 @@ export interface UseKeyEditorActionsReturn {
  * キーエディターの保存・削除アクションフック
  */
 export function useKeyEditorActions({
-  state: { actionType, selectedLayerId, targetKeys },
+  state,
   layerId,
   targetVk,
   selectedTrigger,
@@ -49,6 +45,8 @@ export function useKeyEditorActions({
   onRemove,
   onClose,
 }: UseKeyEditorActionsProps): UseKeyEditorActionsReturn {
+  const { actionType, targetKeys } = state;
+
   console.log("[DEBUG] useKeyEditorActions - render", {
     actionType,
     targetKeys,
@@ -114,49 +112,55 @@ export function useKeyEditorActions({
     if (!canSave) {
       return;
     }
-    const action: Action = objectiveSwitch<ActionType, Action>(
+
+    const action: Action = objectiveDiscriminantSwitch<
+      BindingState,
+      "actionType",
+      Action
+    >(
       {
         remap: () => ({ type: "remap", keys }),
-        layerToggle: () => ({
+        layerToggle: (s) => ({
           type: "layerToggle",
-          layerId: selectedLayerId,
+          layerId: s.selectedLayerId,
         }),
-        layerMomentary: () => ({
+        layerMomentary: (s) => ({
           type: "layerMomentary",
-          layerId: selectedLayerId,
+          layerId: s.selectedLayerId,
         }),
-        mouseMove: () => ({
+        mouseMove: (s) => ({
           type: "mouseMove",
-          x: 0,
-          y: 0,
+          x: s.mouseX,
+          y: s.mouseY,
         }),
-        mouseClick: () => ({
+        mouseClick: (s) => ({
           type: "mouseClick",
-          x: 0,
-          y: 0,
-          button: "left",
-          clickCount: 1,
+          x: s.mouseX,
+          y: s.mouseY,
+          button: s.mouseButton,
+          clickCount: s.clickCount,
         }),
-        cursorReturn: () => ({
+        cursorReturn: (s) => ({
           type: "cursorReturn",
-          delayMs: 1000,
+          delayMs: s.cursorReturnDelayMs,
+        }),
+        delay: (s) => ({
+          type: "delay",
+          delayMs: s.delayActionMs,
+        }),
+        macro: (s) => ({
+          type: "macro",
+          macroId: s.macroId,
         }),
         none: () => ({ type: "none" }),
       },
-      actionType
+      state,
+      "actionType"
     );
 
     onSave(selectedTrigger, action);
     onClose?.();
-  }, [
-    actionType,
-    keys,
-    selectedLayerId,
-    selectedTrigger,
-    onClose,
-    onSave,
-    canSave,
-  ]);
+  }, [state, keys, selectedTrigger, onClose, onSave, canSave]);
 
   const handleRemove = useCallback<
     UseKeyEditorActionsReturn["handleRemove"]

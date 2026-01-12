@@ -15,7 +15,8 @@
     "strictNullChecks": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/renderer/src/*"]
+      "@/*": ["./src/renderer/src/*"],
+      "@shared/*": ["./src/shared/*"]
     }
   },
   "include": ["src/**/*"]

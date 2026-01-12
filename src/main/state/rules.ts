@@ -7,6 +7,7 @@ import type {
   RemapConfig,
   TriggerType,
 } from "@shared/types/remapConfig";
+import { validateMacros } from "@shared/utils/macroUtils";
 import { configStorage } from "../storage/configStorage";
 import { layerState } from "./layerState";
 
@@ -265,9 +266,16 @@ export class RemapRules {
   }
 
   setMacros(macros: MacroDef[]): void {
+    // 循環参照ガード
+    if (!validateMacros(macros)) {
+      console.error("Failed to save macros: Circular reference detected.");
+      return;
+    }
+
     const config = configStorage.getConfig();
     config.macros = macros;
-    configStorage.save(config);
+    // macros.json に保存
+    configStorage.saveMacros(macros);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Keyboard, Power, Settings } from "lucide-react";
+import { Eye, EyeOff, Keyboard, List, Power, Settings } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import { Text } from "@/components/atoms/Text";
@@ -14,6 +14,8 @@ interface AppHeaderProps {
   onToggleSimpleMode?: () => void;
   /** グローバル設定を開くコールバック */
   onOpenSettings: () => void;
+  /** マクロ管理を開くコールバック */
+  onOpenMacros: () => void;
 }
 
 export function AppHeader({
@@ -22,6 +24,7 @@ export function AppHeader({
   simpleMode, // 🆕 → 🔥 (E. App Header Control)
   onToggleSimpleMode, // 🆕 → 🔥 (E. App Header Control)
   onOpenSettings, // 🆕 → 🔥 (E. App Header Control)
+  onOpenMacros,
 }: AppHeaderProps) {
   const icon = simpleMode ? Eye : EyeOff;
   return (
@@ -41,6 +44,18 @@ export function AppHeader({
       </HStack>
 
       <HStack gap={2}>
+        <With value={onOpenMacros}>
+          {(onClick) => (
+            <Button
+              className="gap-2 rounded-full"
+              onClick={onClick}
+              variant="ghost"
+            >
+              <Icon icon={List} />
+              マクロ管理
+            </Button>
+          )}
+        </With>
         <With value={onOpenSettings}>
           {(onClick) => (
             <Button

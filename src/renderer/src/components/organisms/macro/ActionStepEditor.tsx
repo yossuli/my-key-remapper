@@ -127,7 +127,7 @@ export function ActionStepEditor({
     targetKey: VK.ENTER,
     holdMs: 800,
   });
-// TODO - 後でやる
+  // TODO - 後でやる
   useEventHandler(
     [
       {
@@ -136,13 +136,21 @@ export function ActionStepEditor({
           if (actionType === "remap") {
             addTargetKey(e.keyCode);
           }
-          handleHoldKeyDown(e.keyCode, { onHold: () => {} }); // マクロ内では一応ガード
+          handleHoldKeyDown(e.keyCode, {
+            onHold: () => {
+              /* noop */
+            },
+          }); // マクロ内では一応ガード
         },
       },
       {
         type: "keyup",
         handler: (e) => {
-          handleHoldKeyUp(e.keyCode, { onHold: () => {} });
+          handleHoldKeyUp(e.keyCode, {
+            onHold: () => {
+              /* noop */
+            },
+          });
         },
       },
     ],
@@ -252,7 +260,9 @@ export function ActionStepEditor({
   // TODO - src\renderer\src\components\organisms\editor\KeyEditorForm.tsxと共通化
   const keyEditorActions: UseKeyEditorActionsReturn = {
     handleSave: handleSaveInternal,
-    handleRemove: () => {},
+    handleRemove: () => {
+      /* noop */
+    },
     canSave: actionType !== "none",
     keys: targetKeys,
     setKeys: setTargetKeys,
@@ -261,7 +271,9 @@ export function ActionStepEditor({
     removeKey: (vk: number) =>
       setTargetKeys((prev) => prev.filter((k) => k !== vk)),
     addHoldKey: addTargetKey,
-    removeHoldKey: (vk: number) => {},
+    removeHoldKey: (_vk: number) => {
+      /* noop */
+    },
   };
 
   return (
@@ -280,7 +292,9 @@ export function ActionStepEditor({
           macroId={macroId}
           mouseHandlers={mouseHandlers}
           mouseState={mouseState}
-          onOpenMacros={() => {}}
+          onOpenMacros={() => {
+            /* noop */
+          }}
           repeatSettings={repeatSettings}
           selectedLayerId={selectedLayerId}
           selectedTrigger="tap"

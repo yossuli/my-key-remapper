@@ -5,10 +5,12 @@ import { GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import { HStack } from "@/components/template/Flex";
+import type { IdentifiedAction } from "../macro/types";
 
 interface SequenceEditorProps {
-  actions: Action[];
-  onChange: (newActions: Action[]) => void;
+  // 並び替えのために一意なIDが必要なので IdentifiedAction を受け取る
+  actions: IdentifiedAction[];
+  onChange: (newActions: IdentifiedAction[]) => void;
   onEditAction: (index: number) => void;
   onDeleteAction: (index: number) => void;
 }
@@ -29,7 +31,7 @@ export function SequenceEditor({
       {actions.map((action, index) => (
         <Reorder.Item
           className="flex select-none items-center gap-3 rounded-md border border-border bg-secondary/30 p-2"
-          key={`${action.type}-${index}`}
+          key={action._uiId} // インデックスではなく不変のIDを使用
           value={action}
         >
           <ActionItem

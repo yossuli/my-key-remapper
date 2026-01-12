@@ -8,6 +8,8 @@ import { HStack, VStack } from "@/components/template/Flex";
 import { ModalLayout } from "@/components/template/ModalLayout";
 import { useLayerState } from "@/hooks/useLayerState";
 import { ActionStepEditor } from "./ActionStepEditor";
+import type { IdentifiedAction } from "./types";
+import { toAction, toIdentifiedAction } from "./utils";
 
 interface MacroEditFormProps {
   initialMacro?: MacroDef;
@@ -21,7 +23,10 @@ export function MacroEditForm({
   onCancel,
 }: MacroEditFormProps) {
   const [name, setName] = useState(initialMacro?.name ?? "新規マクロ");
-  const [actions, setActions] = useState<Action[]>(initialMacro?.actions ?? []);
+  // UI内部では _uiId 付きの IdentifiedAction として管理する
+  const [actions, setActions] = useState<IdentifiedAction[]>(
+    initialMacro?.actions.map(toIdentifiedAction) ?? []
+  );
   const [macroId] = useState(initialMacro?.id ?? crypto.randomUUID());
   const { layers } = useLayerState();
 
@@ -39,9 +44,20 @@ export function MacroEditForm({
 
   const handleSaveStep = (action: Action) => {
     if (isAdding) {
-      setActions([...actions, action]);
+      // 新規追加時は _uiId を付与して追加
+      setActions([...actions, toIdentifiedAction(action)]);
     } else if (editingIndex !== null) {
-      setActions(actions.map((a, i) => (i === editingIndex ? action : a)));
+      setActions(
+        actions.map((a, i) =>
+          // 既存更新時は、Action型が返ってくるため再ID付与が必要だが
+          // 既存の _uiId を維持したい場合は展開して上書きする
+          // ここでは単純に新しい内容で上書き（ID再生成）しても実害はないが、
+          // Reactのレンダリング安定性のために既存IDを維持するほうがベター
+          i === editingIndex
+            ? { ...toIdentifiedAction(action), _uiId: a._uiId }
+            : a
+        )
+      );
     }
     handleCloseModal();
   };
@@ -56,9 +72,14 @@ export function MacroEditForm({
   };
 
   const handleSave = () => {
-    onSave({ id: macroId, name, actions });
+    // 保存時に _uiId を除去して Action[] に戻す
+    onSave({ id: macroId, name, actions: actions.map(toAction) });
   };
-  const initialAction = actions[editingIndex ?? 0];
+
+  // 編集モーダルに渡す初期値には _uiId は不要なので除去して渡す（ActionStepEditorはAction型を期待するか確認が必要だが、現状はAction型）
+  const initialAction =
+    editingIndex !== null ? toAction(actions[editingIndex]) : undefined;
+
   return (
     <VStack className="h-full w-full" gap={6}>
       <HStack className="items-center justify-between border-border border-b pb-4">

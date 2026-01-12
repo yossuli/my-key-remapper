@@ -24,20 +24,21 @@ export function isCircularMacro(
   }
 
   for (const action of targetMacro.actions) {
-    if (action.type === "macro") {
-      if (action.macroId === currentMacroId) {
-        return true;
-      }
-      if (
-        isCircularMacro(
-          currentMacroId,
-          action.macroId,
-          allMacros,
-          new Set(visited)
-        )
-      ) {
-        return true;
-      }
+    if (action.type !== "macro") {
+      continue;
+    }
+    if (action.macroId === currentMacroId) {
+      return true;
+    }
+    if (
+      isCircularMacro(
+        currentMacroId,
+        action.macroId,
+        allMacros,
+        new Set(visited)
+      )
+    ) {
+      return true;
     }
   }
 

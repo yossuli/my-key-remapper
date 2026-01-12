@@ -3,6 +3,7 @@ import type {
   GlobalSettings,
   KeyBinding,
   Layer,
+  MacroDef,
   RemapConfig,
   TriggerType,
 } from "../../shared/types/remapConfig";
@@ -32,6 +33,13 @@ export class RemapRules {
       // shiftレイヤー自体が存在しない場合は自動生成 (既存コメント通り)
       // Note: DEFAULT_REMAP_CONFIG で生成されるので、ここで明示的に作る必要はないかもしれないが
       // 既存の処理があればそれに従う。ここでは変更を最小限に。
+    }
+
+    // Migration: macros が未定義の場合は空配列で初期化
+    if (!config.macros) {
+      config.macros = [];
+      console.log("Migrated config to have empty 'macros' array");
+      configStorage.save(config);
     }
   }
 
@@ -245,6 +253,20 @@ export class RemapRules {
       ...config.globalSettings,
       ...settings,
     };
+    configStorage.save(config);
+  }
+
+  // =====================================
+  // マクロ管理
+  // =====================================
+
+  getMacros(): MacroDef[] {
+    return configStorage.getConfig().macros ?? [];
+  }
+
+  setMacros(macros: MacroDef[]): void {
+    const config = configStorage.getConfig();
+    config.macros = macros;
     configStorage.save(config);
   }
 }

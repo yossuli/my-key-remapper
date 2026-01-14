@@ -6,8 +6,8 @@ type MappedProps<
   T extends { id: string | number },
   U extends JSX.ElementType = typeof React.Fragment,
 > = {
-  value: T[];
-  children: (item: T, index: number, array: T[]) => React.ReactNode;
+  value: readonly T[];
+  children: (item: T, index: number, array: readonly T[]) => React.ReactNode;
 } & _BaseProps<U>;
 
 export const Mapped = <

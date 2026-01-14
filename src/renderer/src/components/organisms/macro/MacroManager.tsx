@@ -90,6 +90,7 @@ export function MacroManager() {
         <Ternary condition={editingId !== null || isAddingNew}>
           <Then>
             <MacroEditForm
+              actionSummaryHandlers={{ onNavigate: handleEditStart }}
               initialMacro={selectedMacro}
               key={editingId || "new"}
               onCancel={handleCancel}

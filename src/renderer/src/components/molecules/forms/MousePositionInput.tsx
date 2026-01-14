@@ -38,6 +38,11 @@ export function MousePositionInput({
   const relativeY = screenSize
     ? (y / screenSize.height) * PERCENTAGE_MULTIPLIER
     : DEFAULT_POSITION_PERCENT;
+  const screenRatioStyle = screenSize
+    ? {
+        aspectRatio: `${screenSize.width} / ${screenSize.height}`,
+      }
+    : undefined;
   return (
     <Center>
       <div className="grid w-fit grid-cols-[auto_1fr_auto] items-center gap-4">
@@ -71,12 +76,7 @@ export function MousePositionInput({
           disabled={isCapturing}
           onClick={onGetMousePosition}
           size="lg"
-          style={
-            // biome-ignore lint/nursery/noLeakedRender: styleプロパティへのundefined渡しはReactで有効
-            screenSize
-              ? { aspectRatio: `${screenSize.width} / ${screenSize.height}` }
-              : undefined
-          }
+          style={screenRatioStyle}
           variant="outline"
         >
           <div className="pointer-events-none absolute inset-2 flex items-center justify-center">

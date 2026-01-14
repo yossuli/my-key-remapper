@@ -7,3 +7,7 @@ import type { Action } from "@shared/types/remapConfig";
 export type IdentifiedAction = Action & {
   _uiId: string;
 };
+
+export interface ActionSummaryHandlers {
+  onNavigate: (macroId: string) => void;
+}

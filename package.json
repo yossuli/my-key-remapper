@@ -9,7 +9,7 @@
     "build": "electron-vite build",
     "build:win": "npm run build && electron-builder --win --x64",
     "preview": "electron-vite preview",
-    "lint": "ultracite lint",
+    "lint": "ultracite check",
     "format": "ultracite format",
     "typecheck": "tsc --noEmit",
     "ultracite:fix": "npx ultracite fix",

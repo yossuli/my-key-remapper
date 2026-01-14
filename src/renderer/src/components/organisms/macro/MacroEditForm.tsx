@@ -3,25 +3,29 @@ import { ArrowLeft, Plus, Save } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
+import { Input } from "@/components/atoms/Input";
+import { Show } from "@/components/control/Show";
 import { SequenceEditor } from "@/components/organisms/editor/SequenceEditor";
 import { HStack, VStack } from "@/components/template/Flex";
 import { ModalLayout } from "@/components/template/ModalLayout";
 import { useLayerState } from "@/hooks/useLayerState";
 import { useRemapControl } from "@/hooks/useRemapControl";
 import { ActionStepEditor } from "./ActionStepEditor";
-import type { IdentifiedAction } from "./types";
+import type { ActionSummaryHandlers, IdentifiedAction } from "./types";
 import { toAction, toIdentifiedAction } from "./utils";
 
 interface MacroEditFormProps {
   initialMacro?: MacroDef;
   onSave: (macro: MacroDef) => void;
   onCancel: () => void;
+  actionSummaryHandlers: ActionSummaryHandlers;
 }
 
 export function MacroEditForm({
   initialMacro,
   onSave,
   onCancel,
+  actionSummaryHandlers,
 }: MacroEditFormProps) {
   const [name, setName] = useState(initialMacro?.name ?? "新規マクロ");
   // UI内部では _uiId 付きの IdentifiedAction として管理する
@@ -53,10 +57,6 @@ export function MacroEditForm({
     } else if (editingIndex !== null) {
       setActions(
         actions.map((a, i) =>
-          // 既存更新時は、Action型が返ってくるため再ID付与が必要だが
-          // 既存の _uiId を維持したい場合は展開して上書きする
-          // ここでは単純に新しい内容で上書き（ID再生成）しても実害はないが、
-          // Reactのレンダリング安定性のために既存IDを維持するほうがベター
           i === editingIndex
             ? { ...toIdentifiedAction(action), _uiId: a._uiId }
             : a
@@ -77,11 +77,9 @@ export function MacroEditForm({
   };
 
   const handleSave = () => {
-    // 保存時に _uiId を除去して Action[] に戻す
     onSave({ id: macroId, name, actions: actions.map(toAction) });
   };
 
-  // 編集モーダルに渡す初期値には _uiId は不要なので除去して渡す（ActionStepEditorはAction型を期待するか確認が必要だが、現状はAction型）
   const initialAction =
     editingIndex !== null ? toAction(actions[editingIndex]) : undefined;
 
@@ -101,31 +99,34 @@ export function MacroEditForm({
       </HStack>
 
       <VStack gap={2}>
-        {/* TODO - カスタムInputコンポーネントを使用する */}
-        <label className="flex flex-col gap-2 font-medium text-muted-foreground text-sm">
+        <label
+          className="flex flex-col gap-2 font-medium text-muted-foreground text-sm"
+          htmlFor="macro-name-input"
+        >
           マクロ名
-          <input
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-foreground text-sm ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            onChange={(e) => setName(e.target.value)}
-            placeholder="マクロ名を入力"
-            value={name}
+          <Input
+            id="macro-name-input"
+            input-onChange={(e) => setName(e.target.value)}
+            input-placeholder="マクロ名を入力"
+            input-value={name}
           />
         </label>
       </VStack>
 
       <div className="flex-1 overflow-auto rounded-md border border-border bg-background/50 p-4">
         <SequenceEditor
+          actionSummaryHandlers={actionSummaryHandlers}
           actions={actions}
           onChange={setActions}
           onDeleteAction={handleDeleteAction}
           onEditAction={handleEditStart}
         />
 
-        {actions.length === 0 && (
+        <Show condition={actions.length === 0}>
           <div className="py-8 text-center text-muted-foreground">
             アクションがありません。下部ボタンから追加してください。
           </div>
-        )}
+        </Show>
       </div>
 
       <div className="border-border border-t pt-4">
@@ -139,7 +140,6 @@ export function MacroEditForm({
         </Button>
       </div>
 
-      {/* アクション編集モーダル */}
       <ModalLayout
         onClose={handleCloseModal}
         value={isAdding || editingIndex !== null}

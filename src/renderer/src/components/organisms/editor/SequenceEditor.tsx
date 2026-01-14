@@ -1,26 +1,6 @@
-import type { Action } from "@shared/types/remapConfig";
-import { objectiveDiscriminantSwitch } from "@shared/utils/objectiveSwitch";
-import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Trash2 } from "lucide-react";
-import { Button } from "@/components/atoms/Button";
-import { Icon } from "@/components/atoms/Icon";
-import { HStack } from "@/components/template/Flex";
-import type { ButtonProps } from "@/components/ui/button";
-import { cn } from "@/utils";
-import type { IdentifiedAction } from "../macro/types";
-
-function ListCellButton({ className, ...props }: ButtonProps) {
-  return (
-    <Button
-      className={cn(
-        "h-auto w-full justify-start px-4 py-3 font-medium hover:bg-transparent",
-        className
-      )}
-      variant="ghost"
-      {...props}
-    />
-  );
-}
+import { Reorder } from "framer-motion";
+import { ActionItem } from "@/components/molecules/ActionItem";
+import type { ActionSummaryHandlers, IdentifiedAction } from "../macro/types";
 
 interface SequenceEditorProps {
   // 並び替えのために一意なIDが必要なので IdentifiedAction を受け取る
@@ -28,6 +8,7 @@ interface SequenceEditorProps {
   onChange: (newActions: IdentifiedAction[]) => void;
   onEditAction: (index: number) => void;
   onDeleteAction: (index: number) => void;
+  actionSummaryHandlers: ActionSummaryHandlers;
 }
 
 export function SequenceEditor({
@@ -35,6 +16,7 @@ export function SequenceEditor({
   onChange,
   onEditAction,
   onDeleteAction,
+  actionSummaryHandlers,
 }: SequenceEditorProps) {
   return (
     <Reorder.Group
@@ -51,6 +33,7 @@ export function SequenceEditor({
         >
           <ActionItem
             action={action}
+            actionSummaryHandlers={actionSummaryHandlers}
             index={index}
             onDelete={() => onDeleteAction(index)}
             onEdit={() => onEditAction(index)}
@@ -59,120 +42,4 @@ export function SequenceEditor({
       ))}
     </Reorder.Group>
   );
-}
-
-interface ActionItemProps {
-  action: Action;
-  index: number;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-function ActionItem({ action, index, onEdit, onDelete }: ActionItemProps) {
-  const controls = useDragControls();
-
-  return (
-    <HStack className="w-full items-center justify-between">
-      <div
-        className="cursor-grab touch-none rounded p-1 hover:bg-muted"
-        onPointerDown={(e) => controls.start(e)}
-      >
-        <Icon className="text-muted-foreground" icon={GripVertical} size="sm" />
-      </div>
-
-      <ListCellButton
-        className="flex-1 px-2 py-2 font-mono text-sm"
-        onClick={onEdit}
-      >
-        <span className="text-muted-foreground">{index + 1}.</span>
-        <ActionSummary action={action} />
-      </ListCellButton>
-
-      <HStack gap={1}>
-        <Button
-          className="text-destructive hover:bg-destructive/10"
-          onClick={onDelete}
-          size="icon"
-          variant="ghost"
-        >
-          <Icon icon={Trash2} size="sm" />
-        </Button>
-      </HStack>
-    </HStack>
-  );
-}
-
-// --- Action Summary Rendering System ---
-
-/**
- * 簡易的なマークダウン記法パーサー
- * **text**: 太字 + プライマリーカラー
- * ((text)): 補足情報（薄い文字）
- * [[text]]: リンク/ID（青文字）
- */
-function RichText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*.*?\*\*|\(\(.*\)\)|\[\[.*\]\])/g);
-  return (
-    <span>
-      {parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-          return (
-            // biome-ignore lint/suspicious/noArrayIndexKey: テキスト解析による生成で順序が固定されているため
-            <span className="font-bold text-primary" key={i}>
-              {part.slice(2, -2)}
-            </span>
-          );
-        }
-        if (part.startsWith("((") && part.endsWith("))")) {
-          return (
-            <span
-              className="ml-2 text-muted-foreground text-xs opacity-80"
-              // biome-ignore lint/suspicious/noArrayIndexKey: テキスト解析による生成で順序が固定されているため
-              key={i}
-            >
-              {part.slice(2, -2)}
-            </span>
-          );
-        }
-        if (part.startsWith("[[") && part.endsWith("]]")) {
-          return (
-            // biome-ignore lint/suspicious/noArrayIndexKey: テキスト解析による生成で順序が固定されているため
-            <span className="font-mono text-blue-400" key={i}>
-              {part.slice(2, -2)}
-            </span>
-          );
-        }
-        return part;
-      })}
-    </span>
-  );
-}
-
-/**
- * アクションごとの説明文生成ロジックマップ
- * オブジェクトとして定義することで、Switch文の複雑さを排除
- */
-
-function ActionSummary({ action }: { action: Action }) {
-  const formatter = objectiveDiscriminantSwitch<Action, "type", string>(
-    {
-      remap: (a) =>
-        `キー入力: **${a.keys.join(" + ")}**${a.repeat ? " ((リピート))" : ""}`,
-      delay: (a) => `待機: **${a.delayMs}ms**`,
-      mouseMove: (a) => `マウス移動: **X:${a.x}, Y:${a.y}**`,
-      mouseClick: (a) =>
-        `クリック: **${a.button}**${
-          (a.clickCount ?? 1) > 1 ? ` ((x${a.clickCount}))` : ""
-        }`,
-      layerToggle: (a) => `レイヤー切替: [[${a.layerId}]]`,
-      layerMomentary: (a) => `レイヤーホールド: [[${a.layerId}]]`,
-      macro: (a) => `マクロ実行: [[${a.macroId}]]`,
-      cursorReturn: (a) => `カーソル復帰: ((遅延 ${a.delayMs}ms))`,
-      none: () => "((なし))",
-    },
-    action,
-    "type"
-  );
-  const text = formatter ?? "((Unknown Action))";
-  return <RichText text={text} />;
 }

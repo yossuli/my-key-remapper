@@ -27,7 +27,7 @@ export function SequenceEditor({
     >
       {actions.map((action, index) => (
         <Reorder.Item
-          className="flex select-none items-center gap-3 rounded-md border border-border bg-secondary/30 p-2 transition-colors hover:bg-secondary"
+          className="flex select-none items-center gap-3 rounded-md border border-border bg-secondary/30 p-2 transition-colors has-[[data-action=edit]:hover]:bg-secondary"
           key={action._uiId} // インデックスではなく不変のIDを使用
           value={action}
         >

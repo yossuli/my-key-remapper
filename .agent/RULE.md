@@ -194,6 +194,8 @@ src/
 - **[Workflow-032] 否定・停止指示の意図確認プロセス**: ユーザーの `n` やリバートを安易に「拒否」と取らず、真意（停止、時期尚早、内容不備）を確認する手順。 (`.agent/workflows/032.md`)
 - **[Workflow-033] 思考シミュレーションによるドキュメント検証**: 仕様書を見ずにユースケースを発想し、実装・ドキュメントとのギャップを分析して網羅性を高める手順。 (`.agent/workflows/033.md`)
 - **[Workflow-035] 大規模置換におけるスクリプト言語の選択**: パスエイリアス追加などの大規模置換作業時に、PowerShell ではなく Node.js スクリプトを使用する手順。 (`.agent/workflows/035.md`)
+- **[Workflow-037] リスト項目のクリック領域確保とボタンネスト回避**: デッドゾーンを排除しつつ HTML 構造を正当に保つ設計パターン。 (`.agent/workflows/037.md`)
+  - 🏷️ **Tags**: `ux`, `clickable-area`, `hydration-error`, `nesting-forbidden`, `pattern`
 
 ## 安全な承認プロセス (Safe Approval Process)
 

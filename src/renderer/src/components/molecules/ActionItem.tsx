@@ -4,7 +4,6 @@ import { useDragControls } from "framer-motion";
 import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
-import { ListCellButton } from "@/components/atoms/ListCellButton";
 import { RichText } from "@/components/atoms/RichText";
 import { HStack } from "@/components/template/Flex";
 import { useMacros } from "@/hooks/useMacros";
@@ -50,18 +49,32 @@ export function ActionItem({
         const displayText = `${macroName ?? a.macroId}`;
 
         return (
-          <span>
-            マクロ実行:
-            <button
-              className="ml-1 inline-flex items-center rounded-sm px-1 font-mono text-blue-400 hover:bg-blue-400/10 hover:underline"
+          <span className="flex w-full items-center">
+            <Button
+              className="h-auto justify-start px-2 py-2 font-medium hover:bg-transparent"
+              data-action="edit"
+              onClick={onEdit}
+              variant="ghost"
+            >
+              マクロ実行:
+            </Button>
+            <Button
+              className="ml-1 px-1 font-mono text-blue-400 hover:bg-blue-400/10 hover:underline"
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigate(a.macroId);
               }}
               type="button"
+              variant="ghost"
             >
               {displayText}
-            </button>
+            </Button>
+            <Button
+              className="h-auto w-full justify-start px-2 py-2 font-medium hover:bg-transparent"
+              data-action="edit"
+              onClick={onEdit}
+              variant="ghost"
+            />
           </span>
         );
       },
@@ -81,17 +94,21 @@ export function ActionItem({
         <Icon className="text-muted-foreground" icon={GripVertical} size="sm" />
       </div>
 
-      <ListCellButton
-        className="flex-1 px-2 py-2 font-mono text-sm"
-        onClick={onEdit}
-      >
-        <span className="text-muted-foreground">{index + 1}.</span>
+      <div className="flex flex-1 items-center font-mono text-sm">
+        <span className="px-2 text-muted-foreground">{index + 1}.</span>
         {typeof summaryContent === "string" ? (
-          <RichText text={summaryContent} />
+          <Button
+            className="h-auto w-full justify-start px-2 py-2 font-medium hover:bg-transparent"
+            data-action="edit"
+            onClick={onEdit}
+            variant="ghost"
+          >
+            <RichText text={summaryContent} />
+          </Button>
         ) : (
           summaryContent
         )}
-      </ListCellButton>
+      </div>
 
       <HStack gap={1}>
         <Button

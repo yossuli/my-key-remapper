@@ -8,9 +8,9 @@ description: 知見の種 (Seed) の記録と管理手順
 
 作業中に発見した「普遍的に有用な知見の候補」を、将来のルール化（[Workflow-000]）に向けて安全かつ確実にストックするための運用手順です。
 
-## 記録場所 (Storage)
+## 保存先
 
-ワーキングディレクトリの `seeds.md` ( `file:///seeds.md` )
+`C:\Users\yo44a\.gemini\antigravity\brain\<conversation-id>\seed.md`
 
 ## 記録の絶対規約 (Mandatory Header)
 

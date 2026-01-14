@@ -1,64 +1,77 @@
-# Windows Key Remapper (Electron + Typescript)
+# Windows Key Remapper (Electron + TypeScript)
 
-Windows 用のキーボードリマップアプリケーションです。`User32.dll` の API を直接利用してグローバルキーフック（`WH_KEYBOARD_LL`）を実現しています。
+Windows 用の高度なキーボードリマップアプリケーションです。`User32.dll` の API を直接利用したグローバルキーフック（`WH_KEYBOARD_LL`）により、OS レベルでの柔軟なキーカスタマイズを実現しています。
 
 ## 開発状況 (Development Status)
 
-現在、**Minimal MVP** の段階です。
+現在、**Feature-rich Beta** 段階です。基本的なリマップに加え、レイヤー、マクロ、マウス自動化などの実用的な機能が実装されています。
 
-- [x] Electron + TypeScript + Vite プロジェクト構築
-- [x] `koffi` (FFI) による `SetWindowsHookEx` の実装
-- [x] キー入力を検知してレンダラープロセスに通知する仕組み
-- [ ] 実際のキーブロックとリマップ送信 (`SendInput`) の実装（未着手）
-- [ ] UI の実装（現在はログ表示のみ）
+- [x] Electron + TypeScript + Vite プロジェクト基盤
+- [x] `koffi` (FFI) による低レイヤーグローバルキーフック
+- [x] 高度なリマップエンジン（レイヤー、マルチトリガー対応）
+- [x] シーケンシャルマクロ（キーシーケンス、ディレイ、マウス操作）
+- [x] モダンな UI エディタ（React + Framer Motion + Shadcn/UI）
+- [x] 設定の永続化と自動読み込み
 
-## Windows 環境への移行ガイド (Handover Notes)
+## 主要な機能 (Core Features)
 
-Linux 環境での初期開発を行いましたが、クロスコンパイル（Windows バイナリ作成）に `wine` が必要であり、環境の制約上ビルドが完了しておりません。
-ソースコードは Windows 環境で動作するように記述されていますが、**Windows マシン上でのビルドと動作検証が必要**です。
+- **レイヤーベースのリマップ**: 複数のレイヤー（Base, Shift, Fn 等）を定義し、キー入力を動的に切り替え。トグル切り替えやモーメンタリ切り替え（押しっぱなしの間有効）に対応。
+- **マルチトリガー**: 単押し（Tap）、長押し（Hold）、二度押し（Double Tap）の使い分け。
+- **強力なマクロ**: キー入力のシーケンス、指定ミリ秒の待機、マウスクリック/移動、カーソル復帰などを組み合わせた自動化。
+- **マウス自動化**: キー操作によるカーソルの絶対座標移動やクリック。操作後のカーソル位置復帰機能（Cursor Return）。
+- **リピート詳細設定**: 長押し時のキーリピート開始遅延や間隔をキーごとにカスタマイズ可能。
+- **モダン UI/UX**: 直感的なマクロエディタ、レイヤー管理、リアルタイムなキー入力プレビュー。
 
-### 開発の始め方
+## 技術スタック (Tech Stack)
 
-1. **必須要件**:
+- **Runtime**: [Electron](https://www.electronjs.org/)
+- **Frontend**: [React](https://react.dev/), [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn/UI](https://ui.shadcn.com/)
+- **Animation**: [Framer Motion](https://www.framer.com/motion/)
+- **FFI**: [Koffi](https://koffi.dev/) (Native API Calling)
+- **Code Quality**: [Ultracite](https://github.com/ultracite-js/ultracite) (Biome-based linter/formatter)
 
-   - Windows 10/11
-   - Node.js (v16+)
+## クイックスタート
 
-2. **セットアップ**:
+### 必須要件
 
-   ```bash
-   npm install
-   ```
+- Windows 10/11
+- Node.js (v20+)
 
-3. **開発モード起動**:
+### セットアップ
 
-   ```bash
-   npm run dev
-   ```
+```powershell
+npm install
+```
 
-   アプリが起動し、キーボードを押すと画面上のリストにキーコードが表示されれば成功です。
+### 開発モード起動
 
-4. **ビルド**:
-   ```bash
-   npm run build:win
-   ```
-   `dist/win-unpacked/WindowsKeyRemapper.exe` が生成されます。
+```powershell
+npm run dev
+```
 
-### ディレクトリ構造とドキュメント
+### ビルド
 
-詳細なドキュメントは `docs/` ディレクトリにあります。
+```powershell
+npm run build:win
+```
 
-- [実装計画書 (Implementation Plan)](docs/implementation_plan.md): 全体のアーキテクチャと計画
-- [タスクリスト (Tasks)](docs/tasks.md): 完了したタスクと残作業
-- [検証ガイド (Walkthrough)](docs/walkthrough.md): 動作確認の手順
+`dist/win-unpacked/WindowsKeyRemapper.exe` が生成されます。
 
-### 技術的な注意点
+## 設定データの保存場所
 
-- **Main Process (`src/main/index.ts`)**: ここに `koffi` を使った Native Hook のロジックがあります。
-- `process.platform !== 'win32'` の場合、フック処理はスキップされるようになっています。
-- **管理者権限**: `SetWindowsHookEx` や `SendInput` は、一部のゲームや特権アプリに対しては管理者権限で実行しないと機能しない場合があります。開発中は通常権限で問題ありませんが、将来的に考慮が必要です。
+本アプリの設定や作成したマクロは、以下のディレクトリに JSON 形式で保存されます。バックアップや設定のリセット（ファイルの削除）の際にご参照ください。
+
+- **場所**: `%APPDATA%\my-key-remapper`
+- **主要なファイル**:
+  - `key-mapping-config-v2.json`: キーリマップ、レイヤー、グローバル設定
+  - `key-mapping-macros-v2.json`: 作成したマクロの定義
+
+## ドキュメント
+
+- [AI 行動ルール (RULE.md)](.agent/RULE.md): 開発プロセスと規約
 
 ---
 
-Author: Antigravity Agent
-Date: 2025-12-10
+**Author**: Antigravity Agent & Yossuli
+**License**: MIT

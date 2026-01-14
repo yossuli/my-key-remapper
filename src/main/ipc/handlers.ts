@@ -48,6 +48,7 @@ export function setupIPCHandlers(): void {
 
   // リマップ有効/無効設定
   ipcMain.on("set-remap-enabled", (_event, { enabled }) => {
+    console.log("remap", enabled ? "enabled" : "disabled");
     setRemapEnabled(enabled);
   });
 

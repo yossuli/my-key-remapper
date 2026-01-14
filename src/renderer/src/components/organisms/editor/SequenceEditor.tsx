@@ -1,11 +1,26 @@
 import type { Action } from "@shared/types/remapConfig";
 import { objectiveDiscriminantSwitch } from "@shared/utils/objectiveSwitch";
 import { Reorder, useDragControls } from "framer-motion";
-import { GripVertical, Pencil, Trash2 } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { Icon } from "@/components/atoms/Icon";
 import { HStack } from "@/components/template/Flex";
+import type { ButtonProps } from "@/components/ui/button";
+import { cn } from "@/utils";
 import type { IdentifiedAction } from "../macro/types";
+
+function ListCellButton({ className, ...props }: ButtonProps) {
+  return (
+    <Button
+      className={cn(
+        "h-auto w-full justify-start px-4 py-3 font-medium hover:bg-transparent",
+        className
+      )}
+      variant="ghost"
+      {...props}
+    />
+  );
+}
 
 interface SequenceEditorProps {
   // 並び替えのために一意なIDが必要なので IdentifiedAction を受け取る
@@ -30,7 +45,7 @@ export function SequenceEditor({
     >
       {actions.map((action, index) => (
         <Reorder.Item
-          className="flex select-none items-center gap-3 rounded-md border border-border bg-secondary/30 p-2"
+          className="flex select-none items-center gap-3 rounded-md border border-border bg-secondary/30 p-2 transition-colors hover:bg-secondary"
           key={action._uiId} // インデックスではなく不変のIDを使用
           value={action}
         >
@@ -65,15 +80,15 @@ function ActionItem({ action, index, onEdit, onDelete }: ActionItemProps) {
         <Icon className="text-muted-foreground" icon={GripVertical} size="sm" />
       </div>
 
-      <div className="flex-1 truncate px-2 font-mono text-sm">
-        <span className="mr-2 text-muted-foreground">{index + 1}.</span>
+      <ListCellButton
+        className="flex-1 px-2 py-2 font-mono text-sm"
+        onClick={onEdit}
+      >
+        <span className="text-muted-foreground">{index + 1}.</span>
         <ActionSummary action={action} />
-      </div>
+      </ListCellButton>
 
       <HStack gap={1}>
-        <Button onClick={onEdit} size="icon" variant="ghost">
-          <Icon icon={Pencil} size="sm" />
-        </Button>
         <Button
           className="text-destructive hover:bg-destructive/10"
           onClick={onDelete}
